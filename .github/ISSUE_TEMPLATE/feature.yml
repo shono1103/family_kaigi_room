@@ -1,0 +1,13 @@
+name: Feature
+description: 機能追加・改善
+title: "[Feature] "
+labels:
+  - feature
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 内容
+      description: 追加・改善したい機能の詳細を記載してください
+    validations:
+      required: true

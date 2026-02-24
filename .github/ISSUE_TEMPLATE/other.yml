@@ -1,0 +1,13 @@
+name: Other
+description: その他
+title: "[Other] "
+labels:
+  - other
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: 内容
+      description: 内容の詳細を記載してください
+    validations:
+      required: true

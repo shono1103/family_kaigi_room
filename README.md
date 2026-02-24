@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# hogehoge_ticket_platform
 
-## Getting Started
+Next.js + Prisma + PostgreSQL で構成された、ローカル利用前提のチケット管理アプリです。  
+現在は認証/セッション管理機能を実装しており、ログイン後に有効セッションの確認・失効ができます。
 
-First, run the development server:
+## 前提
+
+- ローカル環境での利用を想定しています（インターネット公開前提ではありません）
+- DB は PostgreSQL を使用します
+- `DATABASE_URL` が必要です
+
+## 主な機能（現状）
+
+- ログイン（`POST /auth`）
+- ログアウト（`POST /auth/logout`）
+- 新規ユーザー作成（`POST /auth/register`）
+- DB セッション管理
+  - セッション作成
+  - 現在セッションのログアウト
+  - 他セッション一括失効
+  - 個別セッション失効
+- 初期ユーザー自動作成
+  - `users` テーブルが空の場合に初期管理者を作成
+
+## 初期ユーザー
+
+`users` テーブルが空のとき、初回アクセス時に以下のユーザーが自動作成されます。
+
+- Email: `admin@example.com`
+- Password: `admin`
+
+## セットアップ
+
+1. 依存関係をインストール
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. 環境変数を設定（`.env`）
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/hogehoge_ticket_platform?schema=public"
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. PostgreSQL を起動（Docker を使う場合）
 
-## Learn More
+```bash
+docker compose -f docker-compose-dev.yml up -d
+```
 
-To learn more about Next.js, take a look at the following resources:
+4. Prisma Client 生成
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm prisma:generate
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+5. マイグレーション適用
 
-## Deploy on Vercel
+```bash
+pnpm prisma:migrate:dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+6. 開発サーバー起動
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm dev
+```
+
+ブラウザで `http://localhost:3000` を開いてください。
+
+## 画面/ルート概要
+
+- `GET /login`
+  - ログイン画面
+  - `?mode=signup` で新規ユーザー作成フォームに切替
+- `POST /auth`
+  - ログイン処理
+- `POST /auth/register`
+  - 新規ユーザー作成処理（作成後にログイン）
+- `POST /auth/logout`
+  - 現在セッションのログアウト
+- `POST /sessions/revoke`
+  - 指定セッション失効
+- `POST /sessions/revoke-others`
+  - 現在セッション以外を一括失効
+
+## 開発用コマンド
+
+```bash
+pnpm lint
+pnpm prisma:studio
+```
+
+## 注意事項
+
+- 本実装はローカル利用を前提にしているため、公開環境向けのセキュリティ対策（CSRF対策、レート制限など）は最小限です。
+- 誤って外部公開しない運用を前提にしてください。
+- Next.js 実行時にワークスペース直下の複数 lockfile 警告が出る場合があります（動作自体には影響しないことがあります）。

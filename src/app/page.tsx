@@ -1,65 +1,83 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+
+const tabs = [
+	{ label: "保有チケット", title: "保有チケット", content: "あ" },
+	{ label: "ユーザー", title: "ユーザー", content: "あ" },
+] as const;
 
 export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+	const [activeIndex, setActiveIndex] = useState(0);
+
+	return (
+		<div className="min-h-screen bg-[radial-gradient(900px_600px_at_15%_15%,rgba(255,79,163,0.18),transparent_60%),radial-gradient(900px_600px_at_85%_25%,rgba(124,92,255,0.18),transparent_60%),linear-gradient(180deg,#fff4fb,#f2fbff)] bg-fixed bg-cover text-[#1e1e2a]">
+			<div className="mx-auto my-10 max-w-[900px] px-4 pb-20">
+				<header className="rounded-[28px] bg-white/90 p-[22px] shadow-[0_18px_55px_rgba(20,15,45,0.18)]">
+					<div className="mb-4 flex items-center gap-[14px]">
+						<div className="grid h-[46px] w-[46px] rotate-[-6deg] place-items-center rounded-2xl bg-gradient-to-br from-[#ff4fa3] to-[#7c5cff] text-lg font-black text-white">
+							★
+						</div>
+						<div>
+							<h1 className="text-[18px] font-semibold">Pop Switch Header</h1>
+							<p className="mt-1.5 text-[13px] text-[#4b4b65]">
+								タブでポップに画面切替
+							</p>
+						</div>
+					</div>
+
+					<nav className="flex flex-wrap gap-2.5" role="tablist" aria-label="画面切替">
+						{tabs.map((tab, index) => {
+							const isActive = activeIndex === index;
+
+							return (
+								<button
+									key={tab.label}
+									type="button"
+									role="tab"
+									aria-selected={isActive}
+									aria-controls={`panel-${index}`}
+									id={`tab-${index}`}
+									onClick={() => setActiveIndex(index)}
+									className={[
+										"cursor-pointer rounded-[18px] px-4 py-2.5 text-[13px] font-extrabold transition duration-150 ease-in-out hover:-translate-y-0.5",
+										isActive
+											? "border-2 border-[rgba(255,79,163,0.25)] bg-white text-black shadow-[0_10px_20px_rgba(0,0,0,0.08)]"
+											: "border-2 border-transparent bg-black/5 text-black/65",
+									].join(" ")}
+								>
+									{tab.label}
+								</button>
+							);
+						})}
+					</nav>
+				</header>
+
+				<main className="mt-6 rounded-[28px] bg-white/90 p-6 shadow-[0_18px_55px_rgba(20,15,45,0.18)]">
+					{tabs.map((tab, index) => {
+						const isActive = activeIndex === index;
+
+						return (
+							<section
+								key={tab.title}
+								id={`panel-${index}`}
+								role="tabpanel"
+								aria-labelledby={`tab-${index}`}
+								aria-hidden={!isActive}
+								className={[
+									"min-h-[60svh] origin-top transition duration-150 ease-out",
+									isActive
+										? "block translate-y-0 scale-100 opacity-100"
+										: "hidden translate-y-2 scale-[0.98] opacity-0",
+								].join(" ")}
+							>
+								<h2 className="mt-0 text-2xl font-semibold">{tab.title}</h2>
+								<p className="mt-3">{tab.content}</p>
+							</section>
+						);
+					})}
+				</main>
+			</div>
+		</div>
+	);
 }

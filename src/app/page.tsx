@@ -1,4 +1,4 @@
-import { HomeClient } from "./components/homeClient";
+import { HomeClient } from "./components/home/homeClient";
 import { listActiveSessions, requireAuth } from "@/lib/auth/session";
 
 function formatDateLabel(date: Date) {

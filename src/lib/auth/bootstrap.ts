@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth/password";
 
+// These are intentional defaults for initial setup, similar to GitLab or Redmine.
+// This project assumes local operation and is not intended for public exposure.
+// See README for details on the initial admin credentials.
 const INITIAL_ADMIN_EMAIL = "admin@example.com";
 const INITIAL_ADMIN_PASSWORD = "admin";
 

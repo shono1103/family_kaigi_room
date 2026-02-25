@@ -10,7 +10,6 @@ export type UserSessionView = {
 	id: string;
 	createdAtLabel: string;
 	expiresAtLabel: string;
-	isExpired: boolean;
 };
 
 export function UserPanel({

@@ -91,26 +91,6 @@ export async function revokeSession(sessionId: string, userId: string) {
   return result.count > 0;
 }
 
-export async function revokeOtherSessions(userId: string, currentSessionId: string) {
-  const result = await prisma.session.updateMany({
-    where: {
-      userId,
-      id: {
-        not: currentSessionId,
-      },
-      revokedAt: null,
-      expiresAt: {
-        gt: new Date(),
-      },
-    },
-    data: {
-      revokedAt: new Date(),
-    },
-  });
-
-  return result.count;
-}
-
 export async function revokeCurrentSession() {
   const auth = await getCurrentAuth();
   if (!auth) {
@@ -208,4 +188,3 @@ export async function requireAuth() {
 
   return auth;
 }
-

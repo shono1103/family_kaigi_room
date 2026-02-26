@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Header } from "./header";
 import { OwnTicketPanel } from "./ownTicketPanel";
-import { BaseInfoPanel, type BaseInfoSessionView } from "./baseInfoPanel";
+import { BaseInfoPanel } from "./baseInfoPanel";
 
 const tabs = [{ label: "保有チケット" }, { label: "基本情報" }] as const;
 
@@ -14,15 +14,11 @@ type HomeClientProps = {
     role: string;
     symbolPubKey: string | null;
   } | null;
-  currentSessionId: string;
-  sessions: BaseInfoSessionView[];
 };
 
 export function HomeClient({
   userEmail,
   userInfo,
-  currentSessionId,
-  sessions,
 }: HomeClientProps) {
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -37,8 +33,6 @@ export function HomeClient({
             index={1}
             userEmail={userEmail}
             userInfo={userInfo}
-            currentSessionId={currentSessionId}
-            sessions={sessions}
           />
         </main>
       </div>

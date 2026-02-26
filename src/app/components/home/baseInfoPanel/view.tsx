@@ -28,14 +28,6 @@ export function BaseInfoPanelView({ userInfo, onEdit }: BaseInfoPanelViewProps) 
             {userInfo?.name ?? "未設定"}
           </p>
         </div>
-        <div className="rounded-xl border border-black/10 bg-white/70 p-3">
-          <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#4b4b65]">
-            Role
-          </p>
-          <p className="mt-1 text-sm font-semibold text-[#202033]">
-            {userInfo?.role ?? "未設定"}
-          </p>
-        </div>
         <div className="rounded-xl border border-black/10 bg-white/70 p-3 sm:col-span-2">
           <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#4b4b65]">
             Symbol Public Key

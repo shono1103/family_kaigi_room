@@ -10,7 +10,6 @@ export default async function Home() {
 		},
 		select: {
 			name: true,
-			role: true,
 			symbolPubKey: true,
 		},
 	});

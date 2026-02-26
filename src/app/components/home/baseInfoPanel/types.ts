@@ -1,6 +1,5 @@
 export type BaseUserInfo = {
   name: string;
-  role: string;
   symbolPubKey: string | null;
 } | null;
 

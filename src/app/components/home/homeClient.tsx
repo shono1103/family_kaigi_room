@@ -11,7 +11,6 @@ type HomeClientProps = {
   userEmail: string;
   userInfo: {
     name: string;
-    role: string;
     symbolPubKey: string | null;
   } | null;
 };

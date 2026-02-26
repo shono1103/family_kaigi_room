@@ -3,18 +3,24 @@
 import { useState } from "react";
 import { Header } from "./header";
 import { OwnTicketPanel } from "./ownTicketPanel";
-import { UserPanel, type UserSessionView } from "./userPanel";
+import { BaseInfoPanel, type BaseInfoSessionView } from "./baseInfoPanel";
 
-const tabs = [{ label: "保有チケット" }, { label: "ユーザー" }] as const;
+const tabs = [{ label: "保有チケット" }, { label: "基本情報" }] as const;
 
 type HomeClientProps = {
   userEmail: string;
+  userInfo: {
+    name: string;
+    role: string;
+    symbolPubKey: string | null;
+  } | null;
   currentSessionId: string;
-  sessions: UserSessionView[];
+  sessions: BaseInfoSessionView[];
 };
 
 export function HomeClient({
   userEmail,
+  userInfo,
   currentSessionId,
   sessions,
 }: HomeClientProps) {
@@ -26,10 +32,11 @@ export function HomeClient({
         <Header tabs={tabs} activeIndex={activeIndex} onTabClick={setActiveIndex} />
         <main className="mt-6 rounded-[28px] bg-white/90 p-6 shadow-[0_18px_55px_rgba(20,15,45,0.18)]">
           <OwnTicketPanel isActive={activeIndex === 0} index={0} />
-          <UserPanel
+          <BaseInfoPanel
             isActive={activeIndex === 1}
             index={1}
             userEmail={userEmail}
+            userInfo={userInfo}
             currentSessionId={currentSessionId}
             sessions={sessions}
           />
@@ -38,4 +45,3 @@ export function HomeClient({
     </div>
   );
 }
-

@@ -7,7 +7,8 @@ import type { AuthMode } from "@/app/components/auth/authTypes";
 const errorMessageMap: Record<string, string> = {
 	invalid_request: "メールアドレスとパスワードを入力してください。",
 	invalid_credentials: "メールアドレスまたはパスワードが正しくありません。",
-	signup_invalid_request: "メールアドレスとパスワードを入力してください。",
+	signup_invalid_request:
+		"メールアドレス・パスワードを入力してください。",
 	signup_password_mismatch: "パスワード確認が一致しません。",
 	signup_email_taken: "このメールアドレスは既に使用されています。",
 };

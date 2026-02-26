@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { BaseInfoPanelEdit } from "./edit";
-import type { BaseInfoPanelMode, BaseUserInfo } from "./types";
-import { BaseInfoPanelView } from "./view";
+import { UserInfoEdit } from "./userInfo/edit";
+import type { UserInfoPanelMode, userInfoForBaseInfo } from "./userInfo/types";
+import { UserEdit } from "./user/edit";
+import { UserView } from "./user/view";
+import { UserInfoView } from "./userInfo/view";
 
 type BaseInfoPanelProps = {
 	isActive: boolean;
 	index: number;
 	userEmail: string;
-	userInfo: BaseUserInfo;
+	userInfo: userInfoForBaseInfo;
 };
 
 export function BaseInfoPanel({
@@ -18,7 +20,9 @@ export function BaseInfoPanel({
 	userEmail,
 	userInfo,
 }: BaseInfoPanelProps) {
-	const [mode, setMode] = useState<BaseInfoPanelMode>("view");
+	const [mode, setMode] = useState<UserInfoPanelMode>("view");
+	const isUserEditing = mode === "userEdit";
+	const isProfileEditing = mode === "profileEdit";
 
 	return (
 		<section
@@ -35,18 +39,30 @@ export function BaseInfoPanel({
 		>
 			<h2 className="mt-0 text-2xl font-semibold">基本情報</h2>
 			<div className="mt-4 rounded-2xl border border-black/10 bg-black/[0.03] p-4">
-				<p className="text-sm text-[#4b4b65]">ログイン中ユーザー</p>
-				<p className="mt-1 break-all text-base font-semibold text-[#202033]">
-					{userEmail}
-				</p>
+				<div className="rounded-xl border border-black/10 bg-white/50 p-3">
+					{isUserEditing ? (
+						<UserEdit
+							userEmail={userEmail}
+							onCancel={() => setMode("view")}
+						/>
+					) : (
+						<UserView
+							userEmail={userEmail}
+							onEdit={() => setMode("userEdit")}
+						/>
+					)}
+				</div>
 				<div className="mt-4 rounded-xl border border-black/10 bg-white/50 p-3">
-					{mode === "edit" ? (
-						<BaseInfoPanelEdit
+					{isProfileEditing ? (
+						<UserInfoEdit
 							userInfo={userInfo}
 							onCancel={() => setMode("view")}
 						/>
 					) : (
-						<BaseInfoPanelView userInfo={userInfo} onEdit={() => setMode("edit")} />
+						<UserInfoView
+							userInfo={userInfo}
+							onEdit={() => setMode("profileEdit")}
+						/>
 					)}
 				</div>
 			</div>

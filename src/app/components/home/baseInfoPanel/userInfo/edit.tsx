@@ -1,11 +1,11 @@
-import type { BaseUserInfo } from "./types";
+import type { userInfoForBaseInfo } from "./types";
 
-type BaseInfoPanelEditProps = {
-  userInfo: BaseUserInfo;
+type UserInfoEditProps = {
+  userInfo: userInfoForBaseInfo;
   onCancel: () => void;
 };
 
-export function BaseInfoPanelEdit({ userInfo, onCancel }: BaseInfoPanelEditProps) {
+export function UserInfoEdit({ userInfo, onCancel }: UserInfoEditProps) {
   return (
     <>
       <div className="mb-3 flex items-center justify-between gap-2">

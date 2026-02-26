@@ -1,11 +1,11 @@
-import type { BaseUserInfo } from "./types";
+import type { userInfoForBaseInfo } from "./types";
 
-type BaseInfoPanelViewProps = {
-  userInfo: BaseUserInfo;
+type UserInfoViewProps = {
+  userInfo: userInfoForBaseInfo;
   onEdit: () => void;
 };
 
-export function BaseInfoPanelView({ userInfo, onEdit }: BaseInfoPanelViewProps) {
+export function UserInfoView({ userInfo, onEdit }: UserInfoViewProps) {
   return (
     <>
       <div className="mb-3 flex items-center justify-between gap-2">

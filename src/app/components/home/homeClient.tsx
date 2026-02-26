@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { Header } from "./header";
+import { BalancePanel } from "./balancePanel";
 import { OwnTicketPanel } from "./ownTicketPanel";
 import { BaseInfoPanel } from "./baseInfoPanel";
 
-const tabs = [{ label: "保有チケット" }, { label: "基本情報" }] as const;
+const tabs = [{ label: "保有チケット" }, { label: "残高" }, { label: "基本情報" }] as const;
 
 type HomeClientProps = {
   userEmail: string;
@@ -27,9 +28,10 @@ export function HomeClient({
         <Header tabs={tabs} activeIndex={activeIndex} onTabClick={setActiveIndex} />
         <main className="mt-6 rounded-[28px] bg-white/90 p-6 shadow-[0_18px_55px_rgba(20,15,45,0.18)]">
           <OwnTicketPanel isActive={activeIndex === 0} index={0} />
+          <BalancePanel isActive={activeIndex === 1} index={1} />
           <BaseInfoPanel
-            isActive={activeIndex === 1}
-            index={1}
+            isActive={activeIndex === 2}
+            index={2}
             userEmail={userEmail}
             userInfo={userInfo}
           />

@@ -60,4 +60,3 @@ export function SignupForm({ errorMessage }: SignupFormProps) {
     </form>
   );
 }
-

@@ -20,6 +20,12 @@ async function ensureInitialUserExistsInternal() {
       data: {
         email: INITIAL_ADMIN_EMAIL,
         passwordHash: hashPassword(INITIAL_ADMIN_PASSWORD),
+        userInfo: {
+          create: {
+            name: "Initial Admin",
+            role: "admin",
+          },
+        },
       },
     });
   } catch (error) {
@@ -40,4 +46,3 @@ export async function ensureInitialUserExists() {
 
   await bootstrapPromise;
 }
-

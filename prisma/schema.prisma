@@ -7,6 +7,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  admin
+  normal
+}
+
 model User {
   id           String    @id @default(uuid()) @db.Uuid
   email        String    @unique
@@ -38,7 +43,7 @@ model Session {
 model UserInfo {
   userId       String    @id @map("user_id") @db.Uuid
   name         String
-  role         String
+  role         UserRole
   symbolPubKey String?   @unique @map("symbol_pub_key")
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")

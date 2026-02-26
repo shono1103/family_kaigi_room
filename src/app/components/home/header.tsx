@@ -18,7 +18,9 @@ export function Header({ tabs, activeIndex, onTabClick }: HeaderProps) {
 					★
 				</div>
 				<div>
-					<h1 className="text-[18px] font-semibold">Pop Switch Header</h1>
+					<h1 className="text-[18px] font-semibold">
+						ほげほげチケットぷらっとふぉーむ
+					</h1>
 					<p className="mt-1.5 text-[13px] text-[#4b4b65]">
 						タブでポップに画面切替
 					</p>

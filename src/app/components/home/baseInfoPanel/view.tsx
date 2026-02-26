@@ -19,7 +19,7 @@ export function BaseInfoPanelView({ userInfo, onEdit }: BaseInfoPanelViewProps) 
         </button>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3">
         <div className="rounded-xl border border-black/10 bg-white/70 p-3">
           <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#4b4b65]">
             Name
@@ -28,7 +28,7 @@ export function BaseInfoPanelView({ userInfo, onEdit }: BaseInfoPanelViewProps) 
             {userInfo?.name ?? "未設定"}
           </p>
         </div>
-        <div className="rounded-xl border border-black/10 bg-white/70 p-3 sm:col-span-2">
+        <div className="rounded-xl border border-black/10 bg-white/70 p-3">
           <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#4b4b65]">
             Symbol Public Key
           </p>

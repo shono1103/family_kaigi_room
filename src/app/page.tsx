@@ -1,27 +1,34 @@
 import { HomeClient } from "./components/home/homeClient";
-import { listActiveSessions, requireAuth } from "@/lib/auth/session";
+import { requireAuth } from "@/lib/auth/session";
+import { prisma } from "@/lib/prisma";
+import { getXymBalanceByPublicKey } from "@/lib/symbol/balance";
 
-function formatDateLabel(date: Date) {
-	return new Intl.DateTimeFormat("ja-JP", {
-		timeZone: "Asia/Tokyo",
-		dateStyle: "medium",
-		timeStyle: "short",
-	}).format(date);
-}
+type HomePageProps = {
+	searchParams?: Promise<{
+		tab?: string;
+	}>;
+};
 
-export default async function Home() {
+export default async function Home({ searchParams }: HomePageProps) {
 	const auth = await requireAuth();
-	const sessions = await listActiveSessions(auth.user.id);
+	const resolvedSearchParams = searchParams ? await searchParams : undefined;
+	const userInfo = await prisma.userInfo.findUnique({
+		where: {
+			userId: auth.user.id,
+		},
+		select: {
+			name: true,
+			symbolPubKey: true,
+		},
+	});
+	const xymBalance = await getXymBalanceByPublicKey(userInfo?.symbolPubKey);
 
 	return (
 		<HomeClient
 			userEmail={auth.user.email}
-			currentSessionId={auth.session.id}
-			sessions={sessions.map((session) => ({
-				id: session.id,
-				createdAtLabel: formatDateLabel(session.createdAt),
-				expiresAtLabel: formatDateLabel(session.expiresAt),
-			}))}
+			userInfo={userInfo}
+			xymBalance={xymBalance}
+			initialTab={resolvedSearchParams?.tab}
 		/>
 	);
 }

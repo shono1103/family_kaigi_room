@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { UserPasswordEdit } from "./password/edit";
-import type { UserEditProps } from "./types";
+
+type UserEditProps = {
+	userEmail: string;
+	onCancel: () => void;
+};
 
 export function UserEdit({ userEmail, onCancel }: UserEditProps) {
 	const [isPasswordEditOpen, setIsPasswordEditOpen] = useState(false);

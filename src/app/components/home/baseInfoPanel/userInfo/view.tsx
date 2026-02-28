@@ -1,7 +1,8 @@
-import type { userInfoForBaseInfo } from "./types";
-
 type UserInfoViewProps = {
-	userInfo: userInfoForBaseInfo;
+	userInfo: {
+		name: string;
+		symbolPubKey: string | null;
+	} | null;
 	onEdit: () => void;
 };
 

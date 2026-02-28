@@ -1,4 +1,6 @@
-import type { UserPasswordEditProps } from "./types";
+type UserPasswordEditProps = {
+	onCancel: () => void;
+};
 
 export function UserPasswordEdit({ onCancel }: UserPasswordEditProps) {
 	return (

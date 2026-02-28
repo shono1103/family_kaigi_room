@@ -2,16 +2,20 @@
 
 import { useState } from "react";
 import { UserInfoEdit } from "./userInfo/edit";
-import type { UserInfoPanelMode, userInfoForBaseInfo } from "./userInfo/types";
 import { UserEdit } from "./user/edit";
 import { UserView } from "./user/view";
 import { UserInfoView } from "./userInfo/view";
+
+type UserInfoPanelMode = "view" | "userEdit" | "profileEdit";
 
 type BaseInfoPanelProps = {
 	isActive: boolean;
 	index: number;
 	userEmail: string;
-	userInfo: userInfoForBaseInfo;
+	userInfo: {
+		name: string;
+		symbolPubKey: string | null;
+	} | null;
 };
 
 export function BaseInfoPanel({

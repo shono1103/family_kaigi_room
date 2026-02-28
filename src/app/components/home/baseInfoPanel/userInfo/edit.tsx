@@ -1,6 +1,5 @@
 import type { FormEventHandler } from "react";
 import { useMemo, useState } from "react";
-import type { userInfoForBaseInfo } from "./types";
 
 const PUBLIC_KEY_REGEX = /^[0-9A-F]{64}$/;
 
@@ -13,7 +12,10 @@ type SymbolCheckState =
 	| "unreachable";
 
 type UserInfoEditProps = {
-	userInfo: userInfoForBaseInfo;
+	userInfo: {
+		name: string;
+		symbolPubKey: string | null;
+	} | null;
 	onCancel: () => void;
 };
 

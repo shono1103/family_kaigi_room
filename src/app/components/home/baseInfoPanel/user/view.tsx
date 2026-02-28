@@ -1,4 +1,7 @@
-import type { UserViewProps } from "./types";
+type UserViewProps = {
+	userEmail: string;
+	onEdit: () => void;
+};
 
 export function UserView({ userEmail, onEdit }: UserViewProps) {
 	return (

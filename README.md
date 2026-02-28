@@ -82,8 +82,6 @@ pnpm dev
     - 現在セッションのログアウト
 - `POST /api/sessions/revoke`
     - 指定セッション失効
-- `POST /api/sessions/revoke-others`
-    - 現在セッション以外を一括失効
 
 ## 開発用コマンド
 

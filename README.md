@@ -11,9 +11,9 @@
 
 ## 主な機能（現状）
 
-- ログイン（`POST /auth`）
-- ログアウト（`POST /auth/logout`）
-- 新規ユーザー作成（`POST /auth/register`）
+- ログイン（`POST /api/auth`）
+- ログアウト（`POST /api/auth/logout`）
+- 新規ユーザー作成（`POST /api/auth/register`）
 - DB セッション管理
     - セッション作成
     - 現在セッションのログアウト
@@ -74,15 +74,15 @@ pnpm dev
 - `GET /login`
     - ログイン画面
     - `?mode=signup` で新規ユーザー作成フォームに切替
-- `POST /auth`
+- `POST /api/auth`
     - ログイン処理
-- `POST /auth/register`
+- `POST /api/auth/register`
     - 新規ユーザー作成処理（作成後にログイン）
-- `POST /auth/logout`
+- `POST /api/auth/logout`
     - 現在セッションのログアウト
-- `POST /sessions/revoke`
+- `POST /api/sessions/revoke`
     - 指定セッション失効
-- `POST /sessions/revoke-others`
+- `POST /api/sessions/revoke-others`
     - 現在セッション以外を一括失効
 
 ## 開発用コマンド

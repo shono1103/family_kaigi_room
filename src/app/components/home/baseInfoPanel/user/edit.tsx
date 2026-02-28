@@ -23,7 +23,7 @@ export function UserEdit({ userEmail, onCancel }: UserEditProps) {
 				{userEmail}
 			</p>
 
-			<form action="/auth/email" method="post" className="mt-4 space-y-3">
+			<form action="/api/auth/email" method="post" className="mt-4 space-y-3">
 				<label className="block">
 					<span className="mb-2 block text-xs font-bold text-[#2b2b3e]">
 						メールアドレス

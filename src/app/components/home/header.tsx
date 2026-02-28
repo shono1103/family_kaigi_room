@@ -57,7 +57,7 @@ export function Header({ tabs, activeIndex, onTabClick }: HeaderProps) {
 						);
 					})}
 				</nav>
-				<form action="/auth/logout" method="post">
+				<form action="/api/auth/logout" method="post">
 					<button
 						type="submit"
 						className="cursor-pointer rounded-xl bg-gradient-to-r from-[#ff4fa3] to-[#7c5cff] px-4 py-2 text-xs font-extrabold text-white"

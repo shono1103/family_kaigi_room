@@ -16,7 +16,7 @@ export function UserPasswordEdit({ onCancel }: UserPasswordEditProps) {
 				</button>
 			</div>
 
-			<form action="/auth/password" method="post" className="space-y-3">
+			<form action="/api/auth/password" method="post" className="space-y-3">
 				<label className="block">
 					<span className="mb-2 block text-xs font-bold text-[#2b2b3e]">
 						現在のパスワード

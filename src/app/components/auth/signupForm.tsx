@@ -6,7 +6,7 @@ type SignupFormProps = {
 
 export function SignupForm({ errorMessage }: SignupFormProps) {
 	return (
-		<form action="/auth/register" method="post" className="mt-6 space-y-4">
+		<form action="/api/auth/register" method="post" className="mt-6 space-y-4">
 			<label className="block">
 				<span className="mb-2 block text-sm font-bold text-[#2b2b3e]">
 					メールアドレス

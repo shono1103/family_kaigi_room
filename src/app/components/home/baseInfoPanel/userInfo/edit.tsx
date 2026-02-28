@@ -21,7 +21,12 @@ export function UserInfoEdit({ userInfo, onCancel }: UserInfoEditProps) {
 				</button>
 			</div>
 
-			<form action="/user-info" method="post" className="space-y-3">
+			<form
+				action="/api/user-info"
+				method="post"
+				className="space-y-3"
+				onSubmit={handleSubmit}
+			>
 				<div className="grid gap-3 sm:grid-cols-2">
 					<label className="block sm:col-span-2">
 						<span className="mb-2 block text-xs font-bold text-[#2b2b3e]">

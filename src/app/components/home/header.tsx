@@ -28,7 +28,11 @@ export function Header({ tabs, activeIndex, onTabClick }: HeaderProps) {
 			</div>
 
 			<div className="flex flex-wrap items-center justify-between gap-3">
-				<nav className="flex flex-wrap gap-2.5" role="tablist" aria-label="画面切替">
+				<nav
+					className="flex flex-wrap gap-2.5"
+					role="tablist"
+					aria-label="画面切替"
+				>
 					{tabs.map((tab, index) => {
 						const isActive = activeIndex === index;
 

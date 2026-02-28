@@ -66,7 +66,6 @@ export function BaseInfoPanel({
 					)}
 				</div>
 			</div>
-
 		</section>
 	);
 }

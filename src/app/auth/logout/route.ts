@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { revokeCurrentSession } from "@/lib/auth/session";
 
 export async function POST(request: Request) {
-  await revokeCurrentSession();
+	await revokeCurrentSession();
 
-  return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
+	return NextResponse.redirect(new URL("/login", request.url), {
+		status: 303,
+	});
 }
-

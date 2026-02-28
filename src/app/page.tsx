@@ -14,10 +14,5 @@ export default async function Home() {
 		},
 	});
 
-	return (
-		<HomeClient
-			userEmail={auth.user.email}
-			userInfo={userInfo}
-		/>
-	);
+	return <HomeClient userEmail={auth.user.email} userInfo={userInfo} />;
 }

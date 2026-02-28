@@ -6,8 +6,8 @@ on:
     branches:
       - main
     paths:
-      - '.github/ISSUE_TEMPLATE/**'
-      - '.github/workflows/create-labels.yml'
+      - ".github/ISSUE_TEMPLATE/**"
+      - ".github/workflows/create-labels.yml"
 
 jobs:
   create-labels:

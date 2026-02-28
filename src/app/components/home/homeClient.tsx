@@ -6,6 +6,7 @@ import { Header } from "./header";
 import { BalancePanel } from "./balancePanel";
 import { OwnTicketPanel } from "./ownTicketPanel";
 import { BaseInfoPanel } from "./baseInfoPanel";
+import type { XymBalanceResult } from "@/lib/symbol/balance";
 
 const tabs = [
 	{ label: "保有チケット", key: "tickets" },
@@ -30,10 +31,16 @@ type HomeClientProps = {
 		name: string;
 		symbolPubKey: string | null;
 	} | null;
+	xymBalance: XymBalanceResult;
 	initialTab?: string;
 };
 
-export function HomeClient({ userEmail, userInfo, initialTab }: HomeClientProps) {
+export function HomeClient({
+	userEmail,
+	userInfo,
+	xymBalance,
+	initialTab,
+}: HomeClientProps) {
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
@@ -65,7 +72,11 @@ export function HomeClient({ userEmail, userInfo, initialTab }: HomeClientProps)
 				/>
 				<main className="mt-6 rounded-[28px] bg-white/90 p-6 shadow-[0_18px_55px_rgba(20,15,45,0.18)]">
 					<OwnTicketPanel isActive={activeIndex === 0} index={0} />
-					<BalancePanel isActive={activeIndex === 1} index={1} />
+					<BalancePanel
+						isActive={activeIndex === 1}
+						index={1}
+						xymBalance={xymBalance}
+					/>
 					<BaseInfoPanel
 						isActive={activeIndex === 2}
 						index={2}

@@ -1,6 +1,7 @@
 import { HomeClient } from "./components/home/homeClient";
 import { requireAuth } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { getXymBalanceByPublicKey } from "@/lib/symbol/balance";
 
 type HomePageProps = {
 	searchParams?: Promise<{
@@ -20,11 +21,13 @@ export default async function Home({ searchParams }: HomePageProps) {
 			symbolPubKey: true,
 		},
 	});
+	const xymBalance = await getXymBalanceByPublicKey(userInfo?.symbolPubKey);
 
 	return (
 		<HomeClient
 			userEmail={auth.user.email}
 			userInfo={userInfo}
+			xymBalance={xymBalance}
 			initialTab={resolvedSearchParams?.tab}
 		/>
 	);

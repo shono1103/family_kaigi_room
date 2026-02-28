@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { getCurrentAuth } from "@/lib/auth/session";
 import {
 	checkSymbolAccountExistenceByPublicKey,
-	isValidSymbolPublicKey,
-	normalizeSymbolPublicKey,
+	parseSymbolPublicKey,
+	validateSymbolPublicKey,
 } from "@/lib/symbol/account";
 
 export async function GET(request: Request) {
@@ -13,8 +13,9 @@ export async function GET(request: Request) {
 	}
 
 	const url = new URL(request.url);
-	const publicKey = normalizeSymbolPublicKey(url.searchParams.get("publicKey"));
-	if (!publicKey || !isValidSymbolPublicKey(publicKey)) {
+	const rawPublicKey = url.searchParams.get("publicKey");
+	const publicKey = parseSymbolPublicKey(rawPublicKey);
+	if (!publicKey || !validateSymbolPublicKey(publicKey)) {
 		return NextResponse.json(
 			{ error: "invalid_symbol_pub_key" },
 			{ status: 400 },

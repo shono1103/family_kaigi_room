@@ -3,8 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentAuth } from "@/lib/auth/session";
 import {
 	checkSymbolAccountExistenceByPublicKey,
-	isValidSymbolPublicKey,
-	normalizeSymbolPublicKey,
+	parseSymbolPublicKey,
+	validateSymbolPublicKey,
 } from "@/lib/symbol/account";
 
 function redirectWithError(request: Request, errorCode: string) {
@@ -35,7 +35,11 @@ export async function POST(request: Request) {
 	}
 
 	const normalizedName = name.trim();
-	const normalizedSymbolPubKey = normalizeSymbolPublicKey(symbolPubKey);
+	const parsedSymbolPubKey = parseSymbolPublicKey(symbolPubKey);
+	const normalizedSymbolPubKey =
+		parsedSymbolPubKey && validateSymbolPublicKey(parsedSymbolPubKey)
+			? parsedSymbolPubKey
+			: null;
 
 	if (!normalizedName) {
 		return NextResponse.redirect(new URL("/", request.url), {
@@ -43,7 +47,7 @@ export async function POST(request: Request) {
 		});
 	}
 
-	if (normalizedSymbolPubKey && !isValidSymbolPublicKey(normalizedSymbolPubKey)) {
+	if (parsedSymbolPubKey && !normalizedSymbolPubKey) {
 		return redirectWithError(request, "invalid_symbol_pub_key");
 	}
 

@@ -1,27 +1,22 @@
-const PUBLIC_KEY_REGEX = /^[0-9A-F]{64}$/;
+import {
+	fetchWithTimeout,
+	getSymbolNodeUrlList,
+	isValidSymbolPublicKey,
+	normalizeSymbolPublicKey,
+} from "./utils";
+
 const SYMBOL_ACCOUNT_REQUEST_TIMEOUT_MS = 3000;
 
 export type SymbolAccountExistence = "exists" | "not_found" | "unreachable";
 
-export function normalizeSymbolPublicKey(value: string | null | undefined) {
-	return (value ?? "").trim().toUpperCase() || null;
+export function parseSymbolPublicKey(
+	value: string | null | undefined,
+): string | null {
+	return normalizeSymbolPublicKey(value);
 }
 
-export function isValidSymbolPublicKey(publicKey: string) {
-	return PUBLIC_KEY_REGEX.test(publicKey);
-}
-
-function getSymbolNodeUrlList() {
-	const network = process.env.SYMBOL_NETWORK;
-	const list =
-		network === "mainnet"
-			? process.env.SYMBOL_MAINNET_NODE_URL_LIST
-			: process.env.SYMBOL_TESTNET_NODE_URL_LIST;
-
-	return (list ?? "")
-		.split(",")
-		.map((url) => url.trim())
-		.filter(Boolean);
+export function validateSymbolPublicKey(publicKey: string) {
+	return isValidSymbolPublicKey(publicKey);
 }
 
 export async function checkSymbolAccountExistenceByPublicKey(
@@ -30,19 +25,10 @@ export async function checkSymbolAccountExistenceByPublicKey(
 	const nodeUrlList = getSymbolNodeUrlList();
 
 	for (const nodeUrl of nodeUrlList) {
-		const controller = new AbortController();
-		const timeoutId = setTimeout(() => {
-			controller.abort();
-		}, SYMBOL_ACCOUNT_REQUEST_TIMEOUT_MS);
-
 		try {
-			const response = await fetch(
+			const response = await fetchWithTimeout(
 				`${nodeUrl.replace(/\/$/, "")}/accounts/${publicKey}`,
-				{
-					method: "GET",
-					cache: "no-store",
-					signal: controller.signal,
-				},
+				SYMBOL_ACCOUNT_REQUEST_TIMEOUT_MS,
 			);
 
 			if (response.status === 200) {
@@ -54,8 +40,6 @@ export async function checkSymbolAccountExistenceByPublicKey(
 			}
 		} catch {
 			// try next node
-		} finally {
-			clearTimeout(timeoutId);
 		}
 	}
 

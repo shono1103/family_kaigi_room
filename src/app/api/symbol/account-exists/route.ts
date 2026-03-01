@@ -7,7 +7,7 @@ import {
 } from "@/lib/symbol/account";
 
 export async function GET(request: Request) {
-	const auth = await getCurrentAuth();
+	const auth = await getCurrentAuth({ mutateCookie: true });
 	if (!auth) {
 		return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 	}

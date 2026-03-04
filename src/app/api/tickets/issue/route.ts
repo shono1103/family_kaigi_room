@@ -1,6 +1,11 @@
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getCurrentAuth } from "@/lib/auth/session";
+import { prisma } from "@/lib/prisma";
+import {
+	parseSymbolPublicKey,
+	validateSymbolPublicKey,
+} from "@/lib/symbol/account";
 import {
 	IssueTicketError,
 	issueTicketOnChain,
@@ -53,6 +58,11 @@ export async function POST(request: Request) {
 	const normalizedName = name.trim();
 	const normalizedDetail = detail.trim();
 	const issuerPrivateKey = issuerPrivateKeyInput.trim();
+	const userInfo = await prisma.userInfo.findUnique({
+		where: { userId: auth.user.id },
+		select: { symbolPubKey: true },
+	});
+	const recipientPublicKey = parseSymbolPublicKey(userInfo?.symbolPubKey);
 
 	if (!normalizedName || normalizedName.length > MAX_NAME_LENGTH) {
 		return jsonError("名称は1〜100文字で入力してください。", 400);
@@ -64,6 +74,12 @@ export async function POST(request: Request) {
 
 	if (!issuerPrivateKey) {
 		return jsonError("秘密鍵を入力してください。", 400);
+	}
+	if (!recipientPublicKey || !validateSymbolPublicKey(recipientPublicKey)) {
+		return jsonError(
+			"基本情報のSymbol公開鍵が未設定または不正です。先に設定してください。",
+			400,
+		);
 	}
 
 	if (!isImageFile(thumbnailImage)) {
@@ -105,7 +121,10 @@ export async function POST(request: Request) {
 	}
 
 	try {
-		const issued = await issueTicketOnChain(metadata, { issuerPrivateKey });
+		const issued = await issueTicketOnChain(metadata, {
+			issuerPrivateKey,
+			recipientPublicKey,
+		});
 		return NextResponse.json({
 			ok: true,
 			mosaicId: issued.mosaicId,

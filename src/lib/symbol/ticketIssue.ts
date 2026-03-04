@@ -1,9 +1,8 @@
 import { randomInt } from "node:crypto";
-import { PrivateKey } from "symbol-sdk";
+import { PrivateKey, PublicKey } from "symbol-sdk";
 import {
 	SymbolFacade,
 	descriptors,
-	generateMosaicId,
 	metadataGenerateKey,
 	models,
 } from "symbol-sdk/symbol";
@@ -13,6 +12,8 @@ const DEFAULT_FEE_MULTIPLIER = 100;
 const MIN_FEE_MULTIPLIER = 1;
 const MAX_FEE_MULTIPLIER = 5000;
 const TX_DEADLINE_SECONDS = 2 * 60 * 60;
+const TX_CONFIRM_TIMEOUT_MS = 10000;
+const TX_CONFIRM_INTERVAL_MS = 1500;
 
 const ISSUE_TICKET_ERROR_CODES = {
 	issuer_private_key_missing: "issuer_private_key_missing",
@@ -54,6 +55,7 @@ export type IssuedTicketResult = {
 
 type IssueTicketOptions = {
 	issuerPrivateKey?: string | null;
+	recipientPublicKey?: string | null;
 };
 
 type SymbolTransactionFeeResponse = {
@@ -61,13 +63,31 @@ type SymbolTransactionFeeResponse = {
 	medianFeeMultiplier?: string | number;
 };
 
+type SymbolTransactionStatusResponse = {
+	hash?: string;
+	code?: string;
+	group?: string;
+	deadline?: string;
+	height?: string;
+};
+
 function normalizeIssuerPrivateKey(value: string | undefined) {
+	const normalized = (value ?? "").trim().replace(/^0x/i, "").toUpperCase();
+	return /^[0-9A-F]{64}$/.test(normalized) ? normalized : null;
+}
+
+function normalizePublicKey(value: string | null | undefined) {
 	const normalized = (value ?? "").trim().replace(/^0x/i, "").toUpperCase();
 	return /^[0-9A-F]{64}$/.test(normalized) ? normalized : null;
 }
 
 function toMosaicIdHex(mosaicId: bigint) {
 	return mosaicId.toString(16).toUpperCase().padStart(16, "0");
+}
+
+function toTransactionHashHex(value: string) {
+	const normalized = value.trim().replace(/^0x/i, "").toUpperCase();
+	return normalized.padStart(64, "0");
 }
 
 function resolveNetworkName() {
@@ -144,17 +164,93 @@ async function announceTransaction(
 	);
 }
 
+async function waitForTransactionResult(
+	nodeUrlList: string[],
+	hash: string,
+	timeoutMs = TX_CONFIRM_TIMEOUT_MS,
+	intervalMs = TX_CONFIRM_INTERVAL_MS,
+): Promise<
+	| { state: "confirmed"; confirmedNodeUrl: string }
+	| { state: "failed"; status: SymbolTransactionStatusResponse }
+	| { state: "timeout" }
+> {
+	const startedAt = Date.now();
+
+	while (Date.now() - startedAt < timeoutMs) {
+		for (const nodeUrl of nodeUrlList) {
+			const normalizedNodeUrl = nodeUrl.replace(/\/$/, "");
+			try {
+				const confirmedResponse = await fetch(
+					`${normalizedNodeUrl}/transactions/confirmed/${hash}`,
+					{
+						method: "GET",
+						cache: "no-store",
+					},
+				);
+				if (confirmedResponse.ok) {
+					return { state: "confirmed", confirmedNodeUrl: normalizedNodeUrl };
+				}
+
+				const statusResponse = await fetch(
+					`${normalizedNodeUrl}/transactionStatus/${hash}`,
+					{
+						method: "GET",
+						cache: "no-store",
+					},
+				);
+				if (!statusResponse.ok) {
+					continue;
+				}
+
+				const status = (await statusResponse.json()) as SymbolTransactionStatusResponse;
+				if (
+					typeof status.code === "string" &&
+					status.code &&
+					status.code.toLowerCase() !== "success"
+				) {
+					return { state: "failed", status };
+				}
+			} catch {
+				// try next node
+			}
+		}
+
+		await new Promise((resolve) => setTimeout(resolve, intervalMs));
+	}
+
+	return { state: "timeout" };
+}
+
+function createSignedTransactionPayload(
+	facade: SymbolFacade,
+	issuerAccount: ReturnType<SymbolFacade["createAccount"]>,
+	rawDescriptor: object,
+	feeMultiplier: number,
+) {
+	const tx = facade.transactionFactory.create({
+		...rawDescriptor,
+		signerPublicKey: issuerAccount.publicKey,
+		fee: 0n,
+		deadline: facade.now().addSeconds(TX_DEADLINE_SECONDS).timestamp,
+	});
+	tx.fee = new models.Amount(BigInt(tx.size) * BigInt(feeMultiplier));
+	const signature = issuerAccount.signTransaction(tx);
+	return {
+		payload: facade.transactionFactory.static.attachSignature(tx, signature),
+		hash: toTransactionHashHex(facade.hashTransaction(tx).toString()),
+		tx,
+	};
+}
+
 export async function issueTicketOnChain(
 	metadata: TicketOnChainMetadata,
 	options: IssueTicketOptions = {},
 ): Promise<IssuedTicketResult> {
-	const issuerPrivateKey = normalizeIssuerPrivateKey(
-		options.issuerPrivateKey ?? process.env.SYMBOL_TICKET_ISSUER_PRIVATE_KEY,
-	);
+	const issuerPrivateKey = normalizeIssuerPrivateKey(options.issuerPrivateKey);
 	if (!issuerPrivateKey) {
 		throw new IssueTicketError(
 			ISSUE_TICKET_ERROR_CODES.issuer_private_key_missing,
-			"SYMBOL_TICKET_ISSUER_PRIVATE_KEY is missing or invalid.",
+			"issuerPrivateKey is missing or invalid.",
 		);
 	}
 
@@ -171,65 +267,121 @@ export async function issueTicketOnChain(
 
 	const facade = new SymbolFacade(resolveNetworkName());
 	const issuerAccount = facade.createAccount(new PrivateKey(issuerPrivateKey));
+	const normalizedRecipientPublicKey = normalizePublicKey(
+		options.recipientPublicKey,
+	);
+	const recipientAddress = normalizedRecipientPublicKey
+		? facade.createPublicAccount(new PublicKey(normalizedRecipientPublicKey)).address
+		: issuerAccount.address;
 	const nonce = randomInt(0, 0x1_0000_0000);
-	const mosaicId = generateMosaicId(issuerAccount.address, nonce);
+	const feeMultiplier = await fetchFeeMultiplier(nodeUrlList[0]);
 
-	const embeddedTransactions = [
-		facade.createEmbeddedTransactionFromTypedDescriptor(
-			new descriptors.MosaicDefinitionTransactionV1Descriptor(
-				new models.MosaicId(mosaicId),
-				new models.BlockDuration(0n),
-				new models.MosaicNonce(nonce),
-				new models.MosaicFlags(models.MosaicFlags.TRANSFERABLE.value),
-				0,
-			),
-			issuerAccount.publicKey,
-		),
-		facade.createEmbeddedTransactionFromTypedDescriptor(
-			new descriptors.MosaicSupplyChangeTransactionV1Descriptor(
+	const definePayload = createSignedTransactionPayload(
+		facade,
+		issuerAccount,
+		{
+			type: "mosaic_definition_transaction_v1",
+			id: 0n,
+			duration: 0n,
+			nonce,
+			flags: new models.MosaicFlags(models.MosaicFlags.TRANSFERABLE.value),
+			divisibility: 0,
+		},
+		feeMultiplier,
+	);
+	const defineAnnouncedNodeUrl = await announceTransaction(
+		nodeUrlList,
+		definePayload.payload,
+	);
+	const defineResult = await waitForTransactionResult(
+		nodeUrlList,
+		definePayload.hash,
+	);
+	if (defineResult.state === "failed") {
+		throw new IssueTicketError(
+			ISSUE_TICKET_ERROR_CODES.transaction_announce_failed,
+			`Mosaic definition failed: ${defineResult.status.code ?? "unknown_error"}`,
+		);
+	}
+	if (defineResult.state === "timeout") {
+		throw new IssueTicketError(
+			ISSUE_TICKET_ERROR_CODES.transaction_announce_failed,
+			"Mosaic definition confirmation timeout.",
+		);
+	}
+	const mosaicId = definePayload.tx.id.value;
+
+	const supplyDescriptor = new descriptors.MosaicSupplyChangeTransactionV1Descriptor(
+		new models.UnresolvedMosaicId(mosaicId),
+		new models.Amount(1n),
+		models.MosaicSupplyChangeAction.INCREASE,
+	);
+	const transferDescriptor = new descriptors.TransferTransactionV1Descriptor(
+		recipientAddress,
+		[
+			new descriptors.UnresolvedMosaicDescriptor(
 				new models.UnresolvedMosaicId(mosaicId),
 				new models.Amount(1n),
-				models.MosaicSupplyChangeAction.INCREASE,
 			),
-			issuerAccount.publicKey,
+		],
+	);
+	const metadataDescriptor = new descriptors.MosaicMetadataTransactionV1Descriptor(
+		issuerAccount.address,
+		metadataGenerateKey("ticket:info/v1"),
+		new models.UnresolvedMosaicId(mosaicId),
+		metadataValueSize,
+		metadataValue,
+	);
+
+	const stagedTransactions = [
+		createSignedTransactionPayload(
+			facade,
+			issuerAccount,
+			supplyDescriptor.toMap(),
+			feeMultiplier,
 		),
-		facade.createEmbeddedTransactionFromTypedDescriptor(
-			new descriptors.MosaicMetadataTransactionV1Descriptor(
-				issuerAccount.address,
-				metadataGenerateKey("ticket:info/v1"),
-				new models.UnresolvedMosaicId(mosaicId),
-				metadataValueSize,
-				metadataValue,
-			),
-			issuerAccount.publicKey,
+		createSignedTransactionPayload(
+			facade,
+			issuerAccount,
+			transferDescriptor.toMap(),
+			feeMultiplier,
+		),
+		createSignedTransactionPayload(
+			facade,
+			issuerAccount,
+			metadataDescriptor.toMap(),
+			feeMultiplier,
 		),
 	];
-
-	const feeMultiplier = await fetchFeeMultiplier(nodeUrlList[0]);
-	const aggregateDescriptor = new descriptors.AggregateCompleteTransactionV2Descriptor(
-		SymbolFacade.hashEmbeddedTransactions(embeddedTransactions),
-		embeddedTransactions,
-		[],
-	);
-
-	const aggregateTransaction = facade.createTransactionFromTypedDescriptor(
-		aggregateDescriptor,
-		issuerAccount.publicKey,
-		feeMultiplier,
-		TX_DEADLINE_SECONDS,
-	);
-	const signature = issuerAccount.signTransaction(aggregateTransaction);
-	const signedPayload = facade.transactionFactory.static.attachSignature(
-		aggregateTransaction,
-		signature,
-	);
-	const transactionHash = facade.hashTransaction(aggregateTransaction).toString();
-
-	const announcedNodeUrl = await announceTransaction(nodeUrlList, signedPayload);
+	let announcedNodeUrl = defineAnnouncedNodeUrl;
+	let lastTransactionHash = definePayload.hash;
+	for (const stagedTransaction of stagedTransactions) {
+		announcedNodeUrl = await announceTransaction(
+			nodeUrlList,
+			stagedTransaction.payload,
+		);
+		const stagedResult = await waitForTransactionResult(
+			nodeUrlList,
+			stagedTransaction.hash,
+		);
+		if (stagedResult.state === "failed") {
+			throw new IssueTicketError(
+				ISSUE_TICKET_ERROR_CODES.transaction_announce_failed,
+				`Ticket issue flow failed: ${stagedResult.status.code ?? "unknown_error"}`,
+			);
+		}
+		if (stagedResult.state === "timeout") {
+			throw new IssueTicketError(
+				ISSUE_TICKET_ERROR_CODES.transaction_announce_failed,
+				"Ticket issue flow confirmation timeout.",
+			);
+		}
+		lastTransactionHash = stagedTransaction.hash;
+	}
 
 	return {
 		mosaicId: toMosaicIdHex(mosaicId),
-		transactionHash,
+		transactionHash: lastTransactionHash,
 		announcedNodeUrl,
 		issuerPublicKey: issuerAccount.publicKey.toString(),
 	};

@@ -27,7 +27,7 @@ describe("symbol ticket create integration", () => {
 			isUsed: false,
 		};
 		const metadataValue = JSON.stringify(expectedTicketMetadata);
-		console.log("[integration:create] request", {
+		console.log("[integration:ticket:create] request", {
 			metadataSeed,
 			metadata: expectedTicketMetadata,
 		});
@@ -37,7 +37,7 @@ describe("symbol ticket create integration", () => {
 			metadataSeed,
 			metadataValue,
 		);
-		console.log("[integration:create] result", issueResult);
+		console.log("[integration:ticket:create] result", issueResult);
 		expect(issueResult.ok).toBe(true);
 		if (!issueResult.ok) {
 			throw new Error(issueResult.message);
@@ -54,9 +54,9 @@ describe("symbol ticket create integration", () => {
 		}
 
 		const { getTicketDetails } = await import("@/lib/symbol/ticket/read");
-		console.log("[integration:read] request", { mosaicIdHex });
+		console.log("[integration:ticket:read] request", { mosaicIdHex });
 		const readResult = await getTicketDetails(mosaicIdHex);
-		console.log("[integration:read] result", readResult);
+		console.log("[integration:ticket:read] result", readResult);
 		if (!readResult.ok) {
 			throw new Error(`[${readResult.status}] ${readResult.message}`);
 		}
@@ -79,7 +79,7 @@ describe("symbol ticket create integration", () => {
 			detail: "integration test ticket (updated)",
 			isUsed: true,
 		};
-		console.log("[integration:update] request", {
+		console.log("[integration:ticket:update] request", {
 			mosaicIdHex,
 			metadataSeed,
 			nextMetadata,
@@ -91,7 +91,7 @@ describe("symbol ticket create integration", () => {
 			mosaicIdHex,
 			nextMetadata
 		);
-		console.log("[integration:update] result", updateResult);
+		console.log("[integration:ticket:update] result", updateResult);
 		if (!updateResult.ok) {
 			throw new Error(`[${updateResult.status}] ${updateResult.message}`);
 		}
@@ -116,7 +116,7 @@ describe("symbol ticket create integration", () => {
 		const mosaicIdHex = requireIssuedMosaicIdHex();
 		const issuerPrivateKey = requireEnv("SYMBOL_ISSUER_PRIVATE_KEY");
 		const metadataSeed = process.env.SYMBOL_TICKET_METADATA_SEED ?? "ticket:info/v1";
-		console.log("[integration:delete] request", {
+		console.log("[integration:ticket:delete] request", {
 			mosaicIdHex,
 			metadataSeed,
 		});
@@ -126,7 +126,7 @@ describe("symbol ticket create integration", () => {
 			metadataSeed,
 			mosaicIdHex
 		);
-		console.log("[integration:delete] result", deleteResult);
+		console.log("[integration:ticket:delete] result", deleteResult);
 		if (!deleteResult.ok) {
 			throw new Error(`[${deleteResult.status}] ${deleteResult.message}`);
 		}

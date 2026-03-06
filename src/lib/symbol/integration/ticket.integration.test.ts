@@ -2,7 +2,7 @@ import { INTEGRATION_TIMEOUT_MS } from "@/lib/symbol/integration/_helpers/timeou
 import { loadIntegrationEnv } from "@/lib/symbol/integration/_helpers/env";
 import { requireEnv } from "@/lib/symbol/integration/_helpers/guards";
 
-describe("symbol ticket create integration", () => {
+describe("symbol ticket CRUD integration", () => {
 	let issuedMosaicIdHex: string | null = null;
 	let expectedTicketMetadata: { name: string; detail: string; isUsed: boolean } | null = null;
 

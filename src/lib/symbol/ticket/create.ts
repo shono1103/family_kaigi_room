@@ -161,10 +161,6 @@ export const issueTicketOnChain = async (
 			error: "node_unreachable",
 			message: "SYMBOL_MAINNET_NODE_URL_LIST or SYMBOL_TESTNET_NODE_URL_LIST is required",
 		};
-
-	console.log(`Node URL        : ${nodeUrl}`);
-	console.log('Mode            : ANNOUNCE');
-
 	// ノードへ送信し、最終状態を確認する
 	const announceRes = await fetch(`${nodeUrl}/transactions`, {
 		method: 'PUT',
@@ -179,13 +175,8 @@ export const issueTicketOnChain = async (
 			error: "announce_failed",
 			message: `Announce failed (${announceRes.status}): ${announceText}`,
 		};
-
-	console.log(`Announce result : ${announceText}`);
-	console.log('Waiting for confirmation...');
-
 	const state = await pollTransactionState(nodeUrl, hash);
 	if ('confirmed' === state.state) {
-		console.log('Final state     : CONFIRMED');
 		return {
 			ok: true,
 			mosaicIdHex: mosaicIdHex
@@ -193,8 +184,6 @@ export const issueTicketOnChain = async (
 	}
 
 	if ('failed' === state.state) {
-		console.log('Final state     : FAILED');
-		console.log(JSON.stringify(state.status, null, 2));
 		const errorCode =
 			typeof state.status.code === "string" && state.status.code
 				? state.status.code
@@ -206,10 +195,6 @@ export const issueTicketOnChain = async (
 		};
 	}
 
-	console.log('Final state     : TIMEOUT (not confirmed within 120s)');
-	if (state.status)
-		console.log(`Last status     : ${JSON.stringify(state.status)}`);
-	console.log(`Check manually  : ${nodeUrl}/transactionStatus/${hash}`);
 	return {
 		ok: false,
 		error: "timeout",

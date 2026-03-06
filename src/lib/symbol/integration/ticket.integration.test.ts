@@ -48,12 +48,14 @@ describe("symbol ticket create integration", () => {
 			throw new Error("expectedTicketMetadata is null. create test must run first.");
 		}
 
-		const {getTicketDetails} = await import("@/lib/symbol/ticket/read");
+		const { getTicketDetails } = await import("@/lib/symbol/ticket/read");
 		const readResult = await getTicketDetails(mosaicIdHex);
 		if (!readResult.ok) {
 			throw new Error(`[${readResult.status}] ${readResult.message}`);
 		}
 		expect(readResult.ok).toBe(true);
+
+		console.log(readResult);
 		expect(readResult.status).toBe("ok");
 		expect(readResult.ticketMetadata.name).toBe(expectedTicketMetadata.name);
 		expect(readResult.ticketMetadata.detail).toBe(expectedTicketMetadata.detail);

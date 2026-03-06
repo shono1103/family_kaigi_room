@@ -29,6 +29,11 @@ export type CreateMosaicSupplyIncreaseTransactionParams = Readonly<{
 	delta: bigint;
 }>;
 
+export type CreateMosaicSupplyDecreaseTransactionParams = Readonly<{
+	mosaicId: bigint;
+	delta: bigint;
+}>;
+
 export type CreateAggregateTransactionParams = Readonly<{
 	aggregateType: string;
 	deadlineHours: number;
@@ -121,6 +126,21 @@ export const createMosaicSupplyIncreaseTransaction = (
 	mosaicId: params.mosaicId,
 	delta: params.delta,
 	action: models.MosaicSupplyChangeAction.INCREASE
+});
+
+/**
+ * モザイク供給量を減少させる埋め込みトランザクションを作成します。
+ */
+export const createMosaicSupplyDecreaseTransaction = (
+	facade: SymbolFacade,
+	account: SymbolAccount,
+	params: CreateMosaicSupplyDecreaseTransactionParams
+) => facade.transactionFactory.createEmbedded({
+	type: 'mosaic_supply_change_transaction_v1',
+	signerPublicKey: account.publicKey,
+	mosaicId: params.mosaicId,
+	delta: params.delta,
+	action: models.MosaicSupplyChangeAction.DECREASE
 });
 
 /**

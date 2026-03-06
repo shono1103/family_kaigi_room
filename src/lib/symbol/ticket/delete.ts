@@ -1,6 +1,6 @@
 import { metadataGenerateKey, metadataUpdateValue, models } from 'symbol-sdk/symbol';
 import { generateAccountFromPrivateKey } from '../utils/account';
-import { createAggregateTransaction } from '../utils/mosaic';
+import { createAggregateTransaction, createMosaicSupplyDecreaseTransaction } from '../utils/mosaic';
 import { pollTransactionState } from '../utils/transaction';
 import { aggregateType, deadlineHours, facade, feeMultiplier, nodeUrl } from '../config';
 import { getMosaicWithMetadata } from '../utils/mosaic';
@@ -68,6 +68,23 @@ const extractExistingMetadataValueBytes = (
 	return null;
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	'object' === typeof value && null !== value;
+
+const extractCurrentSupply = (mosaic: Record<string, unknown>): bigint | null => {
+	const directSupply = parseBigIntLike(mosaic.supply);
+	if (null !== directSupply && directSupply >= 0n)
+		return directSupply;
+
+	if (isRecord(mosaic.mosaic)) {
+		const nestedSupply = parseBigIntLike(mosaic.mosaic.supply);
+		if (null !== nestedSupply && nestedSupply >= 0n)
+			return nestedSupply;
+	}
+
+	return null;
+};
+
 export const deleteTicketOnChain = async (
 	privateKey: string,
 	metadataKeySeed: string,
@@ -92,11 +109,21 @@ export const deleteTicketOnChain = async (
 			mosaicWithMetadata.metadataEntries as ReadonlyArray<Record<string, unknown>>,
 			metadataKey
 		);
+		const currentSupply = extractCurrentSupply(
+			mosaicWithMetadata.mosaic as Record<string, unknown>
+		);
 		if (!oldValueBytes) {
 			return {
 				ok: false,
 				status: 'metadata_not_found',
 				message: 'metadata entry was not found for the given metadataKeySeed.'
+			};
+		}
+		if (null === currentSupply) {
+			return {
+				ok: false,
+				status: 'delete_failed',
+				message: 'failed to read current mosaic supply.'
 			};
 		}
 
@@ -113,6 +140,18 @@ export const deleteTicketOnChain = async (
 			valueSizeDelta,
 			value
 		});
+		const embeddedTransactions = [embeddedMetadata];
+		if (currentSupply > 0n) {
+			const embeddedSupplyDecrease = createMosaicSupplyDecreaseTransaction(
+				facade,
+				account,
+				{
+					mosaicId,
+					delta: currentSupply
+				}
+			);
+			embeddedTransactions.push(embeddedSupplyDecrease);
+		}
 
 		const { transaction } = createAggregateTransaction(
 			facade,
@@ -120,7 +159,7 @@ export const deleteTicketOnChain = async (
 			{
 				aggregateType,
 				deadlineHours,
-				embeddedTransactions: [embeddedMetadata],
+				embeddedTransactions,
 				feeMultiplier
 			}
 		);

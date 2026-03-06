@@ -95,8 +95,8 @@ export const issueTicketOnChain = async (
 	const account = generateAccountFromPrivateKey(facade, privateKey);
 
 	const mosaicFlagOptions: MosaicFlagOptions = {
-		// 供給量を固定し、発行後に枚数を増減できないようにする。
-		mutable: false,
+		// 削除時に供給量を0まで減らせるように供給量変更を許可する。
+		mutable: true,
 		// MVPではアドレス制限ロジックを使わないため無効化する。
 		restrictable: false,
 		// 発行者による強制回収を防ぎ、保有者の所有権を維持する。

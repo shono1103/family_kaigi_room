@@ -40,6 +40,9 @@ const fetchJson = async (
 	return res.json();
 };
 
+const normalizeMosaicIdHex = (mosaicIdHex: string): string =>
+	mosaicIdHex.trim().replace(/^0x/i, "").toUpperCase();
+
 /**
  * モザイク本体情報と紐づくメタデータ一覧を取得します。
  */
@@ -47,10 +50,11 @@ export const getMosaicWithMetadata = async (
 	nodeUrl: string,
 	mosaicIdHex: string
 ): Promise<GetMosaicWithMetadataResult> => {
-	const mosaicResponse = await fetchJson(`${nodeUrl}/mosaics/${mosaicIdHex}`) as SymbolMosaicDto;
+	const normalizedMosaicIdHex = normalizeMosaicIdHex(mosaicIdHex);
+	const mosaicResponse = await fetchJson(`${nodeUrl}/mosaics/${normalizedMosaicIdHex}`) as SymbolMosaicDto;
 
 	const metadataQuery = new URLSearchParams({
-		targetId: mosaicIdHex,
+		targetId: normalizedMosaicIdHex,
 		metadataType: '1',
 		pageSize: '100'
 	});

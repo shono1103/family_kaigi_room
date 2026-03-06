@@ -2,11 +2,8 @@ import { INTEGRATION_TIMEOUT_MS } from "@/lib/symbol/integration/_helpers/timeou
 import { loadIntegrationEnv } from "@/lib/symbol/integration/_helpers/env";
 import { requireEnv } from "@/lib/symbol/integration/_helpers/guards";
 
-const shouldRunIntegration = process.env.RUN_SYMBOL_INTEGRATION_TESTS === "true";
-const describeIf = shouldRunIntegration ? describe : describe.skip;
-
-describeIf("symbol ticket create integration", () => {
-	let issuedMosaicId: string | null = null;
+describe("symbol ticket create integration", () => {
+	let issuedMosaicIdHex: string | null = null;
 
 	test("create: issueTicketOnChainでmosaicを発行する", async () => {
 		loadIntegrationEnv();
@@ -27,12 +24,12 @@ describeIf("symbol ticket create integration", () => {
 		if (!issueResult.ok) {
 			throw new Error(issueResult.message);
 		}
-		issuedMosaicId = issueResult.mosaicId;
-		expect(issuedMosaicId).toMatch(/^0x[0-9A-F]{16}$/);
+		issuedMosaicIdHex = issueResult.mosaicIdHex;
+		expect(issuedMosaicIdHex).toMatch(/^0x[0-9A-F]{16}$/);
 	}, INTEGRATION_TIMEOUT_MS);
 
 	test("read: 作成済みmosaicIdを利用してチケット情報を参照する", async () => {
-		expect(issuedMosaicId).toBeTruthy();
+		expect(issuedMosaicIdHex).toBeTruthy();
 		// TODO: read 実装完了後に呼び出しへ差し替える
 		// const { readTicketOnChain } = await import("@/lib/symbol/ticket/read");
 		// const readResult = await readTicketOnChain(issuedMosaicId!);
@@ -40,7 +37,7 @@ describeIf("symbol ticket create integration", () => {
 	}, INTEGRATION_TIMEOUT_MS);
 
 	test("update: 作成済みmosaicIdを利用してチケット情報を更新する", async () => {
-		expect(issuedMosaicId).toBeTruthy();
+		expect(issuedMosaicIdHex).toBeTruthy();
 		// TODO: update 実装完了後に呼び出しへ差し替える
 		// const { updateTicketOnChain } = await import("@/lib/symbol/ticket/update");
 		// const updateResult = await updateTicketOnChain(issuedMosaicId!, { ... });
@@ -48,7 +45,7 @@ describeIf("symbol ticket create integration", () => {
 	}, INTEGRATION_TIMEOUT_MS);
 
 	test("delete: 作成済みmosaicIdを利用してチケットを削除する", async () => {
-		expect(issuedMosaicId).toBeTruthy();
+		expect(issuedMosaicIdHex).toBeTruthy();
 		// TODO: delete 実装完了後に呼び出しへ差し替える
 		// const { deleteTicketOnChain } = await import("@/lib/symbol/ticket/delete");
 		// const deleteResult = await deleteTicketOnChain(issuedMosaicId!);

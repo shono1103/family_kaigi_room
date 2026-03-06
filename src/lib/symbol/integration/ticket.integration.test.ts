@@ -1,6 +1,6 @@
-import { INTEGRATION_TIMEOUT_MS } from "@/lib/integration/_helpers/timeout";
-import { loadIntegrationEnv } from "@/lib/integration/_helpers/env";
-import { requireEnv } from "@/lib/integration/_helpers/guards";
+import { INTEGRATION_TIMEOUT_MS } from "@/lib/symbol/integration/_helpers/timeout";
+import { loadIntegrationEnv } from "@/lib/symbol/integration/_helpers/env";
+import { requireEnv } from "@/lib/symbol/integration/_helpers/guards";
 
 const shouldRunIntegration = process.env.RUN_SYMBOL_INTEGRATION_TESTS === "true";
 const describeIf = shouldRunIntegration ? describe : describe.skip;

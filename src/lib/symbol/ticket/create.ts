@@ -28,7 +28,7 @@ import {
 const INITIAL_SUPPLY = 1n;
 
 type IssueTicketResult =
-	| { ok: true; mosaicId: string }
+	| { ok: true; mosaicIdHex: string }
 	| { ok: false; error: "node_unreachable" | "announce_failed" | "timeout"; message: string };
 
 export const issueTicketOnChain = async (
@@ -133,7 +133,7 @@ export const issueTicketOnChain = async (
 		console.log('Final state     : CONFIRMED');
 		return {
 			ok: true,
-			mosaicId: mosaicIdHex
+			mosaicIdHex: mosaicIdHex
 		};
 	}
 

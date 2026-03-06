@@ -2,9 +2,23 @@ import { nodeUrl } from '../config'
 import { getMosaicWithMetadata, type GetMosaicWithMetadataResult } from '../utils/mosaic'
 import type { TicketMetadata, TicketMetadataThumbnail } from './types';
 
-export type GetTicketDetailsResult = GetMosaicWithMetadataResult & Readonly<{
+type GetTicketDetailsSuccess = Readonly<{
+	ok: true;
+	status: 'ok';
+	mosaic: GetMosaicWithMetadataResult['mosaic'];
+	metadataEntries: GetMosaicWithMetadataResult['metadataEntries'];
 	ticketMetadata: TicketMetadata;
 }>;
+
+type GetTicketDetailsFailure = Readonly<{
+	ok: false;
+	status: 'invalid_ticket_metadata' | 'read_failed';
+	message: string;
+}>;
+
+export type GetTicketDetailsResult =
+	| GetTicketDetailsSuccess
+	| GetTicketDetailsFailure;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
 	'object' === typeof value && null !== value;
@@ -80,10 +94,25 @@ const extractTicketMetadata = (source: GetMosaicWithMetadataResult): TicketMetad
 export const getTicketDetails = async (
 	mosaicIdHex: string
 ): Promise<GetTicketDetailsResult> => {
-	const mosaicWithMetadata = await getMosaicWithMetadata(nodeUrl, mosaicIdHex);
-	const ticketMetadata = extractTicketMetadata(mosaicWithMetadata);
-	return {
-		...mosaicWithMetadata,
-		ticketMetadata
-	};
+	try {
+		const mosaicWithMetadata = await getMosaicWithMetadata(nodeUrl, mosaicIdHex);
+		const ticketMetadata = extractTicketMetadata(mosaicWithMetadata);
+		return {
+			ok: true,
+			status: 'ok',
+			mosaic: mosaicWithMetadata.mosaic,
+			metadataEntries: mosaicWithMetadata.metadataEntries,
+			ticketMetadata
+		};
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		const status = message.includes('Ticket metadata validation failed')
+			? 'invalid_ticket_metadata'
+			: 'read_failed';
+		return {
+			ok: false,
+			status,
+			message
+		};
+	}
 };

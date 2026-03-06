@@ -24,18 +24,73 @@ import {
 	deadlineHours,
 	aggregateType
 } from '../config';
+import type { TicketMetadata, TicketMetadataThumbnail } from './types';
 
 const INITIAL_SUPPLY = 1n;
 
 type IssueTicketResult =
 	| { ok: true; mosaicIdHex: string }
-	| { ok: false; error: "node_unreachable" | "announce_failed" | "timeout"; message: string };
+	| { ok: false; error: "node_unreachable" | "announce_failed" | "timeout" | "invalid_metadata"; message: string };
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	'object' === typeof value && null !== value;
+
+const isTicketMetadataThumbnail = (value: unknown): value is TicketMetadataThumbnail => {
+	if (!isRecord(value))
+		return false;
+
+	return (
+		'string' === typeof value.filename &&
+		'string' === typeof value.mimeType &&
+		'number' === typeof value.size &&
+		Number.isFinite(value.size) &&
+		'string' === typeof value.sha256
+	);
+};
+
+const isTicketMetadata = (value: unknown): value is TicketMetadata => {
+	if (!isRecord(value))
+		return false;
+
+	const thumbnail = value.thumbnail;
+	return (
+		'string' === typeof value.name &&
+		'string' === typeof value.detail &&
+		'boolean' === typeof value.isUsed &&
+		(undefined === thumbnail || isTicketMetadataThumbnail(thumbnail))
+	);
+};
+
+const normalizeTicketMetadataValue = (
+	metadataInput: string | TicketMetadata
+): TicketMetadata | null => {
+	if ('string' !== typeof metadataInput) {
+		return isTicketMetadata(metadataInput) ? metadataInput : null;
+	}
+
+	try {
+		const parsed = JSON.parse(metadataInput) as unknown;
+		return isTicketMetadata(parsed) ? parsed : null;
+	} catch {
+		return null;
+	}
+};
 
 export const issueTicketOnChain = async (
 	privateKey: string,
 	metadataKeySeed: string,
-	metadataValueText: string
+	metadataValue: string | TicketMetadata
 ): Promise<IssueTicketResult> => {
+	const normalizedMetadata = normalizeTicketMetadataValue(metadataValue);
+	if (!normalizedMetadata) {
+		return {
+			ok: false,
+			error: "invalid_metadata",
+			message: "metadata must include name(string), detail(string), isUsed(boolean).",
+		};
+	}
+
+	const metadataValueText = JSON.stringify(normalizedMetadata);
 
 	const account = generateAccountFromPrivateKey(facade, privateKey);
 

@@ -4,6 +4,7 @@ import { requireEnv } from "@/lib/symbol/integration/_helpers/guards";
 
 describe("symbol ticket create integration", () => {
 	let issuedMosaicIdHex: string | null = null;
+	let expectedTicketMetadata: { name: string; detail: string; isUsed: boolean } | null = null;
 
 	const requireIssuedMosaicIdHex = (): string => {
 		expect(issuedMosaicIdHex).not.toBeNull();
@@ -20,11 +21,12 @@ describe("symbol ticket create integration", () => {
 	test("create: issueTicketOnChainでmosaicを発行する", async () => {
 		const issuerPrivateKey = requireEnv("SYMBOL_ISSUER_PRIVATE_KEY");
 		const metadataSeed = process.env.SYMBOL_TICKET_METADATA_SEED ?? "ticket:info/v1";
-		const metadataValue = JSON.stringify({
+		expectedTicketMetadata = {
 			name: `integration-${Date.now()}`,
 			detail: "integration test ticket",
 			isUsed: false,
-		});
+		};
+		const metadataValue = JSON.stringify(expectedTicketMetadata);
 		const { issueTicketOnChain } = await import("@/lib/symbol/ticket/create");
 		const issueResult = await issueTicketOnChain(
 			issuerPrivateKey,
@@ -41,12 +43,24 @@ describe("symbol ticket create integration", () => {
 
 	test("read: 作成済みmosaicIdを利用してチケット情報を参照する", async () => {
 		const mosaicIdHex = requireIssuedMosaicIdHex();
+		expect(expectedTicketMetadata).not.toBeNull();
+		if (!expectedTicketMetadata) {
+			throw new Error("expectedTicketMetadata is null. create test must run first.");
+		}
 
 		const {getTicketDetails} = await import("@/lib/symbol/ticket/read");
-		// TODO: read 実装完了後に呼び出しへ差し替える
-		// const { readTicketOnChain } = await import("@/lib/symbol/ticket/read");
-		// const readResult = await readTicketOnChain(mosaicIdHex);
-		// expect(readResult.ok).toBe(true);
+		const readResult = await getTicketDetails(mosaicIdHex);
+		if (!readResult.ok) {
+			throw new Error(`[${readResult.status}] ${readResult.message}`);
+		}
+		expect(readResult.ok).toBe(true);
+		expect(readResult.status).toBe("ok");
+		expect(readResult.ticketMetadata.name).toBe(expectedTicketMetadata.name);
+		expect(readResult.ticketMetadata.detail).toBe(expectedTicketMetadata.detail);
+		expect(readResult.ticketMetadata.isUsed).toBe(expectedTicketMetadata.isUsed);
+		expect(Array.isArray(readResult.metadataEntries)).toBe(true);
+		expect(readResult.mosaic).toBeTruthy();
+
 	}, INTEGRATION_TIMEOUT_MS);
 
 	test("update: 作成済みmosaicIdを利用してチケット情報を更新する", async () => {

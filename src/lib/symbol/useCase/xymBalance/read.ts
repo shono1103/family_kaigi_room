@@ -1,9 +1,11 @@
-import { nodeUrl } from "../config";
+import { nodeUrl } from "../../config";
 import {
 	fetchWithTimeout,
+} from "../../utils/node-client";
+import {
 	isValidSymbolPublicKey,
 	normalizeSymbolPublicKey,
-} from "../utils";
+} from "../../utils/normalizers"
 
 const SYMBOL_REQUEST_TIMEOUT_MS = 5000;
 const DEFAULT_XYM_DIVISIBILITY = 6;
@@ -38,26 +40,26 @@ type CurrencyInfo = {
 
 export type ReadXymBalanceResult =
 	| {
-			ok: true;
-			status: "ok";
-			publicKey: string;
-			balance: {
-				amountRaw: string;
-				amountDisplay: string;
-				currencyMosaicId: string;
-				divisibility: number;
-			};
-	  }
+		ok: true;
+		status: "ok";
+		publicKey: string;
+		balance: {
+			amountRaw: string;
+			amountDisplay: string;
+			currencyMosaicId: string;
+			divisibility: number;
+		};
+	}
 	| {
-			ok: false;
-			status:
-				| "missing_public_key"
-				| "invalid_public_key"
-				| "account_not_found"
-				| "node_unreachable"
-				| "read_failed";
-			message: string;
-	  };
+		ok: false;
+		status:
+		| "missing_public_key"
+		| "invalid_public_key"
+		| "account_not_found"
+		| "node_unreachable"
+		| "read_failed";
+		message: string;
+	};
 
 const normalizeMosaicId = (mosaicId: string | undefined | null) => {
 	if (!mosaicId) {
@@ -91,8 +93,7 @@ const getFallbackCurrencyInfo = (): CurrencyInfo => {
 const fetchCurrencyInfo = async (): Promise<CurrencyInfo> => {
 	try {
 		const response = await fetchWithTimeout(
-			`${nodeUrl.replace(/\/$/, "")}/network/currency`,
-			SYMBOL_REQUEST_TIMEOUT_MS,
+			`${nodeUrl.replace(/\/$/, "")}/network/currency`
 		);
 		if (!response.ok) {
 			return getFallbackCurrencyInfo();
@@ -140,8 +141,7 @@ export const readXymBalanceByPublicKey = async (
 		}
 
 		const accountResponse = await fetchWithTimeout(
-			`${nodeUrl.replace(/\/$/, "")}/accounts/${normalizedPublicKey}`,
-			SYMBOL_REQUEST_TIMEOUT_MS,
+			`${nodeUrl.replace(/\/$/, "")}/accounts/${normalizedPublicKey}`
 		);
 
 		if (accountResponse.status === 404) {

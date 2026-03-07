@@ -4,14 +4,16 @@ import {
 	facade,
 	feeMultiplier,
 	nodeUrl,
-} from "../config";
-import { generateAccountFromPrivateKey, generateAccountFromPublicKey } from "../utils/account";
+} from "../../config";
+import { generateAccountFromPrivateKey, generateAccountFromPublicKey } from "../../utils/accounts";
 import {
 	fetchWithTimeout,
+} from "../../utils/node-client";
+import {
 	isValidSymbolPublicKey,
 	normalizeSymbolPublicKey,
-} from "../utils";
-import { pollTransactionState } from "../utils/transaction";
+} from "../../utils/normalizers"
+import { pollTransactionState } from "../../utils/node-client";
 
 const SYMBOL_REQUEST_TIMEOUT_MS = 5000;
 const DEFAULT_XYM_DIVISIBILITY = 6;
@@ -37,24 +39,24 @@ type CurrencyInfo = {
 
 export type SendXymOnChainResult =
 	| {
-			ok: true;
-			status: "ok";
-			transactionHash: string;
-			recipientAddress: string;
-			amountRaw: string;
-	  }
+		ok: true;
+		status: "ok";
+		transactionHash: string;
+		recipientAddress: string;
+		amountRaw: string;
+	}
 	| {
-			ok: false;
-			status:
-				| "invalid_sender_private_key"
-				| "invalid_recipient_public_key"
-				| "invalid_amount"
-				| "node_unreachable"
-				| "announce_failed"
-				| "timeout"
-				| "send_failed";
-			message: string;
-	  };
+		ok: false;
+		status:
+		| "invalid_sender_private_key"
+		| "invalid_recipient_public_key"
+		| "invalid_amount"
+		| "node_unreachable"
+		| "announce_failed"
+		| "timeout"
+		| "send_failed";
+		message: string;
+	};
 
 const normalizeMosaicId = (mosaicId: string | undefined | null) => {
 	if (!mosaicId) {
@@ -75,8 +77,7 @@ const getFallbackCurrencyInfo = (): CurrencyInfo => {
 const fetchCurrencyInfo = async (): Promise<CurrencyInfo> => {
 	try {
 		const response = await fetchWithTimeout(
-			`${nodeUrl.replace(/\/$/, "")}/network/currency`,
-			SYMBOL_REQUEST_TIMEOUT_MS,
+			`${nodeUrl.replace(/\/$/, "")}/network/currency`
 		);
 		if (!response.ok) {
 			return getFallbackCurrencyInfo();

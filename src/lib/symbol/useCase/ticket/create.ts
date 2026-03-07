@@ -1,7 +1,10 @@
 import { PrivateKey } from 'symbol-sdk';
 import { SymbolAccount, SymbolFacade, metadataGenerateKey, metadataUpdateValue, models } from 'symbol-sdk/symbol';
 import { randomInt } from "node:crypto";
-import { generateAccountFromPrivateKey, generateAccountFromPublicKey } from '../utils/account'
+import {
+	generateAccountFromPrivateKey,
+	generateAccountFromPublicKey
+} from '../../utils/accounts'
 import {
 	MosaicFlagOptions,
 	CreateMosaicDefinitionTransactionParams,
@@ -11,19 +14,21 @@ import {
 	createMosaicMetadataTransaction,
 	createMosaicSupplyIncreaseTransaction,
 	createAggregateTransaction,
+} from '../../utils/transaction-builders'
+import {
 	toHexMetadataKey,
 	toHexMosaicId
-} from '../utils/mosaic'
+} from '../../utils/normalizers'
 import {
 	pollTransactionState
-} from '../utils/transaction'
+} from '../../utils/node-client'
 import {
 	facade,
 	nodeUrl,
 	feeMultiplier,
 	deadlineHours,
 	aggregateType
-} from '../config';
+} from '../../config';
 import type { TicketMetadata, TicketMetadataThumbnail } from './types';
 
 const INITIAL_SUPPLY = 1n;

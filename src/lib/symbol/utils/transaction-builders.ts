@@ -41,18 +41,7 @@ export type CreateAggregateTransactionParams = Readonly<{
 	feeMultiplier: number;
 }>;
 
-export const toHexMosaicId = (mosaicId: bigint): string =>
-	`0x${mosaicId.toString(16).toUpperCase().padStart(16, '0')}`;
 
-export const toHexMetadataKey = (metadataKey: bigint): string =>
-	`0x${metadataKey.toString(16).toUpperCase().padStart(16, '0')}`;
-
-/**
- *
- * @param mosaicFlagOptions
- * フラグの具体的な値
- * @returns
- */
 export const buildMosaicFlags = (mosaicFlagOptions: MosaicFlagOptions) => {
 	let flags = models.MosaicFlags.TRANSFERABLE.value;
 	if (mosaicFlagOptions.mutable)

@@ -1,13 +1,57 @@
 import { metadataGenerateKey, metadataUpdateValue, models } from 'symbol-sdk/symbol';
-import { generateAccountFromPrivateKey } from '../utils/account';
-import { createAggregateTransaction, createMosaicSupplyDecreaseTransaction } from '../utils/mosaic';
-import { pollTransactionState } from '../utils/transaction';
-import { aggregateType, deadlineHours, facade, feeMultiplier, nodeUrl } from '../config';
-import { getMosaicWithMetadata } from '../utils/mosaic';
+import type { TicketMetadata, TicketMetadataThumbnail } from './types';
+import { generateAccountFromPrivateKey } from '../../utils/accounts';
+import { createAggregateTransaction } from '../../utils/transaction-builders';
+import { pollTransactionState, getMosaicWithMetadata } from '../../utils/node-client';
+import { aggregateType, deadlineHours, facade, feeMultiplier, nodeUrl } from '../../config';
 
-type DeleteTicketResult =
+type UpdateTicketResult =
 	| { ok: true; status: 'ok'; mosaicIdHex: string }
-	| { ok: false; status: 'metadata_not_found' | 'node_unreachable' | 'announce_failed' | 'timeout' | 'delete_failed'; message: string };
+	| { ok: false; status: 'invalid_metadata' | 'metadata_not_found' | 'node_unreachable' | 'announce_failed' | 'timeout' | 'update_failed'; message: string };
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+	'object' === typeof value && null !== value;
+
+const isTicketMetadataThumbnail = (value: unknown): value is TicketMetadataThumbnail => {
+	if (!isRecord(value))
+		return false;
+
+	return (
+		'string' === typeof value.filename &&
+		'string' === typeof value.mimeType &&
+		'number' === typeof value.size &&
+		Number.isFinite(value.size) &&
+		'string' === typeof value.sha256
+	);
+};
+
+const isTicketMetadata = (value: unknown): value is TicketMetadata => {
+	if (!isRecord(value))
+		return false;
+
+	const thumbnail = value.thumbnail;
+	return (
+		'string' === typeof value.name &&
+		'string' === typeof value.detail &&
+		'boolean' === typeof value.isUsed &&
+		(undefined === thumbnail || isTicketMetadataThumbnail(thumbnail))
+	);
+};
+
+const normalizeTicketMetadataValue = (
+	metadataInput: string | TicketMetadata
+): TicketMetadata | null => {
+	if ('string' !== typeof metadataInput) {
+		return isTicketMetadata(metadataInput) ? metadataInput : null;
+	}
+
+	try {
+		const parsed = JSON.parse(metadataInput) as unknown;
+		return isTicketMetadata(parsed) ? parsed : null;
+	} catch {
+		return null;
+	}
+};
 
 const normalizeMosaicIdHex = (mosaicIdHex: string): string =>
 	mosaicIdHex.trim().replace(/^0x/i, '').toUpperCase();
@@ -68,28 +112,21 @@ const extractExistingMetadataValueBytes = (
 	return null;
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-	'object' === typeof value && null !== value;
-
-const extractCurrentSupply = (mosaic: Record<string, unknown>): bigint | null => {
-	const directSupply = parseBigIntLike(mosaic.supply);
-	if (null !== directSupply && directSupply >= 0n)
-		return directSupply;
-
-	if (isRecord(mosaic.mosaic)) {
-		const nestedSupply = parseBigIntLike(mosaic.mosaic.supply);
-		if (null !== nestedSupply && nestedSupply >= 0n)
-			return nestedSupply;
-	}
-
-	return null;
-};
-
-export const deleteTicketOnChain = async (
+export const updateTicketOnChain = async (
 	privateKey: string,
 	metadataKeySeed: string,
-	mosaicIdHex: string
-): Promise<DeleteTicketResult> => {
+	mosaicIdHex: string,
+	nextMetadata: string | TicketMetadata
+): Promise<UpdateTicketResult> => {
+	const normalizedMetadata = normalizeTicketMetadataValue(nextMetadata);
+	if (!normalizedMetadata) {
+		return {
+			ok: false,
+			status: 'invalid_metadata',
+			message: 'metadata must include name(string), detail(string), isUsed(boolean).'
+		};
+	}
+
 	if (!nodeUrl) {
 		return {
 			ok: false,
@@ -109,9 +146,6 @@ export const deleteTicketOnChain = async (
 			mosaicWithMetadata.metadataEntries as ReadonlyArray<Record<string, unknown>>,
 			metadataKey
 		);
-		const currentSupply = extractCurrentSupply(
-			mosaicWithMetadata.mosaic as Record<string, unknown>
-		);
 		if (!oldValueBytes) {
 			return {
 				ok: false,
@@ -119,15 +153,8 @@ export const deleteTicketOnChain = async (
 				message: 'metadata entry was not found for the given metadataKeySeed.'
 			};
 		}
-		if (null === currentSupply) {
-			return {
-				ok: false,
-				status: 'delete_failed',
-				message: 'failed to read current mosaic supply.'
-			};
-		}
 
-		const newValueBytes = new Uint8Array(0);
+		const newValueBytes = new TextEncoder().encode(JSON.stringify(normalizedMetadata));
 		const value = metadataUpdateValue(oldValueBytes, newValueBytes);
 		const valueSizeDelta = newValueBytes.length - oldValueBytes.length;
 
@@ -140,18 +167,6 @@ export const deleteTicketOnChain = async (
 			valueSizeDelta,
 			value
 		});
-		const embeddedTransactions = [embeddedMetadata];
-		if (currentSupply > 0n) {
-			const embeddedSupplyDecrease = createMosaicSupplyDecreaseTransaction(
-				facade,
-				account,
-				{
-					mosaicId,
-					delta: currentSupply
-				}
-			);
-			embeddedTransactions.push(embeddedSupplyDecrease);
-		}
 
 		const { transaction } = createAggregateTransaction(
 			facade,
@@ -159,7 +174,7 @@ export const deleteTicketOnChain = async (
 			{
 				aggregateType,
 				deadlineHours,
-				embeddedTransactions,
+				embeddedTransactions: [embeddedMetadata],
 				feeMultiplier
 			}
 		);
@@ -213,7 +228,7 @@ export const deleteTicketOnChain = async (
 		const message = error instanceof Error ? error.message : String(error);
 		return {
 			ok: false,
-			status: 'delete_failed',
+			status: 'update_failed',
 			message
 		};
 	}

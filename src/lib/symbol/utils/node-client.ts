@@ -46,6 +46,7 @@ const fetchJson = async (
 
 export async function fetchWithTimeout(
 	url: string,
+	init?: RequestInit,
 ): Promise<Response> {
 	const controller = new AbortController();
 	const timeoutId = setTimeout(() => {
@@ -53,7 +54,7 @@ export async function fetchWithTimeout(
 	}, symbolHttpTimeoutMs);
 
 	try {
-		return await fetch(url, { signal: controller.signal });
+		return await fetch(url, { ...init, signal: controller.signal });
 	} finally {
 		clearTimeout(timeoutId);
 	}
@@ -83,6 +84,56 @@ export const getMosaicWithMetadata = async (
 	return {
 		mosaic: mosaicResponse,
 		metadataEntries
+	};
+};
+
+export type AnnounceTransactionResult =
+	| {
+		ok: true;
+		text: string;
+	}
+	| {
+		ok: false;
+		error: 'network_error' | 'announce_failed';
+		message: string;
+		status?: number;
+		text?: string;
+	};
+
+export const announceTransaction = async (
+	nodeUrl: string,
+	payloadJson: string
+): Promise<AnnounceTransactionResult> => {
+	let announceRes: Response;
+	try {
+		announceRes = await fetchWithTimeout(`${nodeUrl}/transactions`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: payloadJson
+		});
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		return {
+			ok: false,
+			error: 'network_error',
+			message
+		};
+	}
+
+	const text = await announceRes.text();
+	if (!announceRes.ok) {
+		return {
+			ok: false,
+			error: 'announce_failed',
+			message: `Announce failed (${announceRes.status}): ${text}`,
+			status: announceRes.status,
+			text
+		};
+	}
+
+	return {
+		ok: true,
+		text
 	};
 };
 
@@ -125,4 +176,3 @@ export const pollTransactionState = async (
 
 	return { state: 'timeout', status: lastStatus };
 };
-

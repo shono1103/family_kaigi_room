@@ -2,7 +2,7 @@ import { metadataGenerateKey, metadataUpdateValue, models } from 'symbol-sdk/sym
 import type { TicketMetadata, TicketMetadataThumbnail } from './types';
 import { generateAccountFromPrivateKey } from '../../utils/accounts';
 import { createAggregateTransaction } from '../../utils/transaction-builders';
-import { pollTransactionState, getMosaicWithMetadata } from '../../utils/node-client';
+import { announceTransaction, pollTransactionState, getMosaicWithMetadata } from '../../utils/node-client';
 import { aggregateType, deadlineHours, facade, feeMultiplier, nodeUrl } from '../../config';
 
 type UpdateTicketResult =
@@ -183,18 +183,12 @@ export const updateTicketOnChain = async (
 		const payloadJson = facade.transactionFactory.static.attachSignature(transaction, signature);
 		const hash = facade.hashTransaction(transaction).toString();
 
-		const announceRes = await fetch(`${nodeUrl}/transactions`, {
-			method: 'PUT',
-			headers: { 'Content-Type': 'application/json' },
-			body: payloadJson
-		});
-
-		const announceText = await announceRes.text();
-		if (!announceRes.ok) {
+		const announceResult = await announceTransaction(nodeUrl, payloadJson);
+		if (!announceResult.ok) {
 			return {
 				ok: false,
-				status: 'announce_failed',
-				message: `Announce failed (${announceRes.status}): ${announceText}`,
+				status: 'network_error' === announceResult.error ? 'node_unreachable' : 'announce_failed',
+				message: announceResult.message,
 			};
 		}
 

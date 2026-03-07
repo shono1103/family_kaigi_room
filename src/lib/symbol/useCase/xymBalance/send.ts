@@ -7,6 +7,7 @@ import {
 } from "../../config";
 import { generateAccountFromPrivateKey, generateAccountFromPublicKey } from "../../utils/accounts";
 import {
+	announceTransaction,
 	fetchWithTimeout,
 } from "../../utils/node-client";
 import {
@@ -173,28 +174,12 @@ export const sendXymOnChain = async (
 		);
 		const hash = facade.hashTransaction(transaction).toString();
 
-		let announceRes: Response;
-		try {
-			announceRes = await fetch(`${nodeUrl}/transactions`, {
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: payloadJson,
-			});
-		} catch (error) {
-			const messageText = error instanceof Error ? error.message : String(error);
+		const announceResult = await announceTransaction(nodeUrl, payloadJson);
+		if (!announceResult.ok) {
 			return {
 				ok: false,
-				status: "node_unreachable",
-				message: messageText,
-			};
-		}
-
-		const announceText = await announceRes.text();
-		if (!announceRes.ok) {
-			return {
-				ok: false,
-				status: "announce_failed",
-				message: `Announce failed (${announceRes.status}): ${announceText}`,
+				status: "network_error" === announceResult.error ? "node_unreachable" : "announce_failed",
+				message: announceResult.message,
 			};
 		}
 

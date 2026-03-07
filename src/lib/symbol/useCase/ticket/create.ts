@@ -20,6 +20,7 @@ import {
 	toHexMosaicId
 } from '../../utils/normalizers'
 import {
+	announceTransaction,
 	pollTransactionState
 } from '../../utils/node-client'
 import {
@@ -167,19 +168,14 @@ export const issueTicketOnChain = async (
 			message: "SYMBOL_MAINNET_NODE_URL_LIST or SYMBOL_TESTNET_NODE_URL_LIST is required",
 		};
 	// ノードへ送信し、最終状態を確認する
-	const announceRes = await fetch(`${nodeUrl}/transactions`, {
-		method: 'PUT',
-		headers: { 'Content-Type': 'application/json' },
-		body: payloadJson
-	});
-
-	const announceText = await announceRes.text();
-	if (!announceRes.ok)
+	const announceResult = await announceTransaction(nodeUrl, payloadJson);
+	if (!announceResult.ok) {
 		return {
 			ok: false,
-			error: "announce_failed",
-			message: `Announce failed (${announceRes.status}): ${announceText}`,
+			error: "network_error" === announceResult.error ? "node_unreachable" : "announce_failed",
+			message: announceResult.message,
 		};
+	}
 	const state = await pollTransactionState(nodeUrl, hash);
 	if ('confirmed' === state.state) {
 		return {

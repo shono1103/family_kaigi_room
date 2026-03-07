@@ -8,7 +8,7 @@ describe("symbol account read integration", () => {
 	});
 
 	test("invalid public key を渡すと invalid_public_key を返す", async () => {
-		const { readSymbolAccountByPublicKey } = await import("@/lib/symbol/account/read");
+		const { readSymbolAccountByPublicKey } = await import("@/lib/symbol/useCase/account/read");
 		const result = await readSymbolAccountByPublicKey("invalid-public-key");
 		expect(result.ok).toBe(false);
 		if (!result.ok) {
@@ -20,12 +20,12 @@ describe("symbol account read integration", () => {
 	test("有効な公開鍵を渡すと account existence を返す", async () => {
 		const issuerPrivateKey = requireEnv("SYMBOL_ISSUER_PRIVATE_KEY");
 		const { facade } = await import("@/lib/symbol/config");
-		const { generateAccountFromPrivateKey } = await import("@/lib/symbol/utils/account");
+		const { generateAccountFromPrivateKey } = await import("@/lib/symbol/utils/accounts");
 		const issuerAccount = generateAccountFromPrivateKey(facade, issuerPrivateKey);
 		const issuerPublicKey = issuerAccount.publicKey.toString();
 
 		console.log("[integration:account:read] request", { issuerPublicKey });
-		const { readSymbolAccountByPublicKey } = await import("@/lib/symbol/account/read");
+		const { readSymbolAccountByPublicKey } = await import("@/lib/symbol/useCase/account/read");
 		const result = await readSymbolAccountByPublicKey(issuerPublicKey);
 		console.log("[integration:account:read] result", result);
 

@@ -31,7 +31,7 @@ describe("symbol ticket CRUD integration", () => {
 			metadataSeed,
 			metadata: expectedTicketMetadata,
 		});
-		const { issueTicketOnChain } = await import("@/lib/symbol/ticket/create");
+		const { issueTicketOnChain } = await import("@/lib/symbol/useCase/ticket/create");
 		const issueResult = await issueTicketOnChain(
 			issuerPrivateKey,
 			metadataSeed,
@@ -53,7 +53,7 @@ describe("symbol ticket CRUD integration", () => {
 			throw new Error("expectedTicketMetadata is null. create test must run first.");
 		}
 
-		const { getTicketDetails } = await import("@/lib/symbol/ticket/read");
+		const { getTicketDetails } = await import("@/lib/symbol/useCase/ticket/read");
 		console.log("[integration:ticket:read] request", { mosaicIdHex });
 		const readResult = await getTicketDetails(mosaicIdHex);
 		console.log("[integration:ticket:read] result", readResult);
@@ -84,7 +84,7 @@ describe("symbol ticket CRUD integration", () => {
 			metadataSeed,
 			nextMetadata,
 		});
-		const { updateTicketOnChain } = await import("@/lib/symbol/ticket/update");
+		const { updateTicketOnChain } = await import("@/lib/symbol/useCase/ticket/update");
 		const updateResult = await updateTicketOnChain(
 			issuerPrivateKey,
 			metadataSeed,
@@ -99,7 +99,7 @@ describe("symbol ticket CRUD integration", () => {
 		expect(updateResult.status).toBe("ok");
 		expect(updateResult.mosaicIdHex).toBe(mosaicIdHex);
 
-		const { getTicketDetails } = await import("@/lib/symbol/ticket/read");
+		const { getTicketDetails } = await import("@/lib/symbol/useCase/ticket/read");
 		const readResult = await getTicketDetails(mosaicIdHex);
 		expect(readResult.ok).toBe(true);
 		if (!readResult.ok) {
@@ -120,7 +120,7 @@ describe("symbol ticket CRUD integration", () => {
 			mosaicIdHex,
 			metadataSeed,
 		});
-		const { deleteTicketOnChain } = await import("@/lib/symbol/ticket/delete");
+		const { deleteTicketOnChain } = await import("@/lib/symbol/useCase/ticket/delete");
 		const deleteResult = await deleteTicketOnChain(
 			issuerPrivateKey,
 			metadataSeed,
@@ -134,7 +134,7 @@ describe("symbol ticket CRUD integration", () => {
 		expect(deleteResult.status).toBe("ok");
 		expect(deleteResult.mosaicIdHex).toBe(mosaicIdHex);
 
-		const { getTicketDetails } = await import("@/lib/symbol/ticket/read");
+		const { getTicketDetails } = await import("@/lib/symbol/useCase/ticket/read");
 		const readAfterDelete = await getTicketDetails(mosaicIdHex);
 		expect(readAfterDelete.ok).toBe(false);
 		if (!readAfterDelete.ok) {

@@ -8,7 +8,7 @@ describe("symbol xymBalance integration", () => {
 	});
 
 	test("read: invalid public key を渡すと invalid_public_key を返す", async () => {
-		const { readXymBalanceByPublicKey } = await import("@/lib/symbol/xymBalance/read");
+		const { readXymBalanceByPublicKey } = await import("@/lib/symbol/useCase/xymBalance/read");
 		const result = await readXymBalanceByPublicKey("invalid-public-key");
 		expect(result.ok).toBe(false);
 		if (!result.ok) {
@@ -20,11 +20,11 @@ describe("symbol xymBalance integration", () => {
 	test("read: 有効な公開鍵を渡すと残高情報を返す", async () => {
 		const issuerPrivateKey = requireEnv("SYMBOL_ISSUER_PRIVATE_KEY");
 		const { facade } = await import("@/lib/symbol/config");
-		const { generateAccountFromPrivateKey } = await import("@/lib/symbol/utils/account");
+		const { generateAccountFromPrivateKey } = await import("@/lib/symbol/utils/accounts");
 		const issuerAccount = generateAccountFromPrivateKey(facade, issuerPrivateKey);
 		const issuerPublicKey = issuerAccount.publicKey.toString();
 
-		const { readXymBalanceByPublicKey } = await import("@/lib/symbol/xymBalance/read");
+		const { readXymBalanceByPublicKey } = await import("@/lib/symbol/useCase/xymBalance/read");
 		console.log("[integration:xymBalance:read:ok] request", { issuerPublicKey });
 		const result = await readXymBalanceByPublicKey(issuerPublicKey);
 		console.log("[integration:xymBalance:read:ok] result", result);
@@ -44,11 +44,11 @@ describe("symbol xymBalance integration", () => {
 	test("send: invalid amount を渡すと invalid_amount を返す", async () => {
 		const issuerPrivateKey = requireEnv("SYMBOL_ISSUER_PRIVATE_KEY");
 		const { facade } = await import("@/lib/symbol/config");
-		const { generateAccountFromPrivateKey } = await import("@/lib/symbol/utils/account");
+		const { generateAccountFromPrivateKey } = await import("@/lib/symbol/utils/accounts");
 		const issuerAccount = generateAccountFromPrivateKey(facade, issuerPrivateKey);
 		const issuerPublicKey = issuerAccount.publicKey.toString();
 
-		const { sendXymOnChain } = await import("@/lib/symbol/xymBalance/send");
+		const { sendXymOnChain } = await import("@/lib/symbol/useCase/xymBalance/send");
 		const result = await sendXymOnChain(issuerPrivateKey, issuerPublicKey, 0n);
 		expect(result.ok).toBe(false);
 		if (!result.ok) {
@@ -60,12 +60,12 @@ describe("symbol xymBalance integration", () => {
 	test("send: 有効な条件で少額送金すると transactionHash を返す", async () => {
 		const issuerPrivateKey = requireEnv("SYMBOL_ISSUER_PRIVATE_KEY");
 		const { facade } = await import("@/lib/symbol/config");
-		const { generateAccountFromPrivateKey } = await import("@/lib/symbol/utils/account");
+		const { generateAccountFromPrivateKey } = await import("@/lib/symbol/utils/accounts");
 		const issuerAccount = generateAccountFromPrivateKey(facade, issuerPrivateKey);
 		const issuerPublicKey = issuerAccount.publicKey.toString();
 		const amountRaw = 1n;
 
-		const { sendXymOnChain } = await import("@/lib/symbol/xymBalance/send");
+		const { sendXymOnChain } = await import("@/lib/symbol/useCase/xymBalance/send");
 		console.log("[integration:xymBalance:send:ok] request", {
 			recipientPublicKey: issuerPublicKey,
 			amountRaw: amountRaw.toString(),

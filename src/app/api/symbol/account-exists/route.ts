@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentAuth } from "@/lib/auth/session";
-import {
-	checkSymbolAccountExistenceByPublicKey,
-	parseSymbolPublicKey,
-	validateSymbolPublicKey,
-} from "@/lib/symbol/account";
+import { readSymbolAccountByPublicKey } from "@/lib/symbol/useCase/account/read";
 
 export async function GET(request: Request) {
 	const auth = await getCurrentAuth({ mutateCookie: true });
@@ -14,14 +10,18 @@ export async function GET(request: Request) {
 
 	const url = new URL(request.url);
 	const rawPublicKey = url.searchParams.get("publicKey");
-	const publicKey = parseSymbolPublicKey(rawPublicKey);
-	if (!publicKey || !validateSymbolPublicKey(publicKey)) {
+	const accountReadResult = await readSymbolAccountByPublicKey(rawPublicKey);
+
+	if (!accountReadResult.ok && accountReadResult.status === "invalid_public_key") {
 		return NextResponse.json(
 			{ error: "invalid_symbol_pub_key" },
 			{ status: 400 },
 		);
 	}
 
-	const result = await checkSymbolAccountExistenceByPublicKey(publicKey);
-	return NextResponse.json({ result });
+	if (!accountReadResult.ok) {
+		return NextResponse.json({ result: "unreachable" });
+	}
+
+	return NextResponse.json({ result: accountReadResult.existence });
 }

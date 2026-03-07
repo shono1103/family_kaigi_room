@@ -8,6 +8,7 @@ import { OwnTicketPanel } from "./ownTicketPanel";
 import { BaseInfoPanel } from "./baseInfoPanel";
 import type { XymBalanceResult } from "@/lib/symbol/balance";
 import type { OwnedTicketsResult } from "@/lib/symbol/tickets";
+import type { ReadAccountOwnedMosaicsResult } from "@/lib/symbol/useCase/account/read";
 
 const tabs = [
 	{ label: "保有チケット", key: "tickets" },
@@ -33,6 +34,7 @@ type HomeClientProps = {
 		symbolPubKey: string | null;
 	} | null;
 	xymBalance: XymBalanceResult;
+	ownedMosaics?: ReadAccountOwnedMosaicsResult;
 	ownedTickets: OwnedTicketsResult;
 	initialTab?: string;
 };
@@ -41,6 +43,7 @@ export function HomeClient({
 	userEmail,
 	userInfo,
 	xymBalance,
+	ownedMosaics: _ownedMosaics,
 	ownedTickets,
 	initialTab,
 }: HomeClientProps) {

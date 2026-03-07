@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentAuth } from "@/lib/auth/session";
-import {
-	checkSymbolAccountExistenceByPublicKey,
-	parseSymbolPublicKey,
-	validateSymbolPublicKey,
-} from "@/lib/symbol/account";
+import { readSymbolAccountByPublicKey } from "@/lib/symbol/useCase/account/read";
 
 function redirectWithError(request: Request, errorCode: string) {
 	const url = new URL("/", request.url);
@@ -35,11 +31,8 @@ export async function POST(request: Request) {
 	}
 
 	const normalizedName = name.trim();
-	const parsedSymbolPubKey = parseSymbolPublicKey(symbolPubKey);
-	const normalizedSymbolPubKey =
-		parsedSymbolPubKey && validateSymbolPublicKey(parsedSymbolPubKey)
-			? parsedSymbolPubKey
-			: null;
+	const rawSymbolPubKey = symbolPubKey?.trim() ?? "";
+	let normalizedSymbolPubKey: string | null = null;
 
 	if (!normalizedName) {
 		return NextResponse.redirect(new URL("/", request.url), {
@@ -47,20 +40,19 @@ export async function POST(request: Request) {
 		});
 	}
 
-	if (parsedSymbolPubKey && !normalizedSymbolPubKey) {
-		return redirectWithError(request, "invalid_symbol_pub_key");
-	}
-
-	if (normalizedSymbolPubKey) {
-		const accountExists = await checkSymbolAccountExistenceByPublicKey(
-			normalizedSymbolPubKey,
-		);
-		if (accountExists === "not_found") {
-			return redirectWithError(request, "symbol_account_not_found");
-		}
-		if (accountExists === "unreachable") {
+	if (rawSymbolPubKey) {
+		const accountReadResult = await readSymbolAccountByPublicKey(rawSymbolPubKey);
+		if (!accountReadResult.ok) {
+			if (accountReadResult.status === "invalid_public_key") {
+				return redirectWithError(request, "invalid_symbol_pub_key");
+			}
 			return redirectWithError(request, "symbol_node_unreachable");
 		}
+		if (accountReadResult.existence === "not_found") {
+			return redirectWithError(request, "symbol_account_not_found");
+		}
+
+		normalizedSymbolPubKey = accountReadResult.publicKey;
 	}
 
 	try {

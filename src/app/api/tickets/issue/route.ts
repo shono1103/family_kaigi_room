@@ -3,14 +3,10 @@ import { NextResponse } from "next/server";
 import { getCurrentAuth } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import {
-	parseSymbolPublicKey,
-	validateSymbolPublicKey,
-} from "@/lib/symbol/account";
-import {
-	IssueTicketError,
 	issueTicketOnChain,
-	type TicketOnChainMetadata,
-} from "@/lib/symbol/ticketIssue";
+} from "@/lib/symbol/useCase/ticket/create";
+import { readSymbolAccountByPublicKey } from "@/lib/symbol/useCase/account/read";
+import type { TicketMetadata } from "@/lib/symbol/useCase/ticket/types";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DETAIL_LENGTH = 1200;
@@ -62,7 +58,7 @@ export async function POST(request: Request) {
 		where: { userId: auth.user.id },
 		select: { symbolPubKey: true },
 	});
-	const recipientPublicKey = parseSymbolPublicKey(userInfo?.symbolPubKey);
+	const accountReadResult = await readSymbolAccountByPublicKey(userInfo?.symbolPubKey);
 
 	if (!normalizedName || normalizedName.length > MAX_NAME_LENGTH) {
 		return jsonError("名称は1〜100文字で入力してください。", 400);
@@ -75,9 +71,24 @@ export async function POST(request: Request) {
 	if (!issuerPrivateKey) {
 		return jsonError("秘密鍵を入力してください。", 400);
 	}
-	if (!recipientPublicKey || !validateSymbolPublicKey(recipientPublicKey)) {
+	if (!accountReadResult.ok) {
+		if (accountReadResult.status === "invalid_public_key") {
+			return jsonError(
+				"基本情報のSymbol公開鍵が未設定または不正です。先に設定してください。",
+				400,
+			);
+		}
+		if (accountReadResult.status === "node_unreachable") {
+			return jsonError("Symbolノードへ接続できませんでした。", 503);
+		}
 		return jsonError(
-			"基本情報のSymbol公開鍵が未設定または不正です。先に設定してください。",
+			"公開鍵の確認に失敗しました。時間を置いて再試行してください。",
+			500,
+		);
+	}
+	if (accountReadResult.existence === "not_found") {
+		return jsonError(
+			"基本情報のSymbol公開鍵に対応するアカウントが見つかりません。",
 			400,
 		);
 	}
@@ -100,7 +111,7 @@ export async function POST(request: Request) {
 		.digest("hex")
 		.toUpperCase();
 
-	const metadata: TicketOnChainMetadata = {
+	const metadata: TicketMetadata = {
 		name: normalizedName,
 		detail: normalizedDetail,
 		isUsed,
@@ -120,38 +131,36 @@ export async function POST(request: Request) {
 		);
 	}
 
-	try {
-		const issued = await issueTicketOnChain(metadata, {
-			issuerPrivateKey,
-			recipientPublicKey,
-		});
-		return NextResponse.json({
-			ok: true,
-			mosaicId: issued.mosaicId,
-			transactionHash: issued.transactionHash,
-			announcedNodeUrl: issued.announcedNodeUrl,
-			issuerPublicKey: issued.issuerPublicKey,
-		});
-	} catch (error) {
-		if (error instanceof IssueTicketError) {
-			if (error.code === "issuer_private_key_missing") {
-				return jsonError(
-					"秘密鍵の形式が不正です。64桁16進数を入力してください。",
-					400,
-				);
-			}
-			if (error.code === "node_unreachable") {
-				return jsonError(
-					"Symbolノード設定が不正です。接続先を確認してください。",
-					503,
-				);
-			}
+	const metadataSeed = process.env.SYMBOL_TICKET_METADATA_SEED ?? "ticket:info/v1";
+	const issued = await issueTicketOnChain(
+		issuerPrivateKey,
+		metadataSeed,
+		metadata,
+	);
+	if (!issued.ok) {
+		if (issued.error === "invalid_metadata") {
+			return jsonError("入力値が不正です。", 400);
+		}
+		if (issued.error === "node_unreachable") {
 			return jsonError(
-				"オンチェーン発行に失敗しました。時間を置いて再試行してください。",
-				502,
+				"Symbolノード設定が不正です。接続先を確認してください。",
+				503,
 			);
 		}
-
-		return jsonError("予期しないエラーが発生しました。", 500);
+		if (issued.error === "timeout") {
+			return jsonError(
+				"発行トランザクションの承認確認がタイムアウトしました。",
+				504,
+			);
+		}
+		return jsonError(
+			"オンチェーン発行に失敗しました。時間を置いて再試行してください。",
+			502,
+		);
 	}
+
+	return NextResponse.json({
+		ok: true,
+		mosaicId: issued.mosaicIdHex,
+	});
 }

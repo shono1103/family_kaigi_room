@@ -6,7 +6,7 @@ import { Header } from "./header";
 import { BalancePanel } from "./balancePanel";
 import { OwnTicketPanel } from "./ownTicketPanel";
 import { BaseInfoPanel } from "./baseInfoPanel";
-import type { XymBalanceResult } from "@/lib/symbol/balance";
+import type { ReadXymBalanceResult } from "@/lib/symbol/useCase/xymBalance/read";
 import type { OwnedTicketsResult } from "@/lib/symbol/useCase/ticket/result";
 import type { ReadAccountOwnedMosaicsResult } from "@/lib/symbol/useCase/account/read";
 
@@ -33,7 +33,7 @@ type HomeClientProps = {
 		name: string;
 		symbolPubKey: string | null;
 	} | null;
-	xymBalance: XymBalanceResult;
+	xymBalance: ReadXymBalanceResult;
 	ownedMosaics?: ReadAccountOwnedMosaicsResult;
 	ownedTickets: OwnedTicketsResult;
 	initialTab?: string;

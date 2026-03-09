@@ -2,7 +2,18 @@ import { SymbolFacade } from "symbol-sdk/symbol";
 
 // --- Environment Bootstrap ---
 // Load default env for non-Next runtime paths (CLI/tests).
-process.loadEnvFile?.(".env");
+const loadOptionalEnvFile = (path: string): void => {
+	try {
+		process.loadEnvFile?.(path);
+	} catch (error) {
+		const nodeError = error as NodeJS.ErrnoException;
+		if (nodeError.code !== "ENOENT") {
+			throw error;
+		}
+	}
+};
+
+loadOptionalEnvFile(".env");
 
 // --- Env Parsing Helpers ---
 const parsePositiveIntEnv = (

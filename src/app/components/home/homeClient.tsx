@@ -6,7 +6,9 @@ import { Header } from "./header";
 import { BalancePanel } from "./balancePanel";
 import { OwnTicketPanel } from "./ownTicketPanel";
 import { BaseInfoPanel } from "./baseInfoPanel";
-import type { XymBalanceResult } from "@/lib/symbol/balance";
+import type { ReadXymBalanceResult } from "@/lib/symbol/useCase/xymBalance/read";
+import type { OwnedTicketsResult } from "@/lib/symbol/useCase/ticket/result";
+import type { ReadAccountOwnedMosaicsResult } from "@/lib/symbol/useCase/account/read";
 
 const tabs = [
 	{ label: "保有チケット", key: "tickets" },
@@ -31,7 +33,9 @@ type HomeClientProps = {
 		name: string;
 		symbolPubKey: string | null;
 	} | null;
-	xymBalance: XymBalanceResult;
+	xymBalance: ReadXymBalanceResult;
+	ownedMosaics?: ReadAccountOwnedMosaicsResult;
+	ownedTickets: OwnedTicketsResult;
 	initialTab?: string;
 };
 
@@ -39,6 +43,8 @@ export function HomeClient({
 	userEmail,
 	userInfo,
 	xymBalance,
+	ownedMosaics: _ownedMosaics,
+	ownedTickets,
 	initialTab,
 }: HomeClientProps) {
 	const router = useRouter();
@@ -71,7 +77,11 @@ export function HomeClient({
 					onTabClick={handleTabClick}
 				/>
 				<main className="mt-6 rounded-[28px] bg-white/90 p-6 shadow-[0_18px_55px_rgba(20,15,45,0.18)]">
-					<OwnTicketPanel isActive={activeIndex === 0} index={0} />
+					<OwnTicketPanel
+						isActive={activeIndex === 0}
+						index={0}
+						ownedTickets={ownedTickets}
+					/>
 					<BalancePanel
 						isActive={activeIndex === 1}
 						index={1}

@@ -4,8 +4,11 @@
 	"private": true,
 	"scripts": {
 		"dev": "next dev",
-		"build": "next build",
+		"build": "prisma generate && next build",
 		"start": "next start",
+		"test": "vitest run --config vitest.config.ts",
+		"test:watch": "vitest --config vitest.config.ts",
+		"test:integration": "RUN_SYMBOL_INTEGRATION_TESTS=true vitest run --config vitest.integration.config.ts",
 		"lint": "eslint",
 		"prisma:generate": "prisma generate",
 		"prisma:migrate:dev": "prisma migrate dev",
@@ -16,7 +19,7 @@
 		"next": "16.1.6",
 		"react": "19.2.3",
 		"react-dom": "19.2.3",
-		"symbol-sdk": "~3.2.0"
+		"symbol-sdk": "^3.3.0"
 	},
 	"devDependencies": {
 		"@tailwindcss/postcss": "^4",
@@ -28,6 +31,7 @@
 		"eslint-config-next": "16.1.6",
 		"prisma": "^6.19.2",
 		"tailwindcss": "^4",
-		"typescript": "^5"
+		"typescript": "^5",
+		"vitest": "^3.2.4"
 	}
 }

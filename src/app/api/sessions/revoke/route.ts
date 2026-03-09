@@ -6,7 +6,7 @@ import {
 } from "@/lib/auth/session";
 
 export async function POST(request: Request) {
-	const auth = await getCurrentAuth();
+	const auth = await getCurrentAuth({ mutateCookie: true });
 	if (!auth) {
 		return NextResponse.redirect(new URL("/login", request.url), {
 			status: 303,

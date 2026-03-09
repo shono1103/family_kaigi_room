@@ -1,0 +1,1 @@
+export const INTEGRATION_TIMEOUT_MS = 180_000;

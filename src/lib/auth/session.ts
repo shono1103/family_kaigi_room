@@ -25,6 +25,10 @@ export type AuthContext = {
 	};
 };
 
+type GetCurrentAuthOptions = {
+	mutateCookie?: boolean;
+};
+
 function hashSessionToken(token: string): string {
 	return createHash("sha256").update(token).digest("hex");
 }
@@ -92,7 +96,7 @@ export async function revokeSession(sessionId: string, userId: string) {
 }
 
 export async function revokeCurrentSession() {
-	const auth = await getCurrentAuth();
+	const auth = await getCurrentAuth({ mutateCookie: true });
 	if (!auth) {
 		await clearSessionCookie();
 		return;
@@ -124,7 +128,9 @@ export async function listActiveSessions(
 	});
 }
 
-export async function getCurrentAuth(): Promise<AuthContext | null> {
+export async function getCurrentAuth(
+	options: GetCurrentAuthOptions = {},
+): Promise<AuthContext | null> {
 	const cookieStore = await cookies();
 	const sessionToken = cookieStore.get(AUTH_SESSION_COOKIE_NAME)?.value;
 
@@ -154,11 +160,14 @@ export async function getCurrentAuth(): Promise<AuthContext | null> {
 	});
 
 	if (!session || session.revokedAt || session.expiresAt <= now) {
-		await clearSessionCookie();
+		if (options.mutateCookie) {
+			await clearSessionCookie();
+		}
 		return null;
 	}
 
 	if (
+		options.mutateCookie &&
 		session.expiresAt.getTime() - now.getTime() <
 		SESSION_REFRESH_THRESHOLD_MS
 	) {

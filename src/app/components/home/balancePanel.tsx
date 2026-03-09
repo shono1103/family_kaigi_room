@@ -1,9 +1,9 @@
-import type { XymBalanceResult } from "@/lib/symbol/balance";
+import type { ReadXymBalanceResult } from "@/lib/symbol/useCase/xymBalance/read";
 
 type BalancePanelProps = {
 	isActive: boolean;
 	index: number;
-	xymBalance: XymBalanceResult;
+	xymBalance: ReadXymBalanceResult;
 };
 
 export function BalancePanel({ isActive, index, xymBalance }: BalancePanelProps) {

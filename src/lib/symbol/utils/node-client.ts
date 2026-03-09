@@ -159,11 +159,11 @@ export const pollTransactionState = async (
 	let lastStatus: SymbolTransactionStatus | undefined;
 
 	while (Date.now() - startedAt < symbolPollTimeoutMs) {
-		const confirmedRes = await fetch(`${nodeUrl}/transactions/confirmed/${hash}`);
+		const confirmedRes = await fetchWithTimeout(`${nodeUrl}/transactions/confirmed/${hash}`);
 		if (confirmedRes.ok)
 			return { state: 'confirmed' };
 
-		const statusRes = await fetch(`${nodeUrl}/transactionStatus/${hash}`);
+		const statusRes = await fetchWithTimeout(`${nodeUrl}/transactionStatus/${hash}`);
 		if (statusRes.ok) {
 			const status = (await statusRes.json()) as SymbolTransactionStatus;
 			lastStatus = status;

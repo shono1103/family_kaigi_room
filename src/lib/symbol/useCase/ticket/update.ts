@@ -1,5 +1,5 @@
 import { metadataGenerateKey, metadataUpdateValue, models } from 'symbol-sdk/symbol';
-import type { TicketMetadata, TicketMetadataThumbnail } from './types';
+import type { TicketMetadata, TicketMetadataThumbnail } from './schema';
 import { generateAccountFromPrivateKey } from '../../utils/accounts';
 import { createAggregateTransaction } from '../../utils/transaction-builders';
 import { announceTransaction, pollTransactionState, getMosaicWithMetadata } from '../../utils/node-client';

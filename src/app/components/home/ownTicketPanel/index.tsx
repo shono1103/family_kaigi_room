@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { OwnedTicketItem } from "@/lib/symbol/tickets";
+import type { OwnedTicketItem } from "@/lib/symbol/useCase/ticket/model";
 import { OwnTicketPanelStatus } from "./OwnTicketPanelStatus";
 import { TicketDetailModal } from "./TicketDetailModal";
 import { TicketGrid } from "./TicketGrid";
@@ -90,6 +90,7 @@ export function OwnTicketPanel({
 					if (isSuccess) {
 						setIsIssueModalOpen(false);
 					}
+					return isSuccess;
 				}}
 				isSubmitting={isSubmitting}
 			/>

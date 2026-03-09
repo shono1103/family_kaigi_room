@@ -1,5 +1,6 @@
 import type { FormEvent } from "react";
-import type { OwnedTicketItem, OwnedTicketsResult } from "@/lib/symbol/tickets";
+import type { OwnedTicketItem } from "@/lib/symbol/useCase/ticket/model";
+import type { OwnedTicketsResult } from "@/lib/symbol/useCase/ticket/result";
 
 export type OwnTicketPanelProps = {
 	isActive: boolean;

@@ -30,7 +30,7 @@ import {
 	deadlineHours,
 	aggregateType
 } from '../../config';
-import type { TicketMetadata, TicketMetadataThumbnail } from './types';
+import type { TicketMetadata, TicketMetadataThumbnail } from './schema';
 
 const INITIAL_SUPPLY = 1n;
 

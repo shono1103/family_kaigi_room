@@ -1,4 +1,4 @@
-import type { OwnedTicketItem } from "@/lib/symbol/tickets";
+import type { OwnedTicketItem } from "@/lib/symbol/useCase/ticket/model";
 import { TicketCard } from "./TicketCard";
 
 type TicketGridProps = {

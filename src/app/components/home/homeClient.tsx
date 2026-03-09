@@ -7,7 +7,7 @@ import { BalancePanel } from "./balancePanel";
 import { OwnTicketPanel } from "./ownTicketPanel";
 import { BaseInfoPanel } from "./baseInfoPanel";
 import type { XymBalanceResult } from "@/lib/symbol/balance";
-import type { OwnedTicketsResult } from "@/lib/symbol/tickets";
+import type { OwnedTicketsResult } from "@/lib/symbol/useCase/ticket/result";
 import type { ReadAccountOwnedMosaicsResult } from "@/lib/symbol/useCase/account/read";
 
 const tabs = [

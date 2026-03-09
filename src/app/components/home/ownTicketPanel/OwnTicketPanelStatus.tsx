@@ -1,4 +1,4 @@
-import type { OwnedTicketsResult } from "@/lib/symbol/tickets";
+import type { OwnedTicketsResult } from "@/lib/symbol/useCase/ticket/result";
 
 type OwnTicketPanelStatusProps = {
 	ownedTickets: OwnedTicketsResult;

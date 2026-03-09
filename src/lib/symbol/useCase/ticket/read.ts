@@ -1,6 +1,6 @@
 import { nodeUrl } from '../../config'
 import { getMosaicWithMetadata, type GetMosaicWithMetadataResult } from '../../utils/node-client'
-import type { TicketMetadata, TicketMetadataThumbnail } from './types';
+import type { TicketMetadata, TicketMetadataThumbnail } from './schema';
 
 type GetTicketDetailsSuccess = Readonly<{
 	ok: true;

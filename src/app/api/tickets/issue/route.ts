@@ -6,7 +6,7 @@ import {
 	issueTicketOnChain,
 } from "@/lib/symbol/useCase/ticket/create";
 import { readSymbolAccountByPublicKey } from "@/lib/symbol/useCase/account/read";
-import type { TicketMetadata } from "@/lib/symbol/useCase/ticket/types";
+import type { TicketMetadata } from "@/lib/symbol/useCase/ticket/schema";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DETAIL_LENGTH = 1200;

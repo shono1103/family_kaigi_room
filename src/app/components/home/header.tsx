@@ -1,70 +1,39 @@
 "use client";
 
-type HeaderTab = {
-	label: string;
-};
-
 type HeaderProps = {
-	tabs: readonly HeaderTab[];
-	activeIndex: number;
-	onTabClick: (index: number) => void;
+	userEmail: string;
+	userName?: string | null;
 };
 
-export function Header({ tabs, activeIndex, onTabClick }: HeaderProps) {
+function getAccountLabel(userName: string | null | undefined, userEmail: string) {
+	const source = (userName?.trim() || userEmail.split("@")[0] || "?").trim();
+	return source.slice(0, 2).toUpperCase();
+}
+
+export function Header({ userEmail, userName }: HeaderProps) {
+	const accountLabel = getAccountLabel(userName, userEmail);
+
 	return (
-		<header className="rounded-[28px] bg-white/90 p-[22px] shadow-[0_18px_55px_rgba(20,15,45,0.18)]">
-			<div className="mb-4 flex items-center gap-[14px]">
-				<div className="grid h-[46px] w-[46px] rotate-[-6deg] place-items-center rounded-2xl bg-gradient-to-br from-[#ff4fa3] to-[#7c5cff] text-lg font-black text-white">
-					★
+		<header className="rounded-[28px] border border-black/10 bg-white/92 px-5 py-4 shadow-[0_18px_55px_rgba(20,15,45,0.08)] backdrop-blur md:px-6">
+			<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+				<div className="flex items-center gap-4">
+					<div>
+						<h1 className="mt-1 text-[20px] font-semibold">
+							家族会議室
+						</h1>
+					</div>
 				</div>
-				<div>
-					<h1 className="text-[18px] font-semibold">
-						ほげほげチケットぷらっとふぉーむ
-					</h1>
-					<p className="mt-1.5 text-[13px] text-[#4b4b65]">
-						タブでポップに画面切替
-					</p>
+				<div className="flex items-center justify-end gap-3">
+					<div className="text-right">
+						<p className="text-sm font-semibold text-[#1e1e2a]">
+							{userName?.trim() || "アカウント"}
+						</p>
+						<p className="text-xs text-[#4b4b65]">{userEmail}</p>
+					</div>
+					<div className="grid h-11 w-11 place-items-center rounded-2xl border border-black/10 bg-[linear-gradient(135deg,#1e1e2a,#50506d)] text-sm font-bold text-white">
+						{accountLabel}
+					</div>
 				</div>
-			</div>
-
-			<div className="flex flex-wrap items-center justify-between gap-3">
-				<nav
-					className="flex flex-wrap gap-2.5"
-					role="tablist"
-					aria-label="画面切替"
-				>
-					{tabs.map((tab, index) => {
-						const isActive = activeIndex === index;
-
-						return (
-							<button
-								key={tab.label}
-								type="button"
-								role="tab"
-								aria-selected={isActive}
-								aria-controls={`panel-${index}`}
-								id={`tab-${index}`}
-								onClick={() => onTabClick(index)}
-								className={[
-									"cursor-pointer rounded-[18px] px-4 py-2.5 text-[13px] font-extrabold transition duration-150 ease-in-out hover:-translate-y-0.5",
-									isActive
-										? "border-2 border-[rgba(255,79,163,0.25)] bg-white text-black shadow-[0_10px_20px_rgba(0,0,0,0.08)]"
-										: "border-2 border-transparent bg-black/5 text-black/65",
-								].join(" ")}
-							>
-								{tab.label}
-							</button>
-						);
-					})}
-				</nav>
-				<form action="/api/auth/logout" method="post">
-					<button
-						type="submit"
-						className="cursor-pointer rounded-xl bg-gradient-to-r from-[#ff4fa3] to-[#7c5cff] px-4 py-2 text-xs font-extrabold text-white"
-					>
-						ログアウト
-					</button>
-				</form>
 			</div>
 		</header>
 	);

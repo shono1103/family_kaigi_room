@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Header } from "./header";
-import { BalancePanel } from "./balancePanel";
-import { OwnTicketPanel } from "./ownTicketPanel";
-import { BaseInfoPanel } from "./baseInfoPanel";
+import { Sidebar } from "./sidebar";
+import { BalancePanel } from "./mainPanel/balancePanel";
+import { OwnTicketPanel } from "./mainPanel/ownTicketPanel";
+import { BaseInfoPanel } from "./mainPanel/baseInfoPanel";
 import type { ReadXymBalanceResult } from "@/lib/symbol/useCase/xymBalance/read";
 import type { OwnedTicketsResult } from "@/lib/symbol/useCase/ticket/result";
 import type { ReadAccountOwnedMosaicsResult } from "@/lib/symbol/useCase/account/read";
@@ -69,31 +70,37 @@ export function HomeClient({
 	};
 
 	return (
-		<div className="min-h-screen bg-[radial-gradient(900px_600px_at_15%_15%,rgba(255,79,163,0.18),transparent_60%),radial-gradient(900px_600px_at_85%_25%,rgba(124,92,255,0.18),transparent_60%),linear-gradient(180deg,#fff4fb,#f2fbff)] bg-fixed bg-cover text-[#1e1e2a]">
-			<div className="mx-auto my-10 max-w-[900px] px-4 pb-20">
-				<Header
-					tabs={tabs}
-					activeIndex={activeIndex}
-					onTabClick={handleTabClick}
-				/>
-				<main className="mt-6 rounded-[28px] bg-white/90 p-6 shadow-[0_18px_55px_rgba(20,15,45,0.18)]">
-					<OwnTicketPanel
-						isActive={activeIndex === 0}
-						index={0}
-						ownedTickets={ownedTickets}
+		<div className="min-h-screen bg-[linear-gradient(180deg,#f4f5f8,#eceff4)] text-[#1e1e2a] lg:h-screen lg:overflow-hidden">
+			<div className="flex min-h-screen flex-col px-3 py-3 md:px-4 md:py-4 lg:h-full lg:min-h-0">
+				<Header userEmail={userEmail} userName={userInfo?.name} />
+
+				<div className="mt-3 grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-[280px_minmax(0,1fr)]">
+					<Sidebar
+						tabs={tabs}
+						activeIndex={activeIndex}
+						onTabClick={handleTabClick}
 					/>
-					<BalancePanel
-						isActive={activeIndex === 1}
-						index={1}
-						xymBalance={xymBalance}
-					/>
-					<BaseInfoPanel
-						isActive={activeIndex === 2}
-						index={2}
-						userEmail={userEmail}
-						userInfo={userInfo}
-					/>
-				</main>
+					<main className="rounded-[32px] border border-black/10 bg-white/92 shadow-[0_18px_55px_rgba(20,15,45,0.08)] backdrop-blur lg:min-h-0 lg:overflow-hidden">
+						<div className="px-6 py-6 md:px-8 md:py-8 lg:h-full lg:overflow-y-auto lg:overscroll-contain">
+							<OwnTicketPanel
+								isActive={activeIndex === 0}
+								index={0}
+								ownedTickets={ownedTickets}
+							/>
+							<BalancePanel
+								isActive={activeIndex === 1}
+								index={1}
+								xymBalance={xymBalance}
+							/>
+							<BaseInfoPanel
+								isActive={activeIndex === 2}
+								index={2}
+								userEmail={userEmail}
+								userInfo={userInfo}
+							/>
+						</div>
+					</main>
+				</div>
 			</div>
 		</div>
 	);

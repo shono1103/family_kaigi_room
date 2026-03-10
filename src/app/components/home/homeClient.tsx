@@ -70,18 +70,18 @@ export function HomeClient({
 	};
 
 	return (
-		<div className="h-screen overflow-hidden bg-[linear-gradient(180deg,#f4f5f8,#eceff4)] text-[#1e1e2a]">
-			<div className="flex h-full min-h-0 flex-col px-3 py-3 md:px-4 md:py-4">
+		<div className="min-h-screen bg-[linear-gradient(180deg,#f4f5f8,#eceff4)] text-[#1e1e2a] lg:h-screen lg:overflow-hidden">
+			<div className="flex min-h-screen flex-col px-3 py-3 md:px-4 md:py-4 lg:h-full lg:min-h-0">
 				<Header userEmail={userEmail} userName={userInfo?.name} />
 
-				<div className="mt-3 grid min-h-0 flex-1 gap-3 lg:grid-cols-[280px_minmax(0,1fr)]">
+				<div className="mt-3 grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-[280px_minmax(0,1fr)]">
 					<Sidebar
 						tabs={tabs}
 						activeIndex={activeIndex}
 						onTabClick={handleTabClick}
 					/>
-					<main className="min-h-0 overflow-hidden rounded-[32px] border border-black/10 bg-white/92 shadow-[0_18px_55px_rgba(20,15,45,0.08)] backdrop-blur">
-						<div className="h-full overflow-y-auto overscroll-contain px-6 py-6 md:px-8 md:py-8">
+					<main className="rounded-[32px] border border-black/10 bg-white/92 shadow-[0_18px_55px_rgba(20,15,45,0.08)] backdrop-blur lg:min-h-0 lg:overflow-hidden">
+						<div className="px-6 py-6 md:px-8 md:py-8 lg:h-full lg:overflow-y-auto lg:overscroll-contain">
 							<OwnTicketPanel
 								isActive={activeIndex === 0}
 								index={0}

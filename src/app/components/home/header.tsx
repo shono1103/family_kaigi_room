@@ -1,79 +1,40 @@
 "use client";
 
-type HeaderTab = {
-	label: string;
-};
-
 type HeaderProps = {
-	tabs: readonly HeaderTab[];
-	activeIndex: number;
-	onTabClick: (index: number) => void;
+	userEmail: string;
+	userName?: string | null;
 };
 
-export function Header({ tabs, activeIndex, onTabClick }: HeaderProps) {
+function getAccountLabel(userName: string | null | undefined, userEmail: string) {
+	const source = (userName?.trim() || userEmail.split("@")[0] || "?").trim();
+	return source.slice(0, 2).toUpperCase();
+}
+
+export function Header({ userEmail, userName }: HeaderProps) {
+	const accountLabel = getAccountLabel(userName, userEmail);
+
 	return (
-		<aside className="rounded-[32px] border border-black/10 bg-white/88 p-5 shadow-[0_20px_60px_rgba(20,15,45,0.12)] backdrop-blur lg:sticky lg:top-3 lg:min-h-[calc(100svh-120px)]">
-			<div className="mb-6">
-				<p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#4b4b65]">
-					Navigation
-				</p>
-				<h2 className="mt-2 text-[20px] font-semibold text-[#1e1e2a]">
-					ほげほげチケット
-				</h2>
-				<p className="mt-2 text-[13px] leading-6 text-[#4b4b65]">
-					各画面を左側から切り替えるダッシュボード構成です。
-				</p>
+		<header className="rounded-[28px] border border-black/10 bg-white/92 px-5 py-4 shadow-[0_18px_55px_rgba(20,15,45,0.08)] backdrop-blur md:px-6">
+			<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+				<div className="flex items-center gap-4">
+					<div>
+						<h1 className="mt-1 text-[20px] font-semibold">
+							家族会議室
+						</h1>
+					</div>
+				</div>
+				<div className="flex items-center justify-end gap-3">
+					<div className="text-right">
+						<p className="text-sm font-semibold text-[#1e1e2a]">
+							{userName?.trim() || "アカウント"}
+						</p>
+						<p className="text-xs text-[#4b4b65]">{userEmail}</p>
+					</div>
+					<div className="grid h-11 w-11 place-items-center rounded-2xl border border-black/10 bg-[linear-gradient(135deg,#1e1e2a,#50506d)] text-sm font-bold text-white">
+						{accountLabel}
+					</div>
+				</div>
 			</div>
-
-			<div className="flex h-full flex-col justify-between gap-6">
-				<nav
-					className="flex flex-col gap-2"
-					role="tablist"
-					aria-label="画面切替"
-				>
-					{tabs.map((tab, index) => {
-						const isActive = activeIndex === index;
-
-						return (
-							<button
-								key={tab.label}
-								type="button"
-								role="tab"
-								aria-selected={isActive}
-								aria-controls={`panel-${index}`}
-								id={`tab-${index}`}
-								onClick={() => onTabClick(index)}
-								className={[
-									"flex w-full cursor-pointer items-center justify-between rounded-[18px] px-4 py-3 text-left text-[14px] font-bold transition duration-150 ease-in-out hover:bg-black/[0.04]",
-									isActive
-										? "border border-[#d8d4ff] bg-[linear-gradient(135deg,rgba(124,92,255,0.14),rgba(255,79,163,0.1))] text-[#1e1e2a] shadow-[0_12px_24px_rgba(124,92,255,0.12)]"
-										: "border border-transparent bg-transparent text-black/65",
-								].join(" ")}
-							>
-								<span>{tab.label}</span>
-								<span
-									aria-hidden="true"
-									className={[
-										"text-xs transition",
-										isActive ? "translate-x-0 opacity-100" : "-translate-x-1 opacity-40",
-									].join(" ")}
-								>
-									→
-								</span>
-							</button>
-						);
-					})}
-				</nav>
-
-				<form action="/api/auth/logout" method="post" className="pt-2">
-					<button
-						type="submit"
-						className="w-full cursor-pointer rounded-2xl bg-[#1e1e2a] px-4 py-3 text-sm font-bold text-white transition hover:opacity-90"
-					>
-						ログアウト
-					</button>
-				</form>
-			</div>
-		</aside>
+		</header>
 	);
 }

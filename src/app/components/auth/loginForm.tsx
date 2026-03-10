@@ -39,7 +39,7 @@ export function LoginForm({ errorMessage }: LoginFormProps) {
 
 			<button
 				type="submit"
-				className="w-full cursor-pointer rounded-2xl bg-gradient-to-r from-[#ff4fa3] to-[#7c5cff] px-4 py-3 text-sm font-extrabold text-white shadow-[0_14px_30px_rgba(124,92,255,0.28)] transition hover:-translate-y-0.5"
+				className="w-full cursor-pointer rounded-2xl bg-[#1e1e2a] px-4 py-3 text-sm font-extrabold text-white shadow-[0_14px_30px_rgba(20,15,45,0.18)] transition hover:opacity-92"
 			>
 				ログイン
 			</button>

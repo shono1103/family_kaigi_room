@@ -1,4 +1,9 @@
 import { prisma } from "@/lib/prisma";
+import {
+	normalizeMosaicIdHex,
+	normalizeSymbolPublicKey,
+	normalizeSymbolPrivateKey,
+} from "@/lib/symbol/utils/normalizers";
 
 export type CreateFamilyInput = Readonly<{
 	familyName: string;
@@ -9,9 +14,9 @@ export type CreateFamilyInput = Readonly<{
 
 export async function createFamily(input: CreateFamilyInput) {
 	const familyName = input.familyName.trim();
-	const currencyMosaicId = input.currencyMosaicId.trim();
-	const symbolPubKey = input.symbolPubKey?.trim() || null;
-	const symbolPrivKey = input.symbolPrivKey?.trim() || null;
+	const currencyMosaicId = normalizeMosaicIdHex(input.currencyMosaicId);
+	const symbolPubKey = normalizeSymbolPublicKey(input.symbolPubKey);
+	const symbolPrivKey = normalizeSymbolPrivateKey(input.symbolPrivKey);
 
 	if (!familyName) {
 		throw new Error("familyName is required");
@@ -19,6 +24,18 @@ export async function createFamily(input: CreateFamilyInput) {
 
 	if (!currencyMosaicId) {
 		throw new Error("currencyMosaicId is required");
+	}
+
+	if (!/^[0-9A-F]{16}$/.test(currencyMosaicId)) {
+		throw new Error("currencyMosaicId must be a 16-character hex string with optional 0x prefix");
+	}
+
+	if (input.symbolPubKey && !symbolPubKey) {
+		throw new Error("symbolPubKey must be a 64-character hex string");
+	}
+
+	if (input.symbolPrivKey && !symbolPrivKey) {
+		throw new Error("symbolPrivKey must be a 64-character hex string");
 	}
 
 	return prisma.family.create({

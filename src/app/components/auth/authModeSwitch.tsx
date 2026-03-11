@@ -14,7 +14,7 @@ export function AuthModeSwitch({ mode }: AuthModeSwitchProps) {
 				type="submit"
 				className="w-full cursor-pointer rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-bold text-[#2b2b3e] transition hover:-translate-y-0.5"
 			>
-				{mode === "signup" ? "ログイン画面に戻る" : "新規ユーザー作成"}
+				{mode === "signup" ? "ログイン画面に戻る" : "新規家族会議室作成"}
 			</button>
 		</form>
 	);

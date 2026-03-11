@@ -41,6 +41,13 @@ export async function POST(request: Request) {
 			data: {
 				email: normalizedEmail,
 				passwordHash: hashPassword(password),
+				role: "normal",
+				isFamilyOwner: true,
+				family: {
+					create: {
+						familyName: `${normalizedEmail} family`,
+					},
+				},
 			},
 			select: {
 				id: true,

@@ -20,10 +20,11 @@ async function ensureInitialUserExistsInternal() {
 			data: {
 				email: INITIAL_ADMIN_EMAIL,
 				passwordHash: hashPassword(INITIAL_ADMIN_PASSWORD),
-				userInfo: {
+				role: "admin",
+				isFamilyOwner: true,
+				family: {
 					create: {
-						name: "Initial Admin",
-						role: "admin",
+						familyName: "Initial Admin Family",
 					},
 				},
 			},

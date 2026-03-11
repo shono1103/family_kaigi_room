@@ -12,9 +12,9 @@ import type { OwnedTicketsResult } from "@/lib/symbol/useCase/ticket/result";
 import type { ReadAccountOwnedMosaicsResult } from "@/lib/symbol/useCase/account/read";
 
 const tabs = [
-	{ label: "保有チケット", key: "tickets" },
-	{ label: "残高", key: "balance" },
-	{ label: "基本情報", key: "base-info" },
+	{ label: "クエスト", key: "tickets" },
+	{ label: "スコア", key: "balance" },
+	{ label: "設定", key: "base-info" },
 ] as const;
 
 type HomeTabKey = (typeof tabs)[number]["key"];

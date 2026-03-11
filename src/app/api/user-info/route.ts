@@ -62,7 +62,7 @@ export async function POST(request: Request) {
 				userId: auth.user.id,
 				name: normalizedName,
 				symbolPubKey: normalizedSymbolPubKey,
-				role: "normal",
+				familyRole: "child",
 			},
 			update: {
 				name: normalizedName,

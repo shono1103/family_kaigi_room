@@ -1,3 +1,4 @@
+import type { Prisma, PrismaClient } from "@prisma/client";
 import { FamilyRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
@@ -8,7 +9,12 @@ export type CreateUserInfoInput = Readonly<{
 	symbolPubKey?: string | null;
 }>;
 
-export async function createUserInfo(input: CreateUserInfoInput) {
+type UserInfoDbClient = PrismaClient | Prisma.TransactionClient;
+
+export async function createUserInfo(
+	input: CreateUserInfoInput,
+	db: UserInfoDbClient = prisma,
+) {
 	const userId = input.userId.trim();
 	const name = input.name.trim();
 	const symbolPubKey = input.symbolPubKey?.trim() || null;
@@ -21,7 +27,7 @@ export async function createUserInfo(input: CreateUserInfoInput) {
 		throw new Error("name is required");
 	}
 
-	return prisma.userInfo.create({
+	return db.userInfo.create({
 		data: {
 			userId,
 			name,

@@ -1,3 +1,4 @@
+import type { Prisma, PrismaClient } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
 	normalizeMosaicIdHex,
@@ -12,7 +13,12 @@ export type CreateFamilyInput = Readonly<{
 	symbolPrivKey?: string | null;
 }>;
 
-export async function createFamily(input: CreateFamilyInput) {
+type FamilyDbClient = PrismaClient | Prisma.TransactionClient;
+
+export async function createFamily(
+	input: CreateFamilyInput,
+	db: FamilyDbClient = prisma,
+) {
 	const familyName = input.familyName.trim();
 	const currencyMosaicId = normalizeMosaicIdHex(input.currencyMosaicId);
 	const symbolPubKey = normalizeSymbolPublicKey(input.symbolPubKey);
@@ -38,7 +44,7 @@ export async function createFamily(input: CreateFamilyInput) {
 		throw new Error("symbolPrivKey must be a 64-character hex string");
 	}
 
-	return prisma.family.create({
+	return db.family.create({
 		data: {
 			familyName,
 			currencyMosaicId,

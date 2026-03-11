@@ -42,3 +42,29 @@ export async function updateSession(id: string, input: UpdateSessionInput) {
 		data,
 	});
 }
+
+export async function revokeSessionRecord(sessionId: string, userId: string, revokedAt: Date) {
+	const normalizedSessionId = sessionId.trim();
+	const normalizedUserId = userId.trim();
+
+	if (!normalizedSessionId) {
+		throw new Error("sessionId is required");
+	}
+
+	if (!normalizedUserId) {
+		throw new Error("userId is required");
+	}
+
+	const result = await prisma.session.updateMany({
+		where: {
+			id: normalizedSessionId,
+			userId: normalizedUserId,
+			revokedAt: null,
+		},
+		data: {
+			revokedAt,
+		},
+	});
+
+	return result.count > 0;
+}

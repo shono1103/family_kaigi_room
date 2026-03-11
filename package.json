@@ -1,5 +1,5 @@
 {
-	"name": "hogehoge_ticket_platform",
+	"name": "family-kaigi-room",
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
@@ -12,6 +12,7 @@
 		"lint": "eslint",
 		"prisma:generate": "prisma generate",
 		"prisma:migrate:dev": "prisma migrate dev",
+		"prisma:migrate:prod": "prisma migrate deploy",
 		"prisma:studio": "prisma studio"
 	},
 	"dependencies": {

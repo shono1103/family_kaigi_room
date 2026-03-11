@@ -2,9 +2,6 @@ import { prisma } from "@/lib/prisma";
 
 export type UpdateFamilyInput = Readonly<{
 	familyName?: string;
-	currencyMosaicId?: string;
-	symbolPubKey?: string | null;
-	symbolPrivKey?: string | null;
 }>;
 
 export async function updateFamily(id: string, input: UpdateFamilyInput) {
@@ -16,9 +13,6 @@ export async function updateFamily(id: string, input: UpdateFamilyInput) {
 
 	const data: {
 		familyName?: string;
-		currencyMosaicId?: string;
-		symbolPubKey?: string | null;
-		symbolPrivKey?: string | null;
 	} = {};
 
 	if (undefined !== input.familyName) {
@@ -27,22 +21,6 @@ export async function updateFamily(id: string, input: UpdateFamilyInput) {
 			throw new Error("familyName must not be empty");
 		}
 		data.familyName = familyName;
-	}
-
-	if (undefined !== input.currencyMosaicId) {
-		const currencyMosaicId = input.currencyMosaicId.trim();
-		if (!currencyMosaicId) {
-			throw new Error("currencyMosaicId must not be empty");
-		}
-		data.currencyMosaicId = currencyMosaicId;
-	}
-
-	if (undefined !== input.symbolPubKey) {
-		data.symbolPubKey = input.symbolPubKey?.trim() || null;
-	}
-
-	if (undefined !== input.symbolPrivKey) {
-		data.symbolPrivKey = input.symbolPrivKey?.trim() || null;
 	}
 
 	return prisma.family.update({

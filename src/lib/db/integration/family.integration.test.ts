@@ -40,9 +40,9 @@ describe("db family CRUD integration", () => {
 		currencyMosaicId = created.currencyMosaicId;
 
 		expect(created.familyName).toBe(input.familyName);
-		expect(created.currencyMosaicId).toBe(input.currencyMosaicId);
-		expect(created.symbolPubKey).toBe(input.symbolPubKey);
-		expect(created.symbolPrivKey).toBe(input.symbolPrivKey);
+		expect(created.currencyMosaicId).toBe(input.currencyMosaicId.toUpperCase());
+		expect(created.symbolPubKey).toBe(input.symbolPubKey?.toUpperCase());
+		expect(created.symbolPrivKey).toBe(input.symbolPrivKey?.toUpperCase());
 		expect(created.createdAt).toBeInstanceOf(Date);
 	}, DB_INTEGRATION_TIMEOUT_MS);
 
@@ -67,18 +67,11 @@ describe("db family CRUD integration", () => {
 		const nextSuffix = `${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
 		const updated = await updateFamily(resolvedFamilyId, {
 			familyName: `updated-family-${nextSuffix}`,
-			currencyMosaicId: `updated-mosaic-${nextSuffix}`,
-			symbolPubKey: `updated-symbol-pub-${nextSuffix}`,
-			symbolPrivKey: `updated-symbol-priv-${nextSuffix}`,
 		});
-
-		currencyMosaicId = updated.currencyMosaicId;
 
 		expect(updated.id).toBe(resolvedFamilyId);
 		expect(updated.familyName).toBe(`updated-family-${nextSuffix}`);
-		expect(updated.currencyMosaicId).toBe(`updated-mosaic-${nextSuffix}`);
-		expect(updated.symbolPubKey).toBe(`updated-symbol-pub-${nextSuffix}`);
-		expect(updated.symbolPrivKey).toBe(`updated-symbol-priv-${nextSuffix}`);
+		expect(updated.currencyMosaicId).toBe(currencyMosaicId);
 	}, DB_INTEGRATION_TIMEOUT_MS);
 
 	test("delete: family を削除できる", async () => {

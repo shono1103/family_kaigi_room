@@ -5,13 +5,16 @@ import { createIntegrationSuffix } from "./ids";
 export function createIntegrationFamilyInput(
 	overrides: Partial<CreateFamilyInput> = {},
 ): CreateFamilyInput {
-	const suffix = createIntegrationSuffix();
+	const suffix = createIntegrationSuffix().replace(/-/g, "").toUpperCase();
+	const symbolHex = suffix.padEnd(64, "A").slice(0, 64);
+	const privateHex = suffix.padEnd(64, "B").slice(0, 64);
+	const mosaicHex = suffix.padEnd(16, "C").slice(0, 16);
 
 	return {
 		familyName: `integration-family-${suffix}`,
-		currencyMosaicId: `integration-mosaic-${suffix}`,
-		symbolPubKey: `integration-symbol-pub-${suffix}`,
-		symbolPrivKey: `integration-symbol-priv-${suffix}`,
+		currencyMosaicId: mosaicHex,
+		symbolPubKey: symbolHex,
+		symbolPrivKey: privateHex,
 		...overrides,
 	};
 }

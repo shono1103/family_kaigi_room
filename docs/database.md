@@ -13,6 +13,12 @@
 
 ## 問題点
 
+### `families.symbol_priv_key` の保存リスク
+
+- `families.symbol_priv_key` をDBに保存する構成は、漏えい時の影響が大きく、セキュリティ上の懸念がある。
+- 本来は外部シークレット管理や暗号化方式まで含めて慎重に扱うべき項目である。
+- ただし現時点では設計と実装を優先し、この問題には目を瞑る前提で進める。
+
 ## 推奨事項
 
 ### 決定事項
@@ -29,6 +35,7 @@
 - `family.family_name` は `NOT NULL` とする
 - `family.currency_mosaic_id` は unique とする
 - `family.created_at` を追加する
+- `families.symbol_priv_key` の保存リスクは認識したうえで、当面はDB保存を許容する
 
 ## 前提上の整理
 

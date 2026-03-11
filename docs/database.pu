@@ -15,10 +15,12 @@ enum FamilyRole {
   child
 }
 
-entity "family" as family {
+entity "families" as families {
 	* id: UUID
 	--
 	family_name: TEXT <<NOT NULL>>
+	symbol_pub_key: TEXT? <<UNIQUE>>
+	symbol_priv_key: TEXT? <<UNIQUE>>
 	currency_mosaic_id: TEXT <<UNIQUE>>
 	created_at : TIMESTAMP(3)
 	
@@ -57,12 +59,12 @@ entity "user_infos" as user_infos {
 }
 
 users ||--o{ sessions : user_id
-family ||--o{ users : family_id
+families ||--o{ users : family_id
 users ||--o| user_infos : user_id
 users }o--|| UserRole : role
 user_infos }o--|| FamilyRole : family_role
 
-note right of family
+note right of families
   PK:
   - id
 

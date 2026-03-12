@@ -1,7 +1,9 @@
+import { loadEnvConfig } from "@next/env";
 import { prisma } from "../src/lib/prisma";
 import { ensureInitialUserExists } from "./lib/initialUser";
 
 async function main() {
+	loadEnvConfig(process.cwd());
 	await ensureInitialUserExists();
 }
 

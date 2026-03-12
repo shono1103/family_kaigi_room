@@ -1,13 +1,16 @@
 import { prisma } from "../../src/lib/prisma";
 import { hashPassword } from "../../src/lib/auth/password";
 
-// These are intentional defaults for initial setup, similar to GitLab or Redmine.
-// This project assumes local operation and is not intended for public exposure.
-// See README for details on the initial admin credentials.
-const INITIAL_ADMIN_EMAIL = "admin@example.com";
-const INITIAL_ADMIN_PASSWORD = "admin";
-
 let initialUserPromise: Promise<void> | null = null;
+
+function getRequiredEnv(name: string): string {
+	const value = process.env[name]?.trim();
+	if (!value) {
+		throw new Error(`${name} is required to create the initial admin user.`);
+	}
+
+	return value;
+}
 
 async function ensureInitialUserExistsInternal() {
 	const userCount = await prisma.user.count();
@@ -15,11 +18,14 @@ async function ensureInitialUserExistsInternal() {
 		return;
 	}
 
+	const initialAdminEmail = getRequiredEnv("INITIAL_ADMIN_EMAIL");
+	const initialAdminPassword = getRequiredEnv("INITIAL_ADMIN_PASSWORD");
+
 	try {
 		await prisma.user.create({
 			data: {
-				email: INITIAL_ADMIN_EMAIL,
-				passwordHash: hashPassword(INITIAL_ADMIN_PASSWORD),
+				email: initialAdminEmail,
+				passwordHash: hashPassword(initialAdminPassword),
 				role: "admin",
 				isFamilyOwner: true,
 				family: {

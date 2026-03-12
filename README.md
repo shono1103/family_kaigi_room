@@ -8,6 +8,7 @@
 - ローカル環境での利用を想定しています（インターネット公開前提ではありません）
 - DB は PostgreSQL を使用します
 - `DATABASE_URL` が必要です
+- integration test 用に `TEST_DATABASE_URL` を用意できます
 
 ## 主な機能（現状）
 
@@ -41,12 +42,19 @@ pnpm install
 
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/hogehoge_ticket_platform?schema=public"
+TEST_DATABASE_URL="postgresql://postgres:postgres@localhost:5433/hogehoge_ticket_platform_test?schema=public"
 ```
 
 3. PostgreSQL を起動（Docker を使う場合）
 
 ```bash
 docker compose -f docker-compose-dev.yml up -d
+```
+
+integration test 用 PostgreSQL も起動する場合:
+
+```bash
+docker compose -f docker-compose-dev.yml --profile test up -d postgres_test
 ```
 
 4. Prisma Client 生成
@@ -88,6 +96,8 @@ pnpm dev
 ```bash
 pnpm lint
 pnpm prisma:studio
+pnpm docker:db:up
+pnpm docker:db:test:up
 ```
 
 ## 注意事項

@@ -1,7 +1,12 @@
 import { createHash, randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { createSessionRecord } from "@/lib/db/session/create";
+import {
+	listActiveSessionRecordsByUserId,
+	readAuthSessionByTokenHash,
+} from "@/lib/db/session/read";
+import { revokeSessionRecord, updateSession } from "@/lib/db/session/update";
 
 export const AUTH_SESSION_COOKIE_NAME = "auth_session";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 30;
@@ -62,17 +67,10 @@ export async function createSession(userId: string) {
 	const tokenHash = hashSessionToken(token);
 	const expiresAt = buildSessionExpiryDate();
 
-	const session = await prisma.session.create({
-		data: {
-			userId,
-			tokenHash,
-			expiresAt,
-		},
-		select: {
-			id: true,
-			createdAt: true,
-			expiresAt: true,
-		},
+	const session = await createSessionRecord({
+		userId,
+		tokenHash,
+		expiresAt,
 	});
 
 	await setSessionCookie(token, expiresAt);
@@ -81,18 +79,7 @@ export async function createSession(userId: string) {
 }
 
 export async function revokeSession(sessionId: string, userId: string) {
-	const result = await prisma.session.updateMany({
-		where: {
-			id: sessionId,
-			userId,
-			revokedAt: null,
-		},
-		data: {
-			revokedAt: new Date(),
-		},
-	});
-
-	return result.count > 0;
+	return revokeSessionRecord(sessionId, userId, new Date());
 }
 
 export async function revokeCurrentSession() {
@@ -109,23 +96,7 @@ export async function revokeCurrentSession() {
 export async function listActiveSessions(
 	userId: string,
 ): Promise<ActiveSessionItem[]> {
-	return prisma.session.findMany({
-		where: {
-			userId,
-			revokedAt: null,
-			expiresAt: {
-				gt: new Date(),
-			},
-		},
-		orderBy: {
-			createdAt: "desc",
-		},
-		select: {
-			id: true,
-			createdAt: true,
-			expiresAt: true,
-		},
-	});
+	return listActiveSessionRecordsByUserId(userId, new Date());
 }
 
 export async function getCurrentAuth(
@@ -141,23 +112,7 @@ export async function getCurrentAuth(
 	const tokenHash = hashSessionToken(sessionToken);
 	const now = new Date();
 
-	const session = await prisma.session.findUnique({
-		where: {
-			tokenHash,
-		},
-		select: {
-			id: true,
-			createdAt: true,
-			expiresAt: true,
-			revokedAt: true,
-			user: {
-				select: {
-					id: true,
-					email: true,
-				},
-			},
-		},
-	});
+	const session = await readAuthSessionByTokenHash(tokenHash);
 
 	if (!session || session.revokedAt || session.expiresAt <= now) {
 		if (options.mutateCookie) {
@@ -172,13 +127,8 @@ export async function getCurrentAuth(
 		SESSION_REFRESH_THRESHOLD_MS
 	) {
 		const refreshedExpiry = buildSessionExpiryDate();
-		await prisma.session.update({
-			where: {
-				id: session.id,
-			},
-			data: {
-				expiresAt: refreshedExpiry,
-			},
+		await updateSession(session.id, {
+			expiresAt: refreshedExpiry,
 		});
 		await setSessionCookie(sessionToken, refreshedExpiry);
 		session.expiresAt = refreshedExpiry;

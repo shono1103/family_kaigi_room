@@ -1,0 +1,1 @@
+export const DB_INTEGRATION_TIMEOUT_MS = 15_000;

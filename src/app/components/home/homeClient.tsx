@@ -4,17 +4,17 @@ import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Header } from "./header";
 import { Sidebar } from "./sidebar";
-import { BalancePanel } from "./mainPanel/balancePanel";
-import { OwnTicketPanel } from "./mainPanel/ownTicketPanel";
+import { FamilyCurrencyPanel } from "./mainPanel/familyCurrencyPanel";
+import { OwnTicketPanel } from "./mainPanel/_old/ownTicketPanel";
 import { BaseInfoPanel } from "./mainPanel/baseInfoPanel";
-import type { ReadXymBalanceResult } from "@/lib/symbol/useCase/xymBalance/read";
 import type { OwnedTicketsResult } from "@/lib/symbol/useCase/ticket/result";
 import type { ReadAccountOwnedMosaicsResult } from "@/lib/symbol/useCase/account/read";
+import type { GetCurrencyDetailsResult } from "@/lib/symbol/useCase/currency/read";
 
 const tabs = [
-	{ label: "保有チケット", key: "tickets" },
-	{ label: "残高", key: "balance" },
-	{ label: "基本情報", key: "base-info" },
+	{ label: "クエスト", key: "tickets" },
+	{ label: "スコア", key: "balance" },
+	{ label: "設定", key: "base-info" },
 ] as const;
 
 type HomeTabKey = (typeof tabs)[number]["key"];
@@ -30,11 +30,12 @@ function toTabIndex(tab: string | null | undefined) {
 
 type HomeClientProps = {
 	userEmail: string;
+	familyName: string | null;
 	userInfo: {
 		name: string;
 		symbolPubKey: string | null;
 	} | null;
-	xymBalance: ReadXymBalanceResult;
+	familyCurrency: GetCurrencyDetailsResult;
 	ownedMosaics?: ReadAccountOwnedMosaicsResult;
 	ownedTickets: OwnedTicketsResult;
 	initialTab?: string;
@@ -42,8 +43,9 @@ type HomeClientProps = {
 
 export function HomeClient({
 	userEmail,
+	familyName,
 	userInfo,
-	xymBalance,
+	familyCurrency,
 	ownedMosaics: _ownedMosaics,
 	ownedTickets,
 	initialTab,
@@ -87,10 +89,11 @@ export function HomeClient({
 								index={0}
 								ownedTickets={ownedTickets}
 							/>
-							<BalancePanel
+							<FamilyCurrencyPanel
 								isActive={activeIndex === 1}
 								index={1}
-								xymBalance={xymBalance}
+								familyName={familyName}
+								familyCurrency={familyCurrency}
 							/>
 							<BaseInfoPanel
 								isActive={activeIndex === 2}

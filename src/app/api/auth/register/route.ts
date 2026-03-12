@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
-import { ensureInitialUserExists } from "@/lib/auth/bootstrap";
+import { registerFamily } from "@/lib/useCase/registerFamily";
 
 function redirectToSignup(request: Request, error: string) {
 	const url = new URL("/login", request.url);
@@ -12,23 +11,33 @@ function redirectToSignup(request: Request, error: string) {
 }
 
 export async function POST(request: Request) {
-	await ensureInitialUserExists();
-
 	const formData = await request.formData();
+	const familyName = formData.get("familyName");
 	const email = formData.get("email");
 	const password = formData.get("password");
 	const passwordConfirm = formData.get("passwordConfirm");
+	const userSymbolPrivKey = formData.get("userSymbolPrivKey");
 
 	if (
+		typeof familyName !== "string" ||
 		typeof email !== "string" ||
 		typeof password !== "string" ||
-		typeof passwordConfirm !== "string"
+		typeof passwordConfirm !== "string" ||
+		typeof userSymbolPrivKey !== "string"
 	) {
 		return redirectToSignup(request, "signup_invalid_request");
 	}
 
+	const normalizedFamilyName = familyName.trim();
 	const normalizedEmail = email.trim().toLowerCase();
-	if (!normalizedEmail || !password || !passwordConfirm) {
+	const normalizedUserSymbolPrivKey = userSymbolPrivKey.trim();
+	if (
+		!normalizedFamilyName ||
+		!normalizedEmail ||
+		!password ||
+		!passwordConfirm ||
+		!normalizedUserSymbolPrivKey
+	) {
 		return redirectToSignup(request, "signup_invalid_request");
 	}
 
@@ -37,17 +46,14 @@ export async function POST(request: Request) {
 	}
 
 	try {
-		const user = await prisma.user.create({
-			data: {
-				email: normalizedEmail,
-				passwordHash: hashPassword(password),
-			},
-			select: {
-				id: true,
-			},
+		const result = await registerFamily({
+			familyName: normalizedFamilyName,
+			ownerUserEmail: normalizedEmail,
+			ownerUserPasswordHash: hashPassword(password),
+			ownerUserSymbolPrivKey: normalizedUserSymbolPrivKey,
 		});
 
-		await createSession(user.id);
+		await createSession(result.ownerUser.id);
 
 		return NextResponse.redirect(new URL("/", request.url), {
 			status: 303,
@@ -58,6 +64,7 @@ export async function POST(request: Request) {
 			return redirectToSignup(request, "signup_email_taken");
 		}
 
-		throw error;
+		console.error("[auth:register] failed to create family", error);
+		return redirectToSignup(request, "signup_failed");
 	}
 }

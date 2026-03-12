@@ -1,9 +1,9 @@
 import { HomeClient } from "./components/home/homeClient";
 import { requireAuth } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { readXymBalanceByPublicKey } from "@/lib/symbol/useCase/xymBalance/read";
 import { readAccountOwnedMosaicsByPublicKey } from "@/lib/symbol/useCase/account/read"
 import { getTicketDetails } from "@/lib/symbol/useCase/ticket/read";
+import { readFamilyCurrencyForUser } from "@/lib/useCase/family/currency/read";
 
 type HomePageProps = {
 	searchParams?: Promise<{
@@ -23,7 +23,10 @@ export default async function Home({ searchParams }: HomePageProps) {
 			symbolPubKey: true,
 		},
 	});
-	const xymBalance = await readXymBalanceByPublicKey(userInfo?.symbolPubKey);
+	const { family, familyCurrency } = await readFamilyCurrencyForUser(
+		auth.user.id,
+		userInfo?.symbolPubKey,
+	);
 	const ownedMosaics = await readAccountOwnedMosaicsByPublicKey(userInfo?.symbolPubKey);
 	const ownedTickets = ownedMosaics.ok
 		? await (async () => {
@@ -82,8 +85,9 @@ export default async function Home({ searchParams }: HomePageProps) {
 	return (
 		<HomeClient
 			userEmail={auth.user.email}
+			familyName={family?.familyName ?? null}
 			userInfo={userInfo}
-			xymBalance={xymBalance}
+			familyCurrency={familyCurrency}
 			ownedMosaics={ownedMosaics}
 			ownedTickets={ownedTickets}
 			initialTab={resolvedSearchParams?.tab}

@@ -1,7 +1,8 @@
 # Integration Test Layout
 
-- `src/lib/integration/_helpers/`
-  - `env.ts`: `.env` / `.env.test` の読み込みヘルパー
+- `src/lib/testing/integration/`
+  - `db/`: DB integration test 用の共通 helper
+  - `symbol/`: Symbol integration test 用の共通 helper（`.env` の読み込みと `TEST_` プレフィックス上書きを含む）
   - `guards.ts`: 必須環境変数の検証ヘルパー
   - `timeout.ts`: 共通タイムアウト値
 - `src/lib/integration/symbol/ticket/`

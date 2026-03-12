@@ -12,15 +12,38 @@ enum UserRole {
   normal
 }
 
-model User {
-  id           String    @id @default(uuid()) @db.Uuid
-  email        String    @unique
-  passwordHash String    @map("password_hash")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
-  sessions     Session[]
-  userInfo     UserInfo?
+enum FamilyRole {
+  father
+  mother
+  child
+}
 
+model Family {
+  id               String   @id @default(uuid()) @db.Uuid
+  familyName       String   @map("family_name")
+  symbolPubKey     String?  @unique @map("symbol_pub_key")
+  symbolPrivKey    String?  @unique @map("symbol_priv_key")
+  currencyMosaicId String   @unique @map("currency_mosaic_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+  users            User[]
+
+  @@map("families")
+}
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  familyId      String    @map("family_id") @db.Uuid
+  isFamilyOwner Boolean   @default(false) @map("is_family_owner")
+  role          UserRole  @default(normal)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  family        Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  sessions      Session[]
+  userInfo      UserInfo?
+
+  @@index([familyId])
   @@map("users")
 }
 
@@ -43,7 +66,7 @@ model Session {
 model UserInfo {
   userId       String    @id @map("user_id") @db.Uuid
   name         String
-  role         UserRole
+  familyRole   FamilyRole @map("family_role")
   symbolPubKey String?   @unique @map("symbol_pub_key")
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")

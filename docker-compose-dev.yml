@@ -21,6 +21,31 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+  postgres_test:
+    profiles:
+      - test
+    image: ${POSTGRES_IMAGE:-postgres:16-alpine}
+    container_name: ${POSTGRES_TEST_CONTAINER_NAME:-hogehoge-ticket-platform-postgres-test}
+    restart: ${POSTGRES_TEST_RESTART_POLICY:-unless-stopped}
+    environment:
+      POSTGRES_DB: ${POSTGRES_TEST_DB:-hogehoge_ticket_platform_test}
+      POSTGRES_USER: ${POSTGRES_TEST_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_TEST_PASSWORD:-postgres}
+      TZ: ${TZ:-Asia/Tokyo}
+    ports:
+      - "${POSTGRES_TEST_PORT:-5433}:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_TEST_USER:-postgres} -d ${POSTGRES_TEST_DB:-hogehoge_ticket_platform_test}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_dev_data:
+  postgres_test_data:

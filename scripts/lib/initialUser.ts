@@ -23,7 +23,9 @@ async function ensureInitialUserExistsInternal() {
 
 	const initialAdminEmail = getRequiredEnv("INITIAL_ADMIN_EMAIL");
 	const initialAdminPassword = getRequiredEnv("INITIAL_ADMIN_PASSWORD");
-	const initialAdminSymbolPrivKey = getRequiredEnv("SYMBOL_ISSUER_PRIVATE_KEY");
+	const initialAdminSymbolPrivKey = getRequiredEnv(
+		"INITIAL_ADMIN_SYMBOL_PRIVATE_KEY",
+	);
 
 	try {
 		await registerFamily({

@@ -33,3 +33,21 @@ export async function cleanupUserInfosByUserIds(userIds: string[]) {
 		},
 	});
 }
+
+export async function cleanupUserInfosBySymbolPubKeys(symbolPubKeys: string[]) {
+	const normalizedSymbolPubKeys = [
+		...new Set(symbolPubKeys.map((symbolPubKey) => symbolPubKey.trim().toUpperCase()).filter(Boolean)),
+	];
+
+	if (normalizedSymbolPubKeys.length === 0) {
+		return;
+	}
+
+	await prisma.userInfo.deleteMany({
+		where: {
+			symbolPubKey: {
+				in: normalizedSymbolPubKeys,
+			},
+		},
+	});
+}

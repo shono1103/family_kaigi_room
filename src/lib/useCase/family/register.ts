@@ -11,7 +11,7 @@ import { generateAccountFromPrivateKey } from "@/lib/symbol/utils/accounts";
 import { registerFamilyUser } from "@/lib/useCase/family/user/register";
 import { registerFamilyUserInfo } from "@/lib/useCase/family/user/userInfo/register";
 
-const INITIAL_FAMILY_XYM_AMOUNT_RAW = 1_000_000n;
+const INITIAL_FAMILY_XYM_AMOUNT_RAW = 100_000_000n;
 const FAMILY_CURRENCY_METADATA_SEED =
 	process.env.SYMBOL_CURRENCY_METADATA_SEED ?? "currency:info/v1";
 
@@ -39,18 +39,34 @@ export async function registerFamily(
 		input.userSymbolPrivKey,
 	);
 
+	console.log("[usecase:family:register] prepared accounts", {
+		familyName: input.familyName,
+		familySymbolPublicKey: symbolAccount.publicKey,
+		userSymbolPublicKey: userSymbolAccount.publicKey.toString(),
+		initialFamilyXymAmountRaw: INITIAL_FAMILY_XYM_AMOUNT_RAW.toString(),
+	});
+
 	const fundResult = await sendXymOnChain(
 		input.userSymbolPrivKey,
 		symbolAccount.publicKey,
 		INITIAL_FAMILY_XYM_AMOUNT_RAW,
 		"Initial funding for family symbol account",
 	);
+	console.log("[usecase:family:register] fundResult", fundResult);
 	if (!fundResult.ok) {
 		throw new Error(
 			`Failed to fund family symbol account: [${fundResult.status}] ${fundResult.message}`,
 		);
 	}
 
+	console.log("[usecase:family:register] issueFamilyCurrencyOnChain request", {
+		signerPublicKey: symbolAccount.publicKey,
+		metadataSeed: FAMILY_CURRENCY_METADATA_SEED,
+		metadata: {
+			name: `${input.familyName} currency`,
+			detail: `Family currency for ${input.familyName}`,
+		},
+	});
 	const issueCurrencyResult = await issueFamilyCurrencyOnChain(
 		symbolAccount.privateKey,
 		FAMILY_CURRENCY_METADATA_SEED,
@@ -59,6 +75,7 @@ export async function registerFamily(
 			detail: `Family currency for ${input.familyName}`,
 		},
 	);
+	console.log("[usecase:family:register] issueCurrencyResult", issueCurrencyResult);
 	if (!issueCurrencyResult.ok) {
 		throw new Error(
 			`Failed to issue family currency: [${issueCurrencyResult.error}] ${issueCurrencyResult.message}`,

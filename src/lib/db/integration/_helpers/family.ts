@@ -34,3 +34,21 @@ export async function cleanupFamiliesByIds(ids: string[]) {
 		},
 	});
 }
+
+export async function cleanupFamiliesByNames(familyNames: string[]) {
+	const normalizedFamilyNames = [
+		...new Set(familyNames.map((familyName) => familyName.trim()).filter(Boolean)),
+	];
+
+	if (normalizedFamilyNames.length === 0) {
+		return;
+	}
+
+	await prisma.family.deleteMany({
+		where: {
+			familyName: {
+				in: normalizedFamilyNames,
+			},
+		},
+	});
+}

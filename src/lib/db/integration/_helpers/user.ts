@@ -34,3 +34,21 @@ export async function cleanupUsersByIds(ids: string[]) {
 		},
 	});
 }
+
+export async function cleanupUsersByEmails(emails: string[]) {
+	const normalizedEmails = [
+		...new Set(emails.map((email) => email.trim().toLowerCase()).filter(Boolean)),
+	];
+
+	if (normalizedEmails.length === 0) {
+		return;
+	}
+
+	await prisma.user.deleteMany({
+		where: {
+			email: {
+				in: normalizedEmails,
+			},
+		},
+	});
+}

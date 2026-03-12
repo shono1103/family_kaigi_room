@@ -27,3 +27,26 @@ export async function readUserByEmail(email: string) {
 		},
 	});
 }
+
+export async function readUserFamilyByUserId(userId: string) {
+	const normalizedUserId = userId.trim();
+
+	if (!normalizedUserId) {
+		throw new Error("userId is required");
+	}
+
+	return prisma.user.findUnique({
+		where: {
+			id: normalizedUserId,
+		},
+		select: {
+			family: {
+				select: {
+					familyName: true,
+					symbolPubKey: true,
+					currencyMosaicId: true,
+				},
+			},
+		},
+	});
+}

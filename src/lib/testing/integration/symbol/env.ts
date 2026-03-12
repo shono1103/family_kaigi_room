@@ -1,7 +1,6 @@
 export const loadIntegrationEnv = () => {
 	if (process.loadEnvFile) {
 		process.loadEnvFile(".env");
-		process.loadEnvFile(".env.test");
 	}
 
 	if (process.env.TEST_DATABASE_URL?.trim()) {

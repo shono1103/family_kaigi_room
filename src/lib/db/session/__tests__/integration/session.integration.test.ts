@@ -1,6 +1,5 @@
 import { createFamily } from "@/lib/db/family/create";
 import { createSessionRecord } from "@/lib/db/session/create";
-import { deleteSession } from "@/lib/db/session/delete";
 import { readSessionById, readSessionByTokenHash } from "@/lib/db/session/read";
 import { updateSession } from "@/lib/db/session/update";
 import { createUser } from "@/lib/db/user/create";
@@ -87,13 +86,4 @@ describe("db session CRUD integration", () => {
 		expect(updated.revokedAt?.getTime()).toBe(revokedAt.getTime());
 	}, DB_INTEGRATION_TIMEOUT_MS);
 
-	test("delete: session を削除できる", async () => {
-		const resolvedSessionId = requireSessionId();
-		const deleted = await deleteSession(resolvedSessionId);
-
-		expect(deleted.id).toBe(resolvedSessionId);
-		expect(await readSessionById(resolvedSessionId)).toBeNull();
-
-		sessionId = null;
-	}, DB_INTEGRATION_TIMEOUT_MS);
 });

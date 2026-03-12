@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { hashPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
-import { registerFamily } from "@/lib/useCase/family/register";
+import { registerFamily } from "@/lib/useCase/registerFamily";
 
 function redirectToSignup(request: Request, error: string) {
 	const url = new URL("/login", request.url);
@@ -48,12 +48,12 @@ export async function POST(request: Request) {
 	try {
 		const result = await registerFamily({
 			familyName: normalizedFamilyName,
-			userEmail: normalizedEmail,
-			userPasswordHash: hashPassword(password),
-			userSymbolPrivKey: normalizedUserSymbolPrivKey,
+			ownerUserEmail: normalizedEmail,
+			ownerUserPasswordHash: hashPassword(password),
+			ownerUserSymbolPrivKey: normalizedUserSymbolPrivKey,
 		});
 
-		await createSession(result.user.id);
+		await createSession(result.ownerUser.id);
 
 		return NextResponse.redirect(new URL("/", request.url), {
 			status: 303,

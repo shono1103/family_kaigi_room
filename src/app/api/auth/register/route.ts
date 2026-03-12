@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
-import { ensureInitialUserExists } from "@/lib/auth/bootstrap";
 
 function redirectToSignup(request: Request, error: string) {
 	const url = new URL("/login", request.url);
@@ -12,8 +11,6 @@ function redirectToSignup(request: Request, error: string) {
 }
 
 export async function POST(request: Request) {
-	await ensureInitialUserExists();
-
 	const formData = await request.formData();
 	const email = formData.get("email");
 	const password = formData.get("password");

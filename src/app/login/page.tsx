@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { getCurrentAuth } from "@/lib/auth/session";
-import { ensureInitialUserExists } from "@/lib/auth/bootstrap";
 import { AuthCard } from "@/app/components/auth/authCard";
 import type { AuthMode } from "@/app/components/auth/authTypes";
 
@@ -20,8 +19,6 @@ type LoginPageProps = {
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-	await ensureInitialUserExists();
-
 	const auth = await getCurrentAuth();
 	if (auth) {
 		redirect("/");

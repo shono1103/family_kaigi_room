@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/prisma";
-import { hashPassword } from "@/lib/auth/password";
+import { prisma } from "../../src/lib/prisma";
+import { hashPassword } from "../../src/lib/auth/password";
 
 // These are intentional defaults for initial setup, similar to GitLab or Redmine.
 // This project assumes local operation and is not intended for public exposure.
@@ -7,7 +7,7 @@ import { hashPassword } from "@/lib/auth/password";
 const INITIAL_ADMIN_EMAIL = "admin@example.com";
 const INITIAL_ADMIN_PASSWORD = "admin";
 
-let bootstrapPromise: Promise<void> | null = null;
+let initialUserPromise: Promise<void> | null = null;
 
 async function ensureInitialUserExistsInternal() {
 	const userCount = await prisma.user.count();
@@ -39,11 +39,11 @@ async function ensureInitialUserExistsInternal() {
 }
 
 export async function ensureInitialUserExists() {
-	if (!bootstrapPromise) {
-		bootstrapPromise = ensureInitialUserExistsInternal().finally(() => {
-			bootstrapPromise = null;
+	if (!initialUserPromise) {
+		initialUserPromise = ensureInitialUserExistsInternal().finally(() => {
+			initialUserPromise = null;
 		});
 	}
 
-	await bootstrapPromise;
+	await initialUserPromise;
 }

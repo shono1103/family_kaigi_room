@@ -3,6 +3,10 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
+		"docker:db:up": "docker compose -f docker-compose-dev.yml up -d postgres",
+		"docker:db:down": "docker compose -f docker-compose-dev.yml stop postgres",
+		"docker:db:test:up": "docker compose -f docker-compose-dev.yml --profile test up -d postgres_test",
+		"docker:db:test:down": "docker compose -f docker-compose-dev.yml --profile test stop postgres_test",
 		"init": "tsx scripts/init.ts",
 		"dev": "npm run init && next dev",
 		"build": "npm run prisma:migrate:prod && npm run prisma:generate && next build",

@@ -1,15 +1,14 @@
 import { FamilyRole, UserRole } from "@prisma/client";
 import { createFamily, type CreateFamilyInput } from "@/lib/db/family/create";
-import type { CreateUserInput } from "@/lib/db/user/create";
-import type { CreateUserInfoInput } from "@/lib/db/userInfo/create";
+import { createUser, type CreateUserInput } from "@/lib/db/user/create";
+import { createUserInfo, type CreateUserInfoInput } from "@/lib/db/userInfo/create";
 import { prisma } from "@/lib/prisma";
 import { facade } from "@/lib/symbol/config";
 import { issueFamilyCurrencyOnChain } from "@/lib/symbol/useCase/currency/create";
 import { createSymbolAccount } from "@/lib/symbol/useCase/account/create";
 import { sendXymOnChain } from "@/lib/symbol/useCase/xymBalance/send";
 import { generateAccountFromPrivateKey } from "@/lib/symbol/utils/accounts";
-import { registerFamilyUser } from "@/lib/useCase/family/user/register";
-import { registerFamilyUserInfo } from "@/lib/useCase/family/user/userInfo/register";
+import type { Prisma } from "@prisma/client";
 
 const INITIAL_FAMILY_XYM_AMOUNT_RAW = 100_000_000n;
 const FAMILY_CURRENCY_METADATA_SEED =
@@ -17,38 +16,37 @@ const FAMILY_CURRENCY_METADATA_SEED =
 
 export type RegisterFamilyInput = Readonly<{
 	familyName: CreateFamilyInput["familyName"];
-	userEmail: CreateUserInput["email"];
-	userPasswordHash: CreateUserInput["passwordHash"];
-	userName?: CreateUserInfoInput["name"];
-	userSymbolPrivKey: string;
-	userRole?: CreateUserInput["role"];
-	familyRole?: FamilyRole;
+	ownerUserEmail: CreateUserInput["email"];
+	ownerUserPasswordHash: CreateUserInput["passwordHash"];
+	ownerUserName?: CreateUserInfoInput["name"];
+	ownerUserSymbolPrivKey: string;
+	ownerUserFamilyRole?: FamilyRole;
 }>;
 
 export type RegisterFamilyResult = Readonly<{
 	family: Awaited<ReturnType<typeof createFamily>>;
-	user: Awaited<ReturnType<typeof registerFamilyUser>>;
-	userInfo: Awaited<ReturnType<typeof registerFamilyUserInfo>>;
+	ownerUser: Awaited<ReturnType<typeof registerFamilyOwnerUser>>;
+	ownerUserInfo: Awaited<ReturnType<typeof registerFamilyOwnerUserInfo>>;
 }>;
 
 export async function registerFamily(
 	input: RegisterFamilyInput,
 ): Promise<RegisterFamilyResult> {
 	const symbolAccount = createSymbolAccount();
-	const userSymbolAccount = generateAccountFromPrivateKey(
+	const ownerUserSymbolAccount = generateAccountFromPrivateKey(
 		facade,
-		input.userSymbolPrivKey,
+		input.ownerUserSymbolPrivKey,
 	);
 
 	console.log("[usecase:family:register] prepared accounts", {
 		familyName: input.familyName,
 		familySymbolPublicKey: symbolAccount.publicKey,
-		userSymbolPublicKey: userSymbolAccount.publicKey.toString(),
+		ownerUserSymbolPublicKey: ownerUserSymbolAccount.publicKey.toString(),
 		initialFamilyXymAmountRaw: INITIAL_FAMILY_XYM_AMOUNT_RAW.toString(),
 	});
 
 	const fundResult = await sendXymOnChain(
-		input.userSymbolPrivKey,
+		input.ownerUserSymbolPrivKey,
 		symbolAccount.publicKey,
 		INITIAL_FAMILY_XYM_AMOUNT_RAW,
 		"Initial funding for family symbol account",
@@ -94,31 +92,82 @@ export async function registerFamily(
 			tx,
 		);
 
-		const user = await registerFamilyUser(
+		const ownerUser = await registerFamilyOwnerUser(
 			{
-				email: input.userEmail,
-				passwordHash: input.userPasswordHash,
+				email: input.ownerUserEmail,
+				passwordHash: input.ownerUserPasswordHash,
 				familyId: family.id,
-				isFamilyOwner: true,
-				role: input.userRole ?? UserRole.normal,
 			},
 			tx,
 		);
 
-		const userInfo = await registerFamilyUserInfo(
+		const ownerUserInfo = await registerFamilyOwnerUserInfo(
 			{
-				userId: user.id,
-				name: input.userName,
-				familyRole: input.familyRole ?? FamilyRole.child,
-				symbolPubKey: userSymbolAccount.publicKey.toString(),
+				ownerUserId: ownerUser.id,
+				ownerUserName: input.ownerUserName,
+				ownerUserFamilyRole: input.ownerUserFamilyRole ?? FamilyRole.child,
+				ownerUserSymbolPubKey: ownerUserSymbolAccount.publicKey.toString(),
 			},
 			tx,
 		);
 
 		return {
 			family,
-			user,
-			userInfo,
+			ownerUser,
+			ownerUserInfo,
 		};
 	});
+}
+
+
+
+type RegisterFamilyOwnerUserInput = Readonly<{
+	email: CreateUserInput["email"];
+	passwordHash: CreateUserInput["passwordHash"];
+	familyId: CreateUserInput["familyId"];
+}>;
+
+async function registerFamilyOwnerUser(
+	input: RegisterFamilyOwnerUserInput,
+	tx: Prisma.TransactionClient,
+) {
+	return createUser(
+		{
+			email: input.email,
+			passwordHash: input.passwordHash,
+			familyId: input.familyId,
+			isFamilyOwner: true,
+			role: UserRole.normal,
+		},
+		tx,
+	);
+}
+
+
+
+type RegisterFamilyOwnerUserInfoInput = Readonly<{
+	ownerUserId: CreateUserInfoInput["userId"];
+	ownerUserName?: CreateUserInfoInput["name"];
+	ownerUserSymbolPubKey?: CreateUserInfoInput["symbolPubKey"];
+	ownerUserFamilyRole?: FamilyRole;
+}>;
+
+async function registerFamilyOwnerUserInfo(
+	input: RegisterFamilyOwnerUserInfoInput,
+	tx: Prisma.TransactionClient,
+) {
+	const normalizedOwnerUserName = input.ownerUserName?.trim();
+	if (!normalizedOwnerUserName) {
+		return null;
+	}
+
+	return createUserInfo(
+		{
+			userId: input.ownerUserId,
+			name: normalizedOwnerUserName,
+			familyRole: input.ownerUserFamilyRole ?? FamilyRole.father,
+			symbolPubKey: input.ownerUserSymbolPubKey,
+		},
+		tx,
+	);
 }

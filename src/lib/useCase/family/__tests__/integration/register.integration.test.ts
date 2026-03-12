@@ -14,7 +14,7 @@ import { facade } from "@/lib/symbol/config";
 import { getCurrencyDetailsByPublicKey } from "@/lib/symbol/useCase/currency/read";
 import { normalizeMosaicIdHex } from "@/lib/symbol/utils/normalizers";
 import { generateAccountFromPrivateKey } from "@/lib/symbol/utils/accounts";
-import { registerFamily } from "@/lib/useCase/family/register";
+import { registerFamily } from "@/lib/useCase/registerFamily";
 
 describe("family register use case integration", () => {
 	const createdFamilyIds: string[] = [];
@@ -61,18 +61,18 @@ describe("family register use case integration", () => {
 
 		const result = await registerFamily({
 			familyName,
-			userEmail,
-			userPasswordHash,
-			userName,
-			userSymbolPrivKey,
-			familyRole: FamilyRole.father,
+			ownerUserEmail: userEmail,
+			ownerUserPasswordHash: userPasswordHash,
+			ownerUserName: userName,
+			ownerUserSymbolPrivKey: userSymbolPrivKey,
+			ownerUserFamilyRole: FamilyRole.father,
 		});
 		console.log("[integration:family:register] result", {
 			familyId: result.family.id,
 			familySymbolPubKey: result.family.symbolPubKey,
 			currencyMosaicId: result.family.currencyMosaicId,
-			userId: result.user.id,
-			userInfoUserId: result.userInfo?.userId ?? null,
+			userId: result.ownerUser.id,
+			userInfoUserId: result.ownerUserInfo?.userId ?? null,
 		});
 
 		createdFamilyIds.push(result.family.id);
@@ -82,25 +82,25 @@ describe("family register use case integration", () => {
 		expect(result.family.symbolPrivKey).toMatch(/^[0-9A-F]{64}$/);
 		expect(result.family.currencyMosaicId).toMatch(/^[0-9A-F]{16}$/);
 
-		expect(result.user.familyId).toBe(result.family.id);
-		expect(result.user.email).toBe(userEmail);
-		expect(result.user.passwordHash).toBe(userPasswordHash);
-		expect(result.user.isFamilyOwner).toBe(true);
-		expect(result.user.role).toBe(UserRole.normal);
+		expect(result.ownerUser.familyId).toBe(result.family.id);
+		expect(result.ownerUser.email).toBe(userEmail);
+		expect(result.ownerUser.passwordHash).toBe(userPasswordHash);
+		expect(result.ownerUser.isFamilyOwner).toBe(true);
+		expect(result.ownerUser.role).toBe(UserRole.normal);
 
-		expect(result.userInfo).not.toBeNull();
-		expect(result.userInfo?.userId).toBe(result.user.id);
-		expect(result.userInfo?.name).toBe(userName);
-		expect(result.userInfo?.familyRole).toBe(FamilyRole.father);
-		expect(result.userInfo?.symbolPubKey).toBe(userSymbolAccount.publicKey.toString());
+		expect(result.ownerUserInfo).not.toBeNull();
+		expect(result.ownerUserInfo?.userId).toBe(result.ownerUser.id);
+		expect(result.ownerUserInfo?.name).toBe(userName);
+		expect(result.ownerUserInfo?.familyRole).toBe(FamilyRole.father);
+		expect(result.ownerUserInfo?.symbolPubKey).toBe(userSymbolAccount.publicKey.toString());
 
 		const persistedFamily = await readFamilyById(result.family.id);
-		const persistedUser = await readUserById(result.user.id);
-		const persistedUserInfo = await readUserInfoByUserId(result.user.id);
+		const persistedUser = await readUserById(result.ownerUser.id);
+		const persistedUserInfo = await readUserInfoByUserId(result.ownerUser.id);
 
 		expect(persistedFamily?.id).toBe(result.family.id);
-		expect(persistedUser?.id).toBe(result.user.id);
-		expect(persistedUserInfo?.userId).toBe(result.user.id);
+		expect(persistedUser?.id).toBe(result.ownerUser.id);
+		expect(persistedUserInfo?.userId).toBe(result.ownerUser.id);
 
 		const currencyReadResult = await getCurrencyDetailsByPublicKey(
 			result.family.symbolPubKey ?? "",

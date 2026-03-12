@@ -1,4 +1,4 @@
-import { FamilyRole } from "@prisma/client";
+import { FamilyRole, UserRole } from "@prisma/client";
 import { createFamily, type CreateFamilyInput } from "@/lib/db/family/create";
 import type { CreateUserInput } from "@/lib/db/user/create";
 import type { CreateUserInfoInput } from "@/lib/db/userInfo/create";
@@ -21,6 +21,7 @@ export type RegisterFamilyInput = Readonly<{
 	userPasswordHash: CreateUserInput["passwordHash"];
 	userName?: CreateUserInfoInput["name"];
 	userSymbolPrivKey: string;
+	userRole?: CreateUserInput["role"];
 	familyRole?: FamilyRole;
 }>;
 
@@ -99,6 +100,7 @@ export async function registerFamily(
 				passwordHash: input.userPasswordHash,
 				familyId: family.id,
 				isFamilyOwner: true,
+				role: input.userRole ?? UserRole.normal,
 			},
 			tx,
 		);

@@ -7,6 +7,7 @@ export type RegisterFamilyUserInput = Readonly<{
 	passwordHash: CreateUserInput["passwordHash"];
 	familyId: CreateUserInput["familyId"];
 	isFamilyOwner?: CreateUserInput["isFamilyOwner"];
+	role?: CreateUserInput["role"];
 }>;
 
 export async function registerFamilyUser(
@@ -19,7 +20,7 @@ export async function registerFamilyUser(
 			passwordHash: input.passwordHash,
 			familyId: input.familyId,
 			isFamilyOwner: input.isFamilyOwner ?? false,
-			role: UserRole.normal,
+			role: input.role ?? UserRole.normal,
 		},
 		tx,
 	);

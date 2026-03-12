@@ -4,17 +4,17 @@ import { deleteSession } from "@/lib/db/session/delete";
 import { readSessionById, readSessionByTokenHash } from "@/lib/db/session/read";
 import { updateSession } from "@/lib/db/session/update";
 import { createUser } from "@/lib/db/user/create";
-import { ensureDbIntegrationEnv } from "@/lib/db/integration/_helpers/env";
+import { ensureDbIntegrationEnv } from "@/lib/testing/integration/db/env";
 import {
 	cleanupFamiliesByIds,
 	createIntegrationFamilyInput,
-} from "@/lib/db/integration/_helpers/family";
+} from "@/lib/testing/integration/db/family";
 import {
 	cleanupSessionsByIds,
 	createIntegrationSessionInput,
-} from "@/lib/db/integration/_helpers/session";
-import { DB_INTEGRATION_TIMEOUT_MS } from "@/lib/db/integration/_helpers/timeout";
-import { createIntegrationUserInput } from "@/lib/db/integration/_helpers/user";
+} from "@/lib/testing/integration/db/session";
+import { DB_INTEGRATION_TIMEOUT_MS } from "@/lib/testing/integration/db/timeout";
+import { createIntegrationUserInput } from "@/lib/testing/integration/db/user";
 
 describe("db session CRUD integration", () => {
 	const createdFamilyIds: string[] = [];

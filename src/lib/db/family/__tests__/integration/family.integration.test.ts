@@ -2,12 +2,12 @@ import { createFamily } from "@/lib/db/family/create";
 import { deleteFamily } from "@/lib/db/family/delete";
 import { readFamilyByCurrencyMosaicId, readFamilyById } from "@/lib/db/family/read";
 import { updateFamily } from "@/lib/db/family/update";
-import { ensureDbIntegrationEnv } from "@/lib/db/integration/_helpers/env";
+import { ensureDbIntegrationEnv } from "@/lib/testing/integration/db/env";
 import {
 	cleanupFamiliesByIds,
 	createIntegrationFamilyInput,
-} from "@/lib/db/integration/_helpers/family";
-import { DB_INTEGRATION_TIMEOUT_MS } from "@/lib/db/integration/_helpers/timeout";
+} from "@/lib/testing/integration/db/family";
+import { DB_INTEGRATION_TIMEOUT_MS } from "@/lib/testing/integration/db/timeout";
 
 describe("db family CRUD integration", () => {
 	const createdFamilyIds: string[] = [];

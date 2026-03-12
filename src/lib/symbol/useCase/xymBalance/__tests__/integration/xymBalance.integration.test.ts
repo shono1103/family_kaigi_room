@@ -1,6 +1,6 @@
-import { INTEGRATION_TIMEOUT_MS } from "@/lib/symbol/integration/_helpers/timeout";
-import { loadIntegrationEnv } from "@/lib/symbol/integration/_helpers/env";
-import { requireEnv } from "@/lib/symbol/integration/_helpers/guards";
+import { INTEGRATION_TIMEOUT_MS } from "@/lib/testing/integration/symbol/timeout";
+import { loadIntegrationEnv } from "@/lib/testing/integration/symbol/env";
+import { requireEnv } from "@/lib/testing/integration/symbol/guards";
 
 describe("symbol xymBalance integration", () => {
 	beforeAll(() => {

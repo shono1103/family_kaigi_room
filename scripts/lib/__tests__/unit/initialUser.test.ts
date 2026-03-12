@@ -5,7 +5,7 @@ const userCountMock = vi.fn();
 const hashPasswordMock = vi.fn();
 const registerFamilyMock = vi.fn();
 
-vi.mock("../../src/lib/prisma", () => ({
+vi.mock("../../../../src/lib/prisma", () => ({
 	prisma: {
 		user: {
 			count: userCountMock,
@@ -13,11 +13,11 @@ vi.mock("../../src/lib/prisma", () => ({
 	},
 }));
 
-vi.mock("../../src/lib/auth/password", () => ({
+vi.mock("../../../../src/lib/auth/password", () => ({
 	hashPassword: hashPasswordMock,
 }));
 
-vi.mock("../../src/lib/useCase/family/register", () => ({
+vi.mock("../../../../src/lib/useCase/family/register", () => ({
 	registerFamily: registerFamilyMock,
 }));
 
@@ -32,7 +32,7 @@ describe("scripts/lib/initialUser", () => {
 
 	test("users が存在する場合は何もしない", async () => {
 		userCountMock.mockResolvedValueOnce(1);
-		const { ensureInitialUserExists } = await import("./initialUser");
+		const { ensureInitialUserExists } = await import("../../initialUser");
 
 		await ensureInitialUserExists();
 
@@ -47,7 +47,7 @@ describe("scripts/lib/initialUser", () => {
 		process.env.INITIAL_ADMIN_EMAIL = "admin@example.com";
 		process.env.INITIAL_ADMIN_PASSWORD = "admin";
 		process.env.INITIAL_ADMIN_SYMBOL_PRIVATE_KEY = "issuer-private-key";
-		const { ensureInitialUserExists } = await import("./initialUser");
+		const { ensureInitialUserExists } = await import("../../initialUser");
 
 		await ensureInitialUserExists();
 
@@ -64,7 +64,7 @@ describe("scripts/lib/initialUser", () => {
 
 	test("必要な env がない場合はエラーにする", async () => {
 		userCountMock.mockResolvedValueOnce(0);
-		const { ensureInitialUserExists } = await import("./initialUser");
+		const { ensureInitialUserExists } = await import("../../initialUser");
 
 		await expect(ensureInitialUserExists()).rejects.toThrow(
 			"INITIAL_ADMIN_EMAIL is required to create the initial admin user.",
@@ -78,7 +78,7 @@ describe("scripts/lib/initialUser", () => {
 		process.env.INITIAL_ADMIN_PASSWORD = "admin";
 		process.env.INITIAL_ADMIN_SYMBOL_PRIVATE_KEY = "issuer-private-key";
 		registerFamilyMock.mockRejectedValueOnce({ code: "P2002" });
-		const { ensureInitialUserExists } = await import("./initialUser");
+		const { ensureInitialUserExists } = await import("../../initialUser");
 
 		await expect(ensureInitialUserExists()).resolves.toBeUndefined();
 	});

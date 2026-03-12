@@ -8,13 +8,13 @@ vi.mock("@next/env", () => ({
 	loadEnvConfig: loadEnvConfigMock,
 }));
 
-vi.mock("../src/lib/prisma", () => ({
+vi.mock("../../../src/lib/prisma", () => ({
 	prisma: {
 		$disconnect: disconnectMock,
 	},
 }));
 
-vi.mock("./lib/initialUser", () => ({
+vi.mock("../../lib/initialUser", () => ({
 	ensureInitialUserExists: ensureInitialUserExistsMock,
 }));
 
@@ -29,7 +29,7 @@ describe("scripts/init", () => {
 	});
 
 	test("runInit: env を読み込み初期ユーザー作成を実行する", async () => {
-		const { runInit } = await import("./init");
+		const { runInit } = await import("../../init");
 
 		await runInit();
 
@@ -45,7 +45,7 @@ describe("scripts/init", () => {
 		const consoleErrorSpy = vi
 			.spyOn(console, "error")
 			.mockImplementation(() => undefined);
-		const { runInit } = await import("./init");
+		const { runInit } = await import("../../init");
 
 		await runInit();
 

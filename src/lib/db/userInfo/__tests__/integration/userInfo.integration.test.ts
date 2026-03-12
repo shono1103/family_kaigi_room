@@ -5,14 +5,14 @@ import { deleteUserInfo } from "@/lib/db/userInfo/delete";
 import { readUserInfoBySymbolPubKey, readUserInfoByUserId } from "@/lib/db/userInfo/read";
 import { updateUserInfo } from "@/lib/db/userInfo/update";
 import { createUser } from "@/lib/db/user/create";
-import { ensureDbIntegrationEnv } from "@/lib/db/integration/_helpers/env";
+import { ensureDbIntegrationEnv } from "@/lib/testing/integration/db/env";
 import {
 	cleanupFamiliesByIds,
 	createIntegrationFamilyInput,
-} from "@/lib/db/integration/_helpers/family";
-import { DB_INTEGRATION_TIMEOUT_MS } from "@/lib/db/integration/_helpers/timeout";
-import { createIntegrationUserInfoInput } from "@/lib/db/integration/_helpers/userInfo";
-import { createIntegrationUserInput } from "@/lib/db/integration/_helpers/user";
+} from "@/lib/testing/integration/db/family";
+import { DB_INTEGRATION_TIMEOUT_MS } from "@/lib/testing/integration/db/timeout";
+import { createIntegrationUserInfoInput } from "@/lib/testing/integration/db/userInfo";
+import { createIntegrationUserInput } from "@/lib/testing/integration/db/user";
 
 describe("db userInfo CRUD integration", () => {
 	const createdFamilyIds: string[] = [];

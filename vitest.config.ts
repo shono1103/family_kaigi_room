@@ -3,7 +3,10 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
 	test: {
-		include: ["src/**/*.test.ts", "scripts/**/*.test.ts"],
+		include: [
+			"src/**/__tests__/unit/**/*.test.ts",
+			"scripts/**/__tests__/unit/**/*.test.ts",
+		],
 		environment: "node",
 		globals: true,
 	},

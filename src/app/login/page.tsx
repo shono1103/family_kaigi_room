@@ -6,9 +6,12 @@ import type { AuthMode } from "@/app/components/auth/authTypes";
 const errorMessageMap: Record<string, string> = {
 	invalid_request: "メールアドレスとパスワードを入力してください。",
 	invalid_credentials: "メールアドレスまたはパスワードが正しくありません。",
-	signup_invalid_request: "家族名・メールアドレス・パスワードを入力してください。",
+	signup_invalid_request:
+		"家族名・メールアドレス・パスワード・Symbol秘密鍵を入力してください。",
 	signup_password_mismatch: "パスワード確認が一致しません。",
 	signup_email_taken: "このメールアドレスは既に使用されています。",
+	signup_failed:
+		"家族会議室の作成に失敗しました。時間を置いて再試行してください。",
 };
 
 type LoginPageProps = {

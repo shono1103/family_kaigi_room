@@ -63,6 +63,20 @@ export function SignupForm({ errorMessage }: SignupFormProps) {
 				/>
 			</label>
 
+			<label className="block">
+				<span className="mb-2 block text-sm font-bold text-[#2b2b3e]">
+					Symbol秘密鍵
+				</span>
+				<input
+					type="password"
+					name="userSymbolPrivKey"
+					autoComplete="off"
+					required
+					className="w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none ring-0 transition focus:border-[#ff8b3d] focus:shadow-[0_0_0_4px_rgba(255,139,61,0.12)]"
+					placeholder="64桁16進"
+				/>
+			</label>
+
 			<AuthErrorMessage message={errorMessage} />
 
 			<button

@@ -21,5 +21,5 @@ const isDirectExecution =
 	import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isDirectExecution) {
-	await runInit();
+	void runInit();
 }

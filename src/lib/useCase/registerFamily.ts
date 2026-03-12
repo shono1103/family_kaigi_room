@@ -104,7 +104,7 @@ export async function registerFamily(
 		const ownerUserInfo = await registerFamilyOwnerUserInfo(
 			{
 				ownerUserId: ownerUser.id,
-				ownerUserName: input.ownerUserName,
+				ownerUserName: input.ownerUserName ?? `${input.familyName} Owner`,
 				ownerUserFamilyRole: input.ownerUserFamilyRole ?? FamilyRole.child,
 				ownerUserSymbolPubKey: ownerUserSymbolAccount.publicKey.toString(),
 			},

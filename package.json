@@ -9,7 +9,7 @@
 		"docker:db:test:down": "docker compose -f docker-compose-dev.yml --profile test stop postgres_test",
 		"init": "tsx scripts/init.ts",
 		"dev": "npm run init && next dev",
-		"build": "npm run prisma:migrate:prod && npm run prisma:generate && next build",
+		"build": "npm run prisma:migrate:prod && npm run prisma:generate && npm run init && next build",
 		"start": "npm run init && next start",
 		"test": "vitest run --config vitest.config.ts",
 		"test:watch": "vitest --config vitest.config.ts",

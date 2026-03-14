@@ -42,6 +42,7 @@ model User {
   family        Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
   sessions      Session[]
   userInfo      UserInfo?
+  quests        Quest[]
 
   @@index([familyId])
   @@map("users")
@@ -74,4 +75,19 @@ model UserInfo {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_infos")
+}
+
+model Quest {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  title      String
+  detail     String
+  isResolved String   @map("is_resolved")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("quests")
 }

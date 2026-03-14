@@ -58,11 +58,23 @@ entity "user_infos" as user_infos {
   updated_at : TIMESTAMP(3)
 }
 
-users ||--o{ sessions : user_id
-families ||--o{ users : family_id
-users ||--o| user_infos : user_id
-users }o--|| UserRole : role
-user_infos }o--|| FamilyRole : family_role
+entity "quests" as quests {
+  id : UUID <<PK>>
+  --
+  user_id : UUID <<FK>>
+  title : TEXT
+  detail : TEXT
+  is_resolved : TEXT
+  created_at : TIMESTAMP(3)
+  updated_at : TIMESTAMP(3)
+}
+
+users "1" -- "0..*" sessions : user_id
+families "1" -- "0..*" users : family_id
+users "1" -- "0..1" user_infos : user_id
+users "1" -- "0..*" quests : user_id
+users "0..*" -- "1" UserRole : role
+user_infos "0..*" -- "1" FamilyRole : family_role
 
 note right of families
   PK:
@@ -123,6 +135,19 @@ note right of user_infos
 
   RULE:
   - family_role is family-local role
+end note
+
+note right of quests
+  UNIQUE:
+  - mosaic_id
+  - resolved_mosaic_id
+
+  INDEX:
+  - user_id
+
+  FK:
+  - user_id -> users.id
+    ON DELETE CASCADE
 end note
 
 @enduml

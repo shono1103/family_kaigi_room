@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Header } from "./header";
 import { Sidebar } from "./sidebar";
 import { FamilyCurrencyPanel } from "./mainPanel/familyCurrencyPanel";
-import { OwnTicketPanel } from "./mainPanel/_old/ownTicketPanel";
+import { QuestPanel } from "./mainPanel/questPanel";
 import { BaseInfoPanel } from "./mainPanel/baseInfoPanel";
 import type { OwnedTicketsResult } from "@/lib/symbol/useCase/ticket/result";
 import type { ReadAccountOwnedMosaicsResult } from "@/lib/symbol/useCase/account/read";
@@ -47,7 +47,7 @@ export function HomeClient({
 	userInfo,
 	familyCurrency,
 	ownedMosaics: _ownedMosaics,
-	ownedTickets,
+	ownedTickets: _ownedTickets,
 	initialTab,
 }: HomeClientProps) {
 	const router = useRouter();
@@ -84,11 +84,7 @@ export function HomeClient({
 					/>
 					<main className="rounded-[32px] border border-black/10 bg-white/92 shadow-[0_18px_55px_rgba(20,15,45,0.08)] backdrop-blur lg:min-h-0 lg:overflow-hidden">
 						<div className="px-6 py-6 md:px-8 md:py-8 lg:h-full lg:overflow-y-auto lg:overscroll-contain">
-							<OwnTicketPanel
-								isActive={activeIndex === 0}
-								index={0}
-								ownedTickets={ownedTickets}
-							/>
+							<QuestPanel isActive={activeIndex === 0} index={0} />
 							<FamilyCurrencyPanel
 								isActive={activeIndex === 1}
 								index={1}

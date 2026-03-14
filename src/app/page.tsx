@@ -3,7 +3,7 @@ import { requireAuth } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { readAccountOwnedMosaicsByPublicKey } from "@/lib/symbol/useCase/account/read"
 import { getTicketDetails } from "@/lib/symbol/useCase/ticket/read";
-import { readFamilyCurrencyForUser } from "@/lib/useCase/family/currency/read";
+import { readFamilyCurrencyForUser } from "@/lib/useCase/readFamilyCurrency";
 
 type HomePageProps = {
 	searchParams?: Promise<{

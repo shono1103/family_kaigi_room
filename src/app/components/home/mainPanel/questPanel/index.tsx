@@ -5,7 +5,7 @@ import { QuestIssueModal } from "./QuestIssueModal";
 import type { QuestPanelProps } from "./types";
 import { useQuestIssue } from "./useQuestIssue";
 
-export function QuestPanel({ isActive, index }: QuestPanelProps) {
+export function QuestPanel({ isActive, index, targetUsers }: QuestPanelProps) {
 	const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
 	const {
 		isSubmitting,
@@ -48,13 +48,16 @@ export function QuestPanel({ isActive, index }: QuestPanelProps) {
 					type="button"
 					onClick={openIssueModal}
 					className="rounded-lg bg-[#1e1e2a] px-4 py-2 text-sm font-bold text-white transition hover:opacity-90"
+					disabled={targetUsers.length === 0}
 				>
 					クエスト作成
 				</button>
 			</div>
 
 			<div className="mt-6 rounded-2xl border border-dashed border-black/15 bg-black/[0.03] p-6 text-sm font-semibold text-[#4b4b65]">
-				クエスト一覧はまだ未実装です。ここから新しいクエストを登録できます。
+				{targetUsers.length > 0
+					? "クエスト一覧はまだ未実装です。ここから新しいクエストを登録できます。"
+					: "対象ユーザーがいないため、今はクエストを作成できません。"}
 			</div>
 
 			{submitSuccess ? (
@@ -79,6 +82,7 @@ export function QuestPanel({ isActive, index }: QuestPanelProps) {
 					return isSuccess;
 				}}
 				isSubmitting={isSubmitting}
+				targetUsers={targetUsers}
 			/>
 		</section>
 	);

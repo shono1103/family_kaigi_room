@@ -3,6 +3,10 @@ import type { FormEvent } from "react";
 export type QuestPanelProps = {
 	isActive: boolean;
 	index: number;
+	targetUsers: Array<{
+		id: string;
+		label: string;
+	}>;
 };
 
 export type QuestIssueResponse = {
@@ -21,4 +25,8 @@ export type QuestIssueModalProps = {
 	onClose: () => void;
 	onSubmit: (event: FormEvent<HTMLFormElement>) => Promise<boolean>;
 	isSubmitting: boolean;
+	targetUsers: Array<{
+		id: string;
+		label: string;
+	}>;
 };

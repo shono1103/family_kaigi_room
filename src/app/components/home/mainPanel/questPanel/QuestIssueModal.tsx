@@ -5,6 +5,7 @@ export function QuestIssueModal({
 	onClose,
 	onSubmit,
 	isSubmitting,
+	targetUsers,
 }: QuestIssueModalProps) {
 	if (!isOpen) {
 		return null;
@@ -56,6 +57,30 @@ export function QuestIssueModal({
 							className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm"
 							placeholder="達成条件や補足を入力"
 						/>
+					</div>
+					<div>
+						<label
+							htmlFor="quest-target-user"
+							className="text-sm font-bold text-[#2f2f47]"
+						>
+							対象ユーザー
+						</label>
+						<select
+							id="quest-target-user"
+							name="targetUserId"
+							required
+							defaultValue=""
+							className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm"
+						>
+							<option value="" disabled>
+								対象ユーザーを選択
+							</option>
+							{targetUsers.map((user) => (
+								<option key={user.id} value={user.id}>
+									{user.label}
+								</option>
+							))}
+						</select>
 					</div>
 
 					<div className="flex justify-end gap-2 pt-2">

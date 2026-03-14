@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 
 export type IssueQuestInput = Readonly<{
 	userId: CreateQuestInput["userId"];
+	targetUserId: CreateQuestInput["targetUserId"];
 	title: CreateQuestInput["title"];
 	detail: CreateQuestInput["detail"];
 }>;
@@ -16,11 +17,16 @@ export async function issueQuest(
 	input: IssueQuestInput,
 ): Promise<IssueQuestResult> {
 	const userId = input.userId.trim();
+	const targetUserId = input.targetUserId.trim();
 	const title = input.title.trim();
 	const detail = input.detail.trim();
 
 	if (!userId) {
 		throw new Error("userId is required");
+	}
+
+	if (!targetUserId) {
+		throw new Error("targetUserId is required");
 	}
 
 	if (!title) {
@@ -38,7 +44,7 @@ export async function issueQuest(
 				title,
 				detail,
 				issuerUserId: userId,
-				targetUserId: userId,
+				targetUserId,
 				isResolved: "false",
 			},
 			tx,

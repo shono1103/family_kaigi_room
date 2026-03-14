@@ -81,6 +81,33 @@ export default async function Home({ searchParams }: HomePageProps) {
 					: ownedMosaics.status,
 			tickets: [],
 		};
+	const questTargetUsers = family?.id
+		? (
+			await prisma.user.findMany({
+				where: {
+					familyId: family.id,
+					id: {
+						not: auth.user.id,
+					},
+				},
+				select: {
+					id: true,
+					email: true,
+					userInfo: {
+						select: {
+							name: true,
+						},
+					},
+				},
+				orderBy: {
+					createdAt: "asc",
+				},
+			})
+		).map((user) => ({
+			id: user.id,
+			label: user.userInfo?.name?.trim() || user.email,
+		}))
+		: [];
 
 	return (
 		<HomeClient
@@ -90,6 +117,7 @@ export default async function Home({ searchParams }: HomePageProps) {
 			familyCurrency={familyCurrency}
 			ownedMosaics={ownedMosaics}
 			ownedTickets={ownedTickets}
+			questTargetUsers={questTargetUsers}
 			initialTab={resolvedSearchParams?.tab}
 		/>
 	);

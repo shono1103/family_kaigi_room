@@ -37,6 +37,8 @@ export async function issueQuest(
 				userId,
 				title,
 				detail,
+				issuerUserId: userId,
+				targetUserId: userId,
 				isResolved: "false",
 			},
 			tx,

@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 export type UpdateQuestInput = Readonly<{
 	title?: string;
 	detail?: string;
+	issuerUserId?: string;
+	targetUserId?: string;
 	isResolved?: string;
 }>;
 
@@ -16,6 +18,8 @@ export async function updateQuest(id: string, input: UpdateQuestInput) {
 	const data: {
 		title?: string;
 		detail?: string;
+		issuerUserId?: string;
+		targetUserId?: string;
 		isResolved?: string;
 	} = {};
 
@@ -33,6 +37,22 @@ export async function updateQuest(id: string, input: UpdateQuestInput) {
 			throw new Error("detail must not be empty");
 		}
 		data.detail = detail;
+	}
+
+	if (undefined !== input.issuerUserId) {
+		const issuerUserId = input.issuerUserId.trim();
+		if (!issuerUserId) {
+			throw new Error("issuerUserId must not be empty");
+		}
+		data.issuerUserId = issuerUserId;
+	}
+
+	if (undefined !== input.targetUserId) {
+		const targetUserId = input.targetUserId.trim();
+		if (!targetUserId) {
+			throw new Error("targetUserId must not be empty");
+		}
+		data.targetUserId = targetUserId;
 	}
 
 	if (undefined !== input.isResolved) {

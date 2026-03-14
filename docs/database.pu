@@ -64,6 +64,8 @@ entity "quests" as quests {
   user_id : UUID <<FK>>
   title : TEXT
   detail : TEXT
+  issuer_user_id: UUID
+  target_user_id: UUID
   is_resolved : TEXT
   created_at : TIMESTAMP(3)
   updated_at : TIMESTAMP(3)

@@ -129,6 +129,9 @@ export default async function FirstLoginPage({
 						<p className="mt-3 text-xs font-semibold text-[#4b4b65]">
 							Symbol Public Key: {symbolAccount.publicKey}
 						</p>
+						<p className="mt-2 text-xs font-semibold text-[#4b4b65]">
+							Symbol Address: {symbolAccount.address}
+						</p>
 						<label className="mt-4 flex items-start gap-2 text-sm font-semibold text-[#2b2b3e]">
 							<input
 								type="checkbox"

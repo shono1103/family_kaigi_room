@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "ほげほげチケットぷらっとふぉーむ",
-	description: "ほげほげチケットぷらっとふぉーむ",
+	title: "家族会議室",
+	description: "家族内で会議を行うアプリ。symbol上の発言権をクエスト実行により取得し、会議で使用する。投じる発言権量が多い案を採用する。",
 };
 
 export default function RootLayout({

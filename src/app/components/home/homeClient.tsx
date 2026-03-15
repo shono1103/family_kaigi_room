@@ -4,12 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Header } from "./header";
 import { Sidebar } from "./sidebar";
-import { FamilyVoicePanel } from "./mainPanel/familyVoicePanel";
 import { FamilyMembersPanel } from "./mainPanel/familyMembersPanel";
 import { FamilyUserPanel } from "./mainPanel/familyUserPanel";
 import { QuestPanel } from "./mainPanel/questPanel";
 import { BaseInfoPanel } from "./mainPanel/baseInfoPanel";
-import type { GetVoiceDetailsResult } from "@/lib/symbol/useCase/voice/read";
 
 type HomeTab = Readonly<{
 	label: string;
@@ -19,7 +17,6 @@ type HomeTab = Readonly<{
 function buildTabs(isFamilyOwner: boolean): HomeTab[] {
 	return [
 		{ label: "クエスト", key: "tickets" },
-		{ label: "Voice", key: "voice" },
 		{ label: "メンバー", key: "members" },
 		...(isFamilyOwner ? [{ label: "家族追加", key: "family-user" }] : []),
 		{ label: "設定", key: "base-info" },
@@ -42,7 +39,7 @@ type HomeClientProps = {
 		name: string;
 		symbolPubKey: string | null;
 	} | null;
-	familyVoice: GetVoiceDetailsResult;
+	userVoiceAmountRaw: string;
 	issuedQuests: Array<{
 		id: string;
 		title: string;
@@ -92,7 +89,7 @@ export function HomeClient({
 	isFamilyOwner,
 	familyName,
 	userInfo,
-	familyVoice,
+	userVoiceAmountRaw,
 	issuedQuests,
 	questTargetUsers,
 	familyMembers,
@@ -131,6 +128,7 @@ export function HomeClient({
 					userEmail={userEmail}
 					userName={userInfo?.name}
 					familyName={familyName}
+					userVoiceAmountRaw={userVoiceAmountRaw}
 				/>
 
 				<div className="mt-3 grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-[280px_minmax(0,1fr)]">
@@ -148,26 +146,20 @@ export function HomeClient({
 								targetUsers={questTargetUsers}
 								targetQuests={targetQuests}
 							/>
-							<FamilyVoicePanel
+							<FamilyMembersPanel
 								isActive={activeIndex === 1}
 								index={1}
-								familyName={familyName}
-								familyVoice={familyVoice}
-							/>
-							<FamilyMembersPanel
-								isActive={activeIndex === 2}
-								index={2}
 								members={familyMembers}
 							/>
 							{isFamilyOwner ? (
 								<FamilyUserPanel
-									isActive={activeIndex === 3}
-									index={3}
+									isActive={activeIndex === 2}
+									index={2}
 								/>
 							) : null}
 							<BaseInfoPanel
-								isActive={activeIndex === (isFamilyOwner ? 4 : 3)}
-								index={isFamilyOwner ? 4 : 3}
+								isActive={activeIndex === (isFamilyOwner ? 3 : 2)}
+								index={isFamilyOwner ? 3 : 2}
 								userEmail={userEmail}
 								userInfo={userInfo}
 							/>

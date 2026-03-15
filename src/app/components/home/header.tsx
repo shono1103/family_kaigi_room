@@ -4,6 +4,7 @@ type HeaderProps = {
 	userEmail: string;
 	userName?: string | null;
 	familyName?: string | null;
+	userVoiceAmountRaw?: string | null;
 };
 
 function getAccountLabel(userName: string | null | undefined, userEmail: string) {
@@ -11,7 +12,12 @@ function getAccountLabel(userName: string | null | undefined, userEmail: string)
 	return source.slice(0, 2).toUpperCase();
 }
 
-export function Header({ userEmail, userName, familyName }: HeaderProps) {
+export function Header({
+	userEmail,
+	userName,
+	familyName,
+	userVoiceAmountRaw,
+}: HeaderProps) {
 	const accountLabel = getAccountLabel(userName, userEmail);
 
 	return (
@@ -25,6 +31,14 @@ export function Header({ userEmail, userName, familyName }: HeaderProps) {
 					</div>
 				</div>
 				<div className="flex items-center justify-end gap-3">
+					<div className="rounded-2xl border border-black/10 bg-[linear-gradient(135deg,#fff8e8,#fff)] px-4 py-2 text-right">
+						<p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[#7a5a12]">
+							Voice
+						</p>
+						<p className="mt-1 text-lg font-extrabold text-[#202033]">
+							{userVoiceAmountRaw ?? "0"}
+						</p>
+					</div>
 					<div className="text-right">
 						<p className="text-sm font-semibold text-[#1e1e2a]">
 							{userName?.trim() || "アカウント"}

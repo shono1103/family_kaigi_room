@@ -2,10 +2,11 @@ import { redirect } from "next/navigation";
 import { HomeClient } from "./components/home/homeClient";
 import { requireAuth } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { readUserFamilyByUserId } from "@/lib/db/user/read";
 import { listFamilyMembers } from "@/lib/useCase/family/listFamilyMembers";
-import { readFamilyVoiceForUser } from "@/lib/useCase/family/readFamilyVoice";
 import { listIssuedQuests } from "@/lib/useCase/quest/listIssuedQuests";
 import { listTargetQuests } from "@/lib/useCase/quest/listTargetQuests";
+import { readUserVoice } from "@/lib/useCase/user/readUserVoice";
 
 type HomePageProps = {
 	searchParams?: Promise<{
@@ -32,10 +33,10 @@ export default async function Home({ searchParams }: HomePageProps) {
 			symbolPubKey: true,
 		},
 	});
-	const { family, familyVoice } = await readFamilyVoiceForUser(
-		auth.user.id,
-		userInfo?.symbolPubKey,
-	);
+	const [{ family }, userVoice] = await Promise.all([
+		readUserFamilyByUserId(auth.user.id),
+		readUserVoice(auth.user.id),
+	]);
 	const familyMembers = (await listFamilyMembers(auth.user.id)).map((member) => ({
 		...member,
 		isCurrentUser: member.id === auth.user.id,
@@ -57,7 +58,7 @@ export default async function Home({ searchParams }: HomePageProps) {
 			isFamilyOwner={user?.isFamilyOwner ?? false}
 			familyName={family?.familyName ?? null}
 			userInfo={userInfo}
-			familyVoice={familyVoice}
+			userVoiceAmountRaw={userVoice.ok ? userVoice.amountRaw : "0"}
 			issuedQuests={issuedQuests}
 			questTargetUsers={questTargetUsers}
 			familyMembers={familyMembers}

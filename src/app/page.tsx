@@ -4,6 +4,7 @@ import { requireAuth } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { readAccountOwnedMosaicsByPublicKey } from "@/lib/symbol/useCase/account/read"
 import { getTicketDetails } from "@/lib/symbol/useCase/ticket/read";
+import { listFamilyMembers } from "@/lib/useCase/listFamilyMembers";
 import { readFamilyCurrencyForUser } from "@/lib/useCase/readFamilyCurrency";
 
 type HomePageProps = {
@@ -116,39 +117,10 @@ export default async function Home({ searchParams }: HomePageProps) {
 			label: user.userInfo?.name?.trim() || user.email,
 		}))
 		: [];
-	const familyMembers = family?.id
-		? (
-			await prisma.user.findMany({
-				where: {
-					familyId: family.id,
-				},
-				select: {
-					id: true,
-					email: true,
-					isFamilyOwner: true,
-					isFirst: true,
-					userInfo: {
-						select: {
-							name: true,
-							familyRole: true,
-						},
-					},
-				},
-				orderBy: [
-					{ isFamilyOwner: "desc" },
-					{ createdAt: "asc" },
-				],
-			})
-		).map((member) => ({
-			id: member.id,
-			name: member.userInfo?.name?.trim() || member.email,
-			email: member.email,
-			familyRole: member.userInfo?.familyRole ?? null,
-			isFamilyOwner: member.isFamilyOwner,
-			isFirst: member.isFirst,
-			isCurrentUser: member.id === auth.user.id,
-		}))
-		: [];
+	const familyMembers = (await listFamilyMembers(auth.user.id)).map((member) => ({
+		...member,
+		isCurrentUser: member.id === auth.user.id,
+	}));
 
 	return (
 		<HomeClient

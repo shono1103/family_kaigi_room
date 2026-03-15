@@ -3,6 +3,7 @@
 type HeaderProps = {
 	userEmail: string;
 	userName?: string | null;
+	familyName?: string | null;
 };
 
 function getAccountLabel(userName: string | null | undefined, userEmail: string) {
@@ -10,7 +11,7 @@ function getAccountLabel(userName: string | null | undefined, userEmail: string)
 	return source.slice(0, 2).toUpperCase();
 }
 
-export function Header({ userEmail, userName }: HeaderProps) {
+export function Header({ userEmail, userName, familyName }: HeaderProps) {
 	const accountLabel = getAccountLabel(userName, userEmail);
 
 	return (
@@ -19,7 +20,7 @@ export function Header({ userEmail, userName }: HeaderProps) {
 				<div className="flex items-center gap-4">
 					<div>
 						<h1 className="mt-1 text-[20px] font-semibold">
-							家族会議室
+							{familyName?.trim() ? `${familyName.trim()}会議室` : "家族会議室"}
 						</h1>
 					</div>
 				</div>

@@ -91,7 +91,11 @@ export function HomeClient({
 	return (
 		<div className="min-h-screen bg-[linear-gradient(180deg,#f4f5f8,#eceff4)] text-[#1e1e2a] lg:h-screen lg:overflow-hidden">
 			<div className="flex min-h-screen flex-col px-3 py-3 md:px-4 md:py-4 lg:h-full lg:min-h-0">
-				<Header userEmail={userEmail} userName={userInfo?.name} />
+				<Header
+					userEmail={userEmail}
+					userName={userInfo?.name}
+					familyName={familyName}
+				/>
 
 				<div className="mt-3 grid gap-3 lg:min-h-0 lg:flex-1 lg:grid-cols-[280px_minmax(0,1fr)]">
 					<Sidebar

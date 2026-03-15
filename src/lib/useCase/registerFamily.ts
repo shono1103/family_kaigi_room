@@ -37,6 +37,10 @@ export async function registerFamily(
 		facade,
 		input.ownerUserSymbolPrivKey,
 	);
+	await assertRegisterFamilyUniqueInputs({
+		ownerUserEmail: input.ownerUserEmail,
+		ownerUserSymbolPubKey: ownerUserSymbolAccount.publicKey.toString(),
+	});
 
 	console.log("[usecase:family:register] prepared accounts", {
 		familyName: input.familyName,
@@ -117,6 +121,37 @@ export async function registerFamily(
 			ownerUserInfo,
 		};
 	});
+}
+
+type AssertRegisterFamilyUniqueInputs = Readonly<{
+	ownerUserEmail: string;
+	ownerUserSymbolPubKey: string;
+}>;
+
+async function assertRegisterFamilyUniqueInputs(
+	input: AssertRegisterFamilyUniqueInputs,
+) {
+	const normalizedEmail = input.ownerUserEmail.trim().toLowerCase();
+	const normalizedOwnerUserSymbolPubKey = input.ownerUserSymbolPubKey.trim().toUpperCase();
+
+	const [existingUser, existingUserInfo] = await Promise.all([
+		prisma.user.findUnique({
+			where: { email: normalizedEmail },
+			select: { id: true },
+		}),
+		prisma.userInfo.findUnique({
+			where: { symbolPubKey: normalizedOwnerUserSymbolPubKey },
+			select: { userId: true },
+		}),
+	]);
+
+	if (existingUser) {
+		throw new Error("ownerUserEmail is already in use");
+	}
+
+	if (existingUserInfo) {
+		throw new Error("ownerUserSymbolPubKey is already in use");
+	}
 }
 
 

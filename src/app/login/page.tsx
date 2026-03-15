@@ -10,6 +10,22 @@ const errorMessageMap: Record<string, string> = {
 		"家族名・メールアドレス・パスワード・Symbol秘密鍵を入力してください。",
 	signup_password_mismatch: "パスワード確認が一致しません。",
 	signup_email_taken: "このメールアドレスは既に使用されています。",
+	signup_symbol_pub_key_taken:
+		"このSymbol公開鍵は既に使用されています。別の秘密鍵を入力してください。",
+	signup_symbol_priv_key_taken:
+		"このSymbol秘密鍵は既に使用されています。別の秘密鍵を入力してください。",
+	signup_currency_mosaic_taken:
+		"家族通貨の識別子が重複しました。もう一度お試しください。",
+	signup_unique_conflict:
+		"一意制約に抵触しました。入力内容を見直して再試行してください。",
+	signup_symbol_invalid:
+		"入力されたSymbol秘密鍵が不正です。内容を確認してください。",
+	signup_symbol_funding_failed:
+		"家族用Symbolアカウントへの初期送金に失敗しました。時間を置いて再試行してください。",
+	signup_symbol_issue_failed:
+		"家族通貨の発行に失敗しました。時間を置いて再試行してください。",
+	signup_session_failed:
+		"家族会議室は作成されましたが、ログインセッションの作成に失敗しました。再度ログインしてください。",
 	signup_failed:
 		"家族会議室の作成に失敗しました。時間を置いて再試行してください。",
 };

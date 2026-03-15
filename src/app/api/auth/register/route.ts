@@ -10,6 +10,63 @@ function redirectToSignup(request: Request, error: string) {
 	return NextResponse.redirect(url, { status: 303 });
 }
 
+function resolveSignupUniqueErrorCode(error: {
+	code?: string;
+	message?: string;
+	meta?: { target?: unknown };
+} | null) {
+	if (error?.message === "ownerUserEmail is already in use") {
+		return "signup_email_taken";
+	}
+	if (error?.message === "ownerUserSymbolPubKey is already in use") {
+		return "signup_symbol_pub_key_taken";
+	}
+	if (error?.code !== "P2002") {
+		return null;
+	}
+
+	const target = Array.isArray(error.meta?.target)
+		? error.meta?.target.filter((value): value is string => typeof value === "string")
+		: [];
+
+	if (target.includes("email")) {
+		return "signup_email_taken";
+	}
+	if (target.includes("symbol_pub_key")) {
+		return "signup_symbol_pub_key_taken";
+	}
+	if (target.includes("symbol_priv_key")) {
+		return "signup_symbol_priv_key_taken";
+	}
+	if (target.includes("currency_mosaic_id")) {
+		return "signup_currency_mosaic_taken";
+	}
+
+	return "signup_unique_conflict";
+}
+
+function resolveSignupFailureErrorCode(error: {
+	message?: string;
+} | null) {
+	const message = error?.message ?? "";
+
+	if (
+		message.includes("PrivateKey") ||
+		message.includes("private key") ||
+		message.includes("invalid private key")
+	) {
+		return "signup_symbol_invalid";
+	}
+	if (message.startsWith("Failed to fund family symbol account:")) {
+		return "signup_symbol_funding_failed";
+	}
+	if (message.startsWith("Failed to issue family currency:")) {
+		return "signup_symbol_issue_failed";
+	}
+
+	return null;
+}
+
 export async function POST(request: Request) {
 	const formData = await request.formData();
 	const familyName = formData.get("familyName");
@@ -53,15 +110,29 @@ export async function POST(request: Request) {
 			ownerUserSymbolPrivKey: normalizedUserSymbolPrivKey,
 		});
 
-		await createSession(result.ownerUser.id);
+		try {
+			await createSession(result.ownerUser.id);
+		} catch (error) {
+			console.error("[auth:register] failed to create session", error);
+			return redirectToSignup(request, "signup_session_failed");
+		}
 
 		return NextResponse.redirect(new URL("/", request.url), {
 			status: 303,
 		});
 	} catch (error) {
-		const knownError = error as { code?: string } | null;
-		if (knownError?.code === "P2002") {
-			return redirectToSignup(request, "signup_email_taken");
+		const knownError = error as {
+			code?: string;
+			message?: string;
+			meta?: { target?: unknown };
+		} | null;
+		const uniqueErrorCode = resolveSignupUniqueErrorCode(knownError);
+		if (uniqueErrorCode) {
+			return redirectToSignup(request, uniqueErrorCode);
+		}
+		const failureErrorCode = resolveSignupFailureErrorCode(knownError);
+		if (failureErrorCode) {
+			return redirectToSignup(request, failureErrorCode);
 		}
 
 		console.error("[auth:register] failed to create family", error);

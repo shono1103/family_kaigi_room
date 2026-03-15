@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Header } from "./header";
 import { Sidebar } from "./sidebar";
 import { FamilyCurrencyPanel } from "./mainPanel/familyCurrencyPanel";
+import { FamilyMembersPanel } from "./mainPanel/familyMembersPanel";
 import { FamilyUserPanel } from "./mainPanel/familyUserPanel";
 import { QuestPanel } from "./mainPanel/questPanel";
 import { BaseInfoPanel } from "./mainPanel/baseInfoPanel";
@@ -21,6 +22,7 @@ function buildTabs(isFamilyOwner: boolean): HomeTab[] {
 	return [
 		{ label: "クエスト", key: "tickets" },
 		{ label: "スコア", key: "balance" },
+		{ label: "メンバー", key: "members" },
 		...(isFamilyOwner ? [{ label: "家族追加", key: "family-user" }] : []),
 		{ label: "設定", key: "base-info" },
 	];
@@ -49,6 +51,15 @@ type HomeClientProps = {
 		id: string;
 		label: string;
 	}>;
+	familyMembers: Array<{
+		id: string;
+		name: string;
+		email: string;
+		familyRole: string | null;
+		isFamilyOwner: boolean;
+		isFirst: boolean;
+		isCurrentUser: boolean;
+	}>;
 	initialTab?: string;
 };
 
@@ -61,6 +72,7 @@ export function HomeClient({
 	ownedMosaics: _ownedMosaics,
 	ownedTickets: _ownedTickets,
 	questTargetUsers,
+	familyMembers,
 	initialTab,
 }: HomeClientProps) {
 	const router = useRouter();
@@ -116,15 +128,20 @@ export function HomeClient({
 								familyName={familyName}
 								familyCurrency={familyCurrency}
 							/>
+							<FamilyMembersPanel
+								isActive={activeIndex === 2}
+								index={2}
+								members={familyMembers}
+							/>
 							{isFamilyOwner ? (
 								<FamilyUserPanel
-									isActive={activeIndex === 2}
-									index={2}
+									isActive={activeIndex === 3}
+									index={3}
 								/>
 							) : null}
 							<BaseInfoPanel
-								isActive={activeIndex === (isFamilyOwner ? 3 : 2)}
-								index={isFamilyOwner ? 3 : 2}
+								isActive={activeIndex === (isFamilyOwner ? 4 : 3)}
+								index={isFamilyOwner ? 4 : 3}
 								userEmail={userEmail}
 								userInfo={userInfo}
 							/>

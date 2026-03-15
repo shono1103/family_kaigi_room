@@ -9,7 +9,7 @@ const createUserInfoMock = vi.fn();
 const createSymbolAccountMock = vi.fn();
 const generateAccountFromPrivateKeyMock = vi.fn();
 const sendXymOnChainMock = vi.fn();
-const issueFamilyCurrencyOnChainMock = vi.fn();
+const issueFamilyVoiceOnChainMock = vi.fn();
 
 vi.mock("../../../../src/lib/prisma", () => ({
 	prisma: {
@@ -52,8 +52,8 @@ vi.mock("../../../../src/lib/symbol/useCase/xymBalance/send", () => ({
 	sendXymOnChain: sendXymOnChainMock,
 }));
 
-vi.mock("../../../../src/lib/symbol/useCase/currency/create", () => ({
-	issueFamilyCurrencyOnChain: issueFamilyCurrencyOnChainMock,
+vi.mock("../../../../src/lib/symbol/useCase/voice/create", () => ({
+	issueFamilyVoiceOnChain: issueFamilyVoiceOnChainMock,
 }));
 
 describe("scripts/lib/initialUser", () => {
@@ -99,7 +99,7 @@ describe("scripts/lib/initialUser", () => {
 			recipientAddress: "addr",
 			amountRaw: "100000000",
 		});
-		issueFamilyCurrencyOnChainMock.mockResolvedValueOnce({
+		issueFamilyVoiceOnChainMock.mockResolvedValueOnce({
 			ok: true,
 			mosaicIdHex: "0x0123456789ABCDEF",
 		});
@@ -118,11 +118,11 @@ describe("scripts/lib/initialUser", () => {
 
 		expect(hashPasswordMock).toHaveBeenCalledWith("admin");
 		expect(sendXymOnChainMock).toHaveBeenCalled();
-		expect(issueFamilyCurrencyOnChainMock).toHaveBeenCalled();
+		expect(issueFamilyVoiceOnChainMock).toHaveBeenCalled();
 		expect(createFamilyMock).toHaveBeenCalledWith(
 			{
 				familyName: "Initial Admin Family",
-				currencyMosaicId: "0x0123456789ABCDEF",
+				familyVoiceMosaicId: "0x0123456789ABCDEF",
 				symbolPubKey: "family-public-key",
 				symbolPrivKey: "family-private-key",
 			},
@@ -180,7 +180,7 @@ describe("scripts/lib/initialUser", () => {
 			recipientAddress: "addr",
 			amountRaw: "100000000",
 		});
-		issueFamilyCurrencyOnChainMock.mockResolvedValueOnce({
+		issueFamilyVoiceOnChainMock.mockResolvedValueOnce({
 			ok: true,
 			mosaicIdHex: "0x0123456789ABCDEF",
 		});

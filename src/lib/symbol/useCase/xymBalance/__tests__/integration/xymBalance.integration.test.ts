@@ -35,7 +35,7 @@ describe("symbol xymBalance integration", () => {
 		expect(result.ok).toBe(true);
 		expect(result.status).toBe("ok");
 		expect(result.publicKey).toBe(issuerPublicKey);
-		expect(result.balance.currencyMosaicId).toMatch(/^[0-9A-F]{16}$/);
+		expect(result.balance.networkMosaicId).toMatch(/^[0-9A-F]{16}$/);
 		expect(typeof result.balance.divisibility).toBe("number");
 		expect(result.balance.amountRaw).toMatch(/^\d+$/);
 		expect(typeof result.balance.amountDisplay).toBe("string");

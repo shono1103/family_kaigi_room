@@ -6,6 +6,7 @@ export type UpdateUserInput = Readonly<{
 	passwordHash?: string;
 	familyId?: string;
 	isFamilyOwner?: boolean;
+	isFirst?: boolean;
 	role?: UserRole;
 }>;
 
@@ -21,6 +22,7 @@ export async function updateUser(id: string, input: UpdateUserInput) {
 		passwordHash?: string;
 		familyId?: string;
 		isFamilyOwner?: boolean;
+		isFirst?: boolean;
 		role?: UserRole;
 	} = {};
 
@@ -50,6 +52,10 @@ export async function updateUser(id: string, input: UpdateUserInput) {
 
 	if (undefined !== input.isFamilyOwner) {
 		data.isFamilyOwner = input.isFamilyOwner;
+	}
+
+	if (undefined !== input.isFirst) {
+		data.isFirst = input.isFirst;
 	}
 
 	if (undefined !== input.role) {

@@ -7,6 +7,7 @@ export type CreateUserInput = Readonly<{
 	passwordHash: string;
 	familyId: string;
 	isFamilyOwner?: boolean;
+	isFirst?: boolean;
 	role?: UserRole;
 }>;
 
@@ -38,6 +39,7 @@ export async function createUser(
 			passwordHash,
 			familyId,
 			isFamilyOwner: input.isFamilyOwner ?? false,
+			isFirst: input.isFirst ?? false,
 			role: input.role ?? UserRole.normal,
 		},
 	});

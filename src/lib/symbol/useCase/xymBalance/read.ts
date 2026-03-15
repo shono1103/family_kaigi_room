@@ -9,7 +9,7 @@ import {
 
 const SYMBOL_REQUEST_TIMEOUT_MS = 5000;
 const DEFAULT_XYM_DIVISIBILITY = 6;
-const FALLBACK_CURRENCY_MOSAIC_ID: Record<"mainnet" | "testnet", string> = {
+const FALLBACK_NETWORK_MOSAIC_ID: Record<"mainnet" | "testnet", string> = {
 	mainnet: "6BED913FA20223F8",
 	testnet: "72C0212E67A08BCE",
 };
@@ -33,7 +33,7 @@ type SymbolNetworkCurrencyResponse = {
 	};
 };
 
-type CurrencyInfo = {
+type NetworkMosaicInfo = {
 	mosaicId: string;
 	divisibility: number;
 };
@@ -46,7 +46,7 @@ export type ReadXymBalanceResult =
 		balance: {
 			amountRaw: string;
 			amountDisplay: string;
-			currencyMosaicId: string;
+			networkMosaicId: string;
 			divisibility: number;
 		};
 	}
@@ -82,21 +82,21 @@ const formatAmount = (rawAmount: bigint, divisibility: number) => {
 	return `${whole.toString()}.${trimmedFraction}`;
 };
 
-const getFallbackCurrencyInfo = (): CurrencyInfo => {
+const getFallbackNetworkMosaicInfo = (): NetworkMosaicInfo => {
 	const network = process.env.SYMBOL_NETWORK === "mainnet" ? "mainnet" : "testnet";
 	return {
-		mosaicId: FALLBACK_CURRENCY_MOSAIC_ID[network],
+		mosaicId: FALLBACK_NETWORK_MOSAIC_ID[network],
 		divisibility: DEFAULT_XYM_DIVISIBILITY,
 	};
 };
 
-const fetchCurrencyInfo = async (): Promise<CurrencyInfo> => {
+const fetchNetworkMosaicInfo = async (): Promise<NetworkMosaicInfo> => {
 	try {
 		const response = await fetchWithTimeout(
 			`${nodeUrl.replace(/\/$/, "")}/network/currency`
 		);
 		if (!response.ok) {
-			return getFallbackCurrencyInfo();
+			return getFallbackNetworkMosaicInfo();
 		}
 
 		const data = (await response.json()) as SymbolNetworkCurrencyResponse;
@@ -111,11 +111,11 @@ const fetchCurrencyInfo = async (): Promise<CurrencyInfo> => {
 					: DEFAULT_XYM_DIVISIBILITY;
 
 		if (!mosaicId) {
-			return getFallbackCurrencyInfo();
+			return getFallbackNetworkMosaicInfo();
 		}
 		return { mosaicId, divisibility };
 	} catch {
-		return getFallbackCurrencyInfo();
+		return getFallbackNetworkMosaicInfo();
 	}
 };
 
@@ -162,14 +162,14 @@ export const readXymBalanceByPublicKey = async (
 
 		const accountData = (await accountResponse.json()) as SymbolAccountResponse;
 		const mosaics = accountData.account?.mosaics ?? [];
-		const currencyInfo = await fetchCurrencyInfo();
+		const networkMosaicInfo = await fetchNetworkMosaicInfo();
 		const targetMosaic = mosaics.find(
-			(mosaic) => normalizeMosaicId(mosaic.id) === currencyInfo.mosaicId,
+			(mosaic) => normalizeMosaicId(mosaic.id) === networkMosaicInfo.mosaicId,
 		);
 		const amountRaw = targetMosaic?.amount ?? "0";
 		const amountDisplay = formatAmount(
 			BigInt(amountRaw),
-			currencyInfo.divisibility,
+			networkMosaicInfo.divisibility,
 		);
 
 		return {
@@ -179,8 +179,8 @@ export const readXymBalanceByPublicKey = async (
 			balance: {
 				amountRaw,
 				amountDisplay,
-				currencyMosaicId: currencyInfo.mosaicId,
-				divisibility: currencyInfo.divisibility,
+				networkMosaicId: networkMosaicInfo.mosaicId,
+				divisibility: networkMosaicInfo.divisibility,
 			},
 		};
 	} catch (error) {

@@ -10,7 +10,7 @@ export function SignupPendingStatus() {
 				</p>
 			</div>
 			<p className="mt-3 text-sm leading-6 text-[#4b4b65]">
-				family作成、初期ユーザー登録、家族通貨発行を順番に処理しています。
+				family作成、初期ユーザー登録、familyVoice 発行を順番に処理しています。
 				そのままお待ちください。
 			</p>
 		</div>

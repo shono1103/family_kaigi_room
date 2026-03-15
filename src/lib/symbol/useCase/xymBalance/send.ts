@@ -18,7 +18,7 @@ import { pollTransactionState } from "../../utils/node-client";
 
 const SYMBOL_REQUEST_TIMEOUT_MS = 5000;
 const DEFAULT_XYM_DIVISIBILITY = 6;
-const FALLBACK_CURRENCY_MOSAIC_ID: Record<"mainnet" | "testnet", string> = {
+const FALLBACK_NETWORK_MOSAIC_ID: Record<"mainnet" | "testnet", string> = {
 	mainnet: "6BED913FA20223F8",
 	testnet: "72C0212E67A08BCE",
 };
@@ -33,7 +33,7 @@ type SymbolNetworkCurrencyResponse = {
 	};
 };
 
-type CurrencyInfo = {
+type NetworkMosaicInfo = {
 	mosaicId: string;
 	divisibility: number;
 };
@@ -67,21 +67,21 @@ const normalizeMosaicId = (mosaicId: string | undefined | null) => {
 	return /^[0-9A-F]{16}$/.test(normalized) ? normalized : null;
 };
 
-const getFallbackCurrencyInfo = (): CurrencyInfo => {
+const getFallbackNetworkMosaicInfo = (): NetworkMosaicInfo => {
 	const network = process.env.SYMBOL_NETWORK === "mainnet" ? "mainnet" : "testnet";
 	return {
-		mosaicId: FALLBACK_CURRENCY_MOSAIC_ID[network],
+		mosaicId: FALLBACK_NETWORK_MOSAIC_ID[network],
 		divisibility: DEFAULT_XYM_DIVISIBILITY,
 	};
 };
 
-const fetchCurrencyInfo = async (): Promise<CurrencyInfo> => {
+const fetchNetworkMosaicInfo = async (): Promise<NetworkMosaicInfo> => {
 	try {
 		const response = await fetchWithTimeout(
 			`${nodeUrl.replace(/\/$/, "")}/network/currency`
 		);
 		if (!response.ok) {
-			return getFallbackCurrencyInfo();
+			return getFallbackNetworkMosaicInfo();
 		}
 
 		const data = (await response.json()) as SymbolNetworkCurrencyResponse;
@@ -96,11 +96,11 @@ const fetchCurrencyInfo = async (): Promise<CurrencyInfo> => {
 					: DEFAULT_XYM_DIVISIBILITY;
 
 		if (!mosaicId) {
-			return getFallbackCurrencyInfo();
+			return getFallbackNetworkMosaicInfo();
 		}
 		return { mosaicId, divisibility };
 	} catch {
-		return getFallbackCurrencyInfo();
+		return getFallbackNetworkMosaicInfo();
 	}
 };
 
@@ -147,8 +147,8 @@ export const sendXymOnChain = async (
 			facade,
 			normalizedRecipientPublicKey,
 		);
-		const currencyInfo = await fetchCurrencyInfo();
-		const currencyMosaicId = BigInt(`0x${currencyInfo.mosaicId}`);
+		const networkMosaicInfo = await fetchNetworkMosaicInfo();
+		const networkMosaicId = BigInt(`0x${networkMosaicInfo.mosaicId}`);
 
 		const transactionDescriptor: Record<string, unknown> = {
 			type: "transfer_transaction_v1",
@@ -156,7 +156,7 @@ export const sendXymOnChain = async (
 			fee: 0n,
 			deadline: facade.now().addHours(deadlineHours).timestamp,
 			recipientAddress: recipientAccount.address,
-			mosaics: [{ mosaicId: currencyMosaicId, amount: amountRaw }],
+			mosaics: [{ mosaicId: networkMosaicId, amount: amountRaw }],
 		};
 		if (message) {
 			transactionDescriptor.message = message;

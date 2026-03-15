@@ -21,7 +21,7 @@ entity "families" as families {
 	family_name: TEXT <<NOT NULL>>
 	symbol_pub_key: TEXT? <<UNIQUE>>
 	symbol_priv_key: TEXT? <<UNIQUE>>
-	currency_mosaic_id: TEXT <<UNIQUE>>
+	family_voice_mosaic_id: TEXT <<UNIQUE>>
 	created_at : TIMESTAMP(3)
 	
 }
@@ -33,6 +33,7 @@ entity "users" as users {
   password_hash : TEXT
   family_id: UUID<<FK>>
   is_family_owner : BOOLEAN
+  is_first : BOOLEAN
   role: UserRole
   created_at : TIMESTAMP(3)
   updated_at : TIMESTAMP(3)
@@ -58,18 +59,32 @@ entity "user_infos" as user_infos {
   updated_at : TIMESTAMP(3)
 }
 
-users ||--o{ sessions : user_id
-families ||--o{ users : family_id
-users ||--o| user_infos : user_id
-users }o--|| UserRole : role
-user_infos }o--|| FamilyRole : family_role
+entity "quests" as quests {
+  id : UUID <<PK>>
+  --
+  user_id : UUID <<FK>>
+  title : TEXT
+  detail : TEXT
+  issuer_user_id: UUID
+  target_user_id: UUID
+  is_resolved : TEXT
+  created_at : TIMESTAMP(3)
+  updated_at : TIMESTAMP(3)
+}
+
+users "1" -- "0..*" sessions : user_id
+families "1" -- "0..*" users : family_id
+users "1" -- "0..1" user_infos : user_id
+users "1" -- "0..*" quests : user_id
+users "0..*" -- "1" UserRole : role
+user_infos "0..*" -- "1" FamilyRole : family_role
 
 note right of families
   PK:
   - id
 
   UNIQUE:
-  - currency_mosaic_id
+  - family_voice_mosaic_id
 
   REQUIRED:
   - family_name
@@ -97,6 +112,8 @@ note right of users
   - is_family_owner is assigned
     only to the account created
     with family creation
+  - is_first indicates whether
+    initial onboarding is pending
   - role is application-wide role
   - one admin user is created
     on initial app startup
@@ -123,6 +140,19 @@ note right of user_infos
 
   RULE:
   - family_role is family-local role
+end note
+
+note right of quests
+  UNIQUE:
+  - mosaic_id
+  - resolved_mosaic_id
+
+  INDEX:
+  - user_id
+
+  FK:
+  - user_id -> users.id
+    ON DELETE CASCADE
 end note
 
 @enduml

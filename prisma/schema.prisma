@@ -36,6 +36,7 @@ model User {
   passwordHash  String    @map("password_hash")
   familyId      String    @map("family_id") @db.Uuid
   isFamilyOwner Boolean   @default(false) @map("is_family_owner")
+  isFirst       Boolean   @default(false) @map("is_first")
   role          UserRole  @default(normal)
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")

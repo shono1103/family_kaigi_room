@@ -51,6 +51,7 @@ export async function addUser(input: AddUserInput): Promise<AddUserResult> {
 				passwordHash,
 				familyId: requester.familyId,
 				isFamilyOwner: false,
+				isFirst: true,
 				role: UserRole.normal,
 			},
 			tx,

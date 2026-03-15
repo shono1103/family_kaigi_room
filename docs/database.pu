@@ -33,6 +33,7 @@ entity "users" as users {
   password_hash : TEXT
   family_id: UUID<<FK>>
   is_family_owner : BOOLEAN
+  is_first : BOOLEAN
   role: UserRole
   created_at : TIMESTAMP(3)
   updated_at : TIMESTAMP(3)
@@ -111,6 +112,8 @@ note right of users
   - is_family_owner is assigned
     only to the account created
     with family creation
+  - is_first indicates whether
+    initial onboarding is pending
   - role is application-wide role
   - one admin user is created
     on initial app startup

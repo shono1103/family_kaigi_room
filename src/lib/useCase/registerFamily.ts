@@ -137,6 +137,7 @@ async function registerFamilyOwnerUser(
 			passwordHash: input.passwordHash,
 			familyId: input.familyId,
 			isFamilyOwner: true,
+			isFirst: false,
 			role: UserRole.normal,
 		},
 		tx,

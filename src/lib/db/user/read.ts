@@ -44,7 +44,7 @@ export async function readUserFamilyByUserId(userId: string) {
 				select: {
 					familyName: true,
 					symbolPubKey: true,
-					currencyMosaicId: true,
+					familyVoiceMosaicId: true,
 				},
 			},
 		},

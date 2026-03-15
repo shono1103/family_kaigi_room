@@ -4,14 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Header } from "./header";
 import { Sidebar } from "./sidebar";
-import { FamilyCurrencyPanel } from "./mainPanel/familyCurrencyPanel";
+import { FamilyVoicePanel } from "./mainPanel/familyVoicePanel";
 import { FamilyMembersPanel } from "./mainPanel/familyMembersPanel";
 import { FamilyUserPanel } from "./mainPanel/familyUserPanel";
 import { QuestPanel } from "./mainPanel/questPanel";
 import { BaseInfoPanel } from "./mainPanel/baseInfoPanel";
 import type { OwnedTicketsResult } from "@/lib/symbol/useCase/ticket/result";
 import type { ReadAccountOwnedMosaicsResult } from "@/lib/symbol/useCase/account/read";
-import type { GetCurrencyDetailsResult } from "@/lib/symbol/useCase/currency/read";
+import type { GetVoiceDetailsResult } from "@/lib/symbol/useCase/voice/read";
 
 type HomeTab = Readonly<{
 	label: string;
@@ -21,7 +21,7 @@ type HomeTab = Readonly<{
 function buildTabs(isFamilyOwner: boolean): HomeTab[] {
 	return [
 		{ label: "クエスト", key: "tickets" },
-		{ label: "スコア", key: "balance" },
+		{ label: "Voice", key: "voice" },
 		{ label: "メンバー", key: "members" },
 		...(isFamilyOwner ? [{ label: "家族追加", key: "family-user" }] : []),
 		{ label: "設定", key: "base-info" },
@@ -44,7 +44,7 @@ type HomeClientProps = {
 		name: string;
 		symbolPubKey: string | null;
 	} | null;
-	familyCurrency: GetCurrencyDetailsResult;
+	familyVoice: GetVoiceDetailsResult;
 	ownedMosaics?: ReadAccountOwnedMosaicsResult;
 	ownedTickets: OwnedTicketsResult;
 	issuedQuests: Array<{
@@ -96,7 +96,7 @@ export function HomeClient({
 	isFamilyOwner,
 	familyName,
 	userInfo,
-	familyCurrency,
+	familyVoice,
 	ownedMosaics: _ownedMosaics,
 	ownedTickets: _ownedTickets,
 	issuedQuests,
@@ -154,11 +154,11 @@ export function HomeClient({
 								targetUsers={questTargetUsers}
 								targetQuests={targetQuests}
 							/>
-							<FamilyCurrencyPanel
+							<FamilyVoicePanel
 								isActive={activeIndex === 1}
 								index={1}
 								familyName={familyName}
-								familyCurrency={familyCurrency}
+								familyVoice={familyVoice}
 							/>
 							<FamilyMembersPanel
 								isActive={activeIndex === 2}

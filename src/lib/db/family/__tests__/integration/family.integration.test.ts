@@ -1,6 +1,9 @@
 import { createFamily } from "@/lib/db/family/create";
 import { deleteFamily } from "@/lib/db/family/delete";
-import { readFamilyByCurrencyMosaicId, readFamilyById } from "@/lib/db/family/read";
+import {
+	readFamilyByFamilyVoiceMosaicId,
+	readFamilyById,
+} from "@/lib/db/family/read";
 import { updateFamily } from "@/lib/db/family/update";
 import { ensureDbIntegrationEnv } from "@/lib/testing/integration/db/env";
 import {
@@ -12,7 +15,7 @@ import { DB_INTEGRATION_TIMEOUT_MS } from "@/lib/testing/integration/db/timeout"
 describe("db family CRUD integration", () => {
 	const createdFamilyIds: string[] = [];
 	let familyId: string | null = null;
-	let currencyMosaicId: string | null = null;
+	let familyVoiceMosaicId: string | null = null;
 
 	const requireFamilyId = () => {
 		expect(familyId).not.toBeNull();
@@ -37,29 +40,32 @@ describe("db family CRUD integration", () => {
 
 		createdFamilyIds.push(created.id);
 		familyId = created.id;
-		currencyMosaicId = created.currencyMosaicId;
+		familyVoiceMosaicId = created.familyVoiceMosaicId;
 
 		expect(created.familyName).toBe(input.familyName);
-		expect(created.currencyMosaicId).toBe(input.currencyMosaicId.toUpperCase());
+		expect(created.familyVoiceMosaicId).toBe(
+			input.familyVoiceMosaicId.toUpperCase(),
+		);
 		expect(created.symbolPubKey).toBe(input.symbolPubKey?.toUpperCase());
 		expect(created.symbolPrivKey).toBe(input.symbolPrivKey?.toUpperCase());
 		expect(created.createdAt).toBeInstanceOf(Date);
 	}, DB_INTEGRATION_TIMEOUT_MS);
 
-	test("read: id と currencyMosaicId で family を取得できる", async () => {
+	test("read: id と familyVoiceMosaicId で family を取得できる", async () => {
 		const resolvedFamilyId = requireFamilyId();
-		expect(currencyMosaicId).not.toBeNull();
-		if (!currencyMosaicId) {
-			throw new Error("currencyMosaicId is null. create test must run first.");
+		expect(familyVoiceMosaicId).not.toBeNull();
+		if (!familyVoiceMosaicId) {
+			throw new Error("familyVoiceMosaicId is null. create test must run first.");
 		}
 
 		const byId = await readFamilyById(resolvedFamilyId);
-		const byCurrencyMosaicId = await readFamilyByCurrencyMosaicId(currencyMosaicId);
+		const byFamilyVoiceMosaicId =
+			await readFamilyByFamilyVoiceMosaicId(familyVoiceMosaicId);
 
 		expect(byId).not.toBeNull();
-		expect(byCurrencyMosaicId).not.toBeNull();
+		expect(byFamilyVoiceMosaicId).not.toBeNull();
 		expect(byId?.id).toBe(resolvedFamilyId);
-		expect(byCurrencyMosaicId?.id).toBe(resolvedFamilyId);
+		expect(byFamilyVoiceMosaicId?.id).toBe(resolvedFamilyId);
 	}, DB_INTEGRATION_TIMEOUT_MS);
 
 	test("update: family の値を更新できる", async () => {
@@ -71,7 +77,7 @@ describe("db family CRUD integration", () => {
 
 		expect(updated.id).toBe(resolvedFamilyId);
 		expect(updated.familyName).toBe(`updated-family-${nextSuffix}`);
-		expect(updated.currencyMosaicId).toBe(currencyMosaicId);
+		expect(updated.familyVoiceMosaicId).toBe(familyVoiceMosaicId);
 	}, DB_INTEGRATION_TIMEOUT_MS);
 
 	test("delete: family を削除できる", async () => {

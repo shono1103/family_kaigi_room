@@ -8,7 +8,7 @@ import { announceTransaction, getMosaicWithMetadata, pollTransactionState } from
 import { aggregateType, deadlineHours, facade, feeMultiplier, nodeUrl } from '../../config';
 import { normalizeMosaicIdHex } from '../../utils/normalizers';
 
-type UpdateCurrencySupplyResult =
+type UpdateVoiceSupplyResult =
 	| Readonly<{
 			ok: true;
 			status: 'ok';
@@ -84,11 +84,11 @@ const extractCurrentSupply = (mosaic: Record<string, unknown>): bigint | null =>
 	return null;
 };
 
-export const updateFamilyCurrencySupplyOnChain = async (
+export const updateFamilyVoiceSupplyOnChain = async (
 	privateKey: string,
 	mosaicIdHex: string,
 	nextSupply: bigint | number | string
-): Promise<UpdateCurrencySupplyResult> => {
+): Promise<UpdateVoiceSupplyResult> => {
 	let normalizedMosaicIdHex: string;
 	try {
 		normalizedMosaicIdHex = normalizeMosaicIdHex(mosaicIdHex);
@@ -229,4 +229,4 @@ export const updateFamilyCurrencySupplyOnChain = async (
 	}
 };
 
-export type { UpdateCurrencySupplyResult };
+export type { UpdateVoiceSupplyResult };

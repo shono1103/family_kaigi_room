@@ -21,7 +21,7 @@ entity "families" as families {
 	family_name: TEXT <<NOT NULL>>
 	symbol_pub_key: TEXT? <<UNIQUE>>
 	symbol_priv_key: TEXT? <<UNIQUE>>
-	currency_mosaic_id: TEXT <<UNIQUE>>
+	family_voice_mosaic_id: TEXT <<UNIQUE>>
 	created_at : TIMESTAMP(3)
 	
 }
@@ -84,7 +84,7 @@ note right of families
   - id
 
   UNIQUE:
-  - currency_mosaic_id
+  - family_voice_mosaic_id
 
   REQUIRED:
   - family_name

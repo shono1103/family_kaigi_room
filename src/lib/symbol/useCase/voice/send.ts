@@ -8,7 +8,7 @@ import {
 	normalizeSymbolPublicKey,
 } from '../../utils/normalizers';
 
-export type SendCurrencyOnChainResult =
+export type SendVoiceOnChainResult =
 	| Readonly<{
 			ok: true;
 			status: 'ok';
@@ -31,13 +31,13 @@ export type SendCurrencyOnChainResult =
 			message: string;
 	  }>;
 
-export const sendCurrencyOnChain = async (
+export const sendVoiceOnChain = async (
 	senderPrivateKey: string,
 	recipientPublicKey: string,
 	mosaicIdHex: string,
 	amountRaw: bigint,
 	message = '',
-): Promise<SendCurrencyOnChainResult> => {
+): Promise<SendVoiceOnChainResult> => {
 	if (amountRaw <= 0n) {
 		return {
 			ok: false,

@@ -2,42 +2,42 @@ import { getMosaicWithMetadata, type GetMosaicWithMetadataResult } from '../../u
 import { normalizeMosaicIdHex, normalizeSymbolPublicKey } from '../../utils/normalizers';
 import { readAccountOwnedMosaicsByPublicKey } from '../account/read';
 import { nodeUrl } from '../../config';
-import type { CurrencyMetadata } from './schema';
+import type { VoiceMetadata } from './schema';
 
-type CurrencyOwnershipStatus = 'owned' | 'not_owned';
+type VoiceOwnershipStatus = 'owned' | 'not_owned';
 
-type GetCurrencyDetailsSuccess = Readonly<{
+type GetVoiceDetailsSuccess = Readonly<{
 	ok: true;
 	status: 'ok';
 	publicKey: string;
 	mosaicIdHex: string;
-	ownershipStatus: CurrencyOwnershipStatus;
+	ownershipStatus: VoiceOwnershipStatus;
 	amountRaw: string;
 	mosaic: GetMosaicWithMetadataResult['mosaic'];
 	metadataEntries: GetMosaicWithMetadataResult['metadataEntries'];
-	currencyMetadata: CurrencyMetadata;
+	voiceMetadata: VoiceMetadata;
 }>;
 
-type GetCurrencyDetailsFailure = Readonly<{
+type GetVoiceDetailsFailure = Readonly<{
 	ok: false;
 	status:
 		| 'invalid_public_key'
 		| 'invalid_mosaic_id'
 		| 'account_not_found'
-		| 'invalid_currency_metadata'
+		| 'invalid_voice_metadata'
 		| 'node_unreachable'
 		| 'read_failed';
 	message: string;
 }>;
 
-export type GetCurrencyDetailsResult =
-	| GetCurrencyDetailsSuccess
-	| GetCurrencyDetailsFailure;
+export type GetVoiceDetailsResult =
+	| GetVoiceDetailsSuccess
+	| GetVoiceDetailsFailure;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
 	'object' === typeof value && null !== value;
 
-const isCurrencyMetadata = (value: unknown): value is CurrencyMetadata => {
+const isVoiceMetadata = (value: unknown): value is VoiceMetadata => {
 	if (!isRecord(value)) {
 		return false;
 	}
@@ -71,9 +71,9 @@ const parseJsonIfPossible = (text: string): unknown => {
 	}
 };
 
-const extractCurrencyMetadata = (
+const extractVoiceMetadata = (
 	source: GetMosaicWithMetadataResult
-): CurrencyMetadata => {
+): VoiceMetadata => {
 	for (const entry of source.metadataEntries) {
 		if (!isRecord(entry) || 'string' !== typeof entry.value) {
 			continue;
@@ -87,19 +87,19 @@ const extractCurrencyMetadata = (
 
 		for (const candidate of candidates) {
 			const parsed = parseJsonIfPossible(candidate);
-			if (isCurrencyMetadata(parsed)) {
+			if (isVoiceMetadata(parsed)) {
 				return parsed;
 			}
 		}
 	}
 
-	throw new Error('Currency metadata validation failed: required keys (name, detail) were not found.');
+	throw new Error('Voice metadata validation failed: required keys (name, detail) were not found.');
 };
 
-export const getCurrencyDetailsByPublicKey = async (
+export const getVoiceDetailsByPublicKey = async (
 	rawPublicKey: string,
 	rawMosaicIdHex: string
-): Promise<GetCurrencyDetailsResult> => {
+): Promise<GetVoiceDetailsResult> => {
 	const publicKey = normalizeSymbolPublicKey(rawPublicKey);
 	if (!publicKey) {
 		return {
@@ -141,7 +141,7 @@ export const getCurrencyDetailsByPublicKey = async (
 		}
 
 		const mosaicWithMetadata = await getMosaicWithMetadata(nodeUrl, mosaicIdHex);
-		const currencyMetadata = extractCurrencyMetadata(mosaicWithMetadata);
+		const voiceMetadata = extractVoiceMetadata(mosaicWithMetadata);
 		const ownedMosaic = ownedMosaicsResult.mosaics.find(
 			(mosaic) => mosaic.mosaicIdHex === mosaicIdHex
 		);
@@ -155,12 +155,12 @@ export const getCurrencyDetailsByPublicKey = async (
 			amountRaw: ownedMosaic?.amountRaw ?? '0',
 			mosaic: mosaicWithMetadata.mosaic,
 			metadataEntries: mosaicWithMetadata.metadataEntries,
-			currencyMetadata
+			voiceMetadata
 		};
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
-		const status = message.includes('Currency metadata validation failed')
-			? 'invalid_currency_metadata'
+		const status = message.includes('Voice metadata validation failed')
+			? 'invalid_voice_metadata'
 			: message.includes('mainnet-node.invalid') || message.includes('testnet-node.invalid')
 				? 'node_unreachable'
 				: 'read_failed';

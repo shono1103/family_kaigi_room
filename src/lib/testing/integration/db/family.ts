@@ -12,7 +12,7 @@ export function createIntegrationFamilyInput(
 
 	return {
 		familyName: `integration-family-${suffix}`,
-		currencyMosaicId: mosaicHex,
+		familyVoiceMosaicId: mosaicHex,
 		symbolPubKey: symbolHex,
 		symbolPrivKey: privateHex,
 		...overrides,

@@ -38,8 +38,8 @@ function resolveSignupUniqueErrorCode(error: {
 	if (target.includes("symbol_priv_key")) {
 		return "signup_symbol_priv_key_taken";
 	}
-	if (target.includes("currency_mosaic_id")) {
-		return "signup_currency_mosaic_taken";
+	if (target.includes("family_voice_mosaic_id")) {
+		return "signup_family_voice_mosaic_taken";
 	}
 
 	return "signup_unique_conflict";
@@ -60,7 +60,7 @@ function resolveSignupFailureErrorCode(error: {
 	if (message.startsWith("Failed to fund family symbol account:")) {
 		return "signup_symbol_funding_failed";
 	}
-	if (message.startsWith("Failed to issue family currency:")) {
+	if (message.startsWith("Failed to issue family voice:")) {
 		return "signup_symbol_issue_failed";
 	}
 

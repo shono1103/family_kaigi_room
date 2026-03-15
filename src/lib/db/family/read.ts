@@ -14,16 +14,16 @@ export async function readFamilyById(id: string) {
 	});
 }
 
-export async function readFamilyByCurrencyMosaicId(currencyMosaicId: string) {
-	const normalizedCurrencyMosaicId = currencyMosaicId.trim();
+export async function readFamilyByFamilyVoiceMosaicId(familyVoiceMosaicId: string) {
+	const normalizedFamilyVoiceMosaicId = familyVoiceMosaicId.trim();
 
-	if (!normalizedCurrencyMosaicId) {
-		throw new Error("currencyMosaicId is required");
+	if (!normalizedFamilyVoiceMosaicId) {
+		throw new Error("familyVoiceMosaicId is required");
 	}
 
 	return prisma.family.findUnique({
 		where: {
-			currencyMosaicId: normalizedCurrencyMosaicId,
+			familyVoiceMosaicId: normalizedFamilyVoiceMosaicId,
 		},
 	});
 }

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 const createSymbolAccountMock = vi.fn();
 const generateAccountFromPrivateKeyMock = vi.fn();
 const sendXymOnChainMock = vi.fn();
-const issueFamilyCurrencyOnChainMock = vi.fn();
+const issueFamilyVoiceOnChainMock = vi.fn();
 const transactionMock = vi.fn();
 const userFindUniqueMock = vi.fn();
 const userInfoFindUniqueMock = vi.fn();
@@ -36,8 +36,8 @@ vi.mock("@/lib/symbol/useCase/xymBalance/send", () => ({
 	sendXymOnChain: sendXymOnChainMock,
 }));
 
-vi.mock("@/lib/symbol/useCase/currency/create", () => ({
-	issueFamilyCurrencyOnChain: issueFamilyCurrencyOnChainMock,
+vi.mock("@/lib/symbol/useCase/voice/create", () => ({
+	issueFamilyVoiceOnChain: issueFamilyVoiceOnChainMock,
 }));
 
 vi.mock("@/lib/db/family/create", () => ({
@@ -83,7 +83,7 @@ describe("registerFamily unique precheck", () => {
 		).rejects.toThrow("ownerUserEmail is already in use");
 
 		expect(sendXymOnChainMock).not.toHaveBeenCalled();
-		expect(issueFamilyCurrencyOnChainMock).not.toHaveBeenCalled();
+		expect(issueFamilyVoiceOnChainMock).not.toHaveBeenCalled();
 	});
 
 	test("owner symbol public key が既に使われている場合は Symbol 処理前に失敗する", async () => {
@@ -102,6 +102,6 @@ describe("registerFamily unique precheck", () => {
 		).rejects.toThrow("ownerUserSymbolPubKey is already in use");
 
 		expect(sendXymOnChainMock).not.toHaveBeenCalled();
-		expect(issueFamilyCurrencyOnChainMock).not.toHaveBeenCalled();
+		expect(issueFamilyVoiceOnChainMock).not.toHaveBeenCalled();
 	});
 });

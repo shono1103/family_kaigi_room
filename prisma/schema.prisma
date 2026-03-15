@@ -23,7 +23,7 @@ model Family {
   familyName       String   @map("family_name")
   symbolPubKey     String?  @unique @map("symbol_pub_key")
   symbolPrivKey    String?  @unique @map("symbol_priv_key")
-  currencyMosaicId String   @unique @map("currency_mosaic_id")
+  familyVoiceMosaicId String   @unique @map("family_voice_mosaic_id")
   createdAt        DateTime @default(now()) @map("created_at")
   users            User[]
 

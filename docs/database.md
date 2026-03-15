@@ -33,7 +33,7 @@
 - `users.role` はアプリケーション全体の権限を表す
 - `users.role = admin` のユーザーはアプリ初回起動時に1人作成する
 - `family.family_name` は `NOT NULL` とする
-- `family.currency_mosaic_id` は unique とする
+- `family.family_voice_mosaic_id` は unique とする
 - `family.created_at` を追加する
 - `families.symbol_priv_key` の保存リスクは認識したうえで、当面はDB保存を許容する
 

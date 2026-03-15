@@ -13,9 +13,9 @@ import {
 import { toHexMosaicId } from '../../utils/normalizers';
 import { announceTransaction, pollTransactionState } from '../../utils/node-client';
 import { aggregateType, deadlineHours, facade, feeMultiplier, nodeUrl } from '../../config';
-import type { CurrencyMetadata } from './schema';
+import type { VoiceMetadata } from './schema';
 
-type IssueCurrencyResult =
+type IssueVoiceResult =
 	| Readonly<{
 			ok: true;
 			mosaicIdHex: string;
@@ -32,7 +32,7 @@ type IssueCurrencyResult =
 			message: string;
 	  }>;
 
-type IssueCurrencyOptions = Readonly<{
+type IssueVoiceOptions = Readonly<{
 	initialSupply?: bigint | number | string;
 	divisibility?: number;
 	duration?: bigint | number | string;
@@ -46,7 +46,7 @@ const MAX_DIVISIBILITY = 6;
 const isRecord = (value: unknown): value is Record<string, unknown> =>
 	'object' === typeof value && null !== value;
 
-const isCurrencyMetadata = (value: unknown): value is CurrencyMetadata => {
+const isVoiceMetadata = (value: unknown): value is VoiceMetadata => {
 	if (!isRecord(value)) {
 		return false;
 	}
@@ -59,16 +59,16 @@ const isCurrencyMetadata = (value: unknown): value is CurrencyMetadata => {
 	);
 };
 
-const normalizeCurrencyMetadataValue = (
-	metadataInput: string | CurrencyMetadata
-): CurrencyMetadata | null => {
+const normalizeVoiceMetadataValue = (
+	metadataInput: string | VoiceMetadata
+): VoiceMetadata | null => {
 	if ('string' !== typeof metadataInput) {
-		return isCurrencyMetadata(metadataInput) ? metadataInput : null;
+		return isVoiceMetadata(metadataInput) ? metadataInput : null;
 	}
 
 	try {
 		const parsed = JSON.parse(metadataInput) as unknown;
-		return isCurrencyMetadata(parsed) ? parsed : null;
+		return isVoiceMetadata(parsed) ? parsed : null;
 	} catch {
 		return null;
 	}
@@ -103,8 +103,8 @@ const parseBigIntLike = (value: bigint | number | string | undefined): bigint | 
 	}
 };
 
-const normalizeIssueCurrencyOptions = (
-	options: IssueCurrencyOptions | undefined
+const normalizeIssueVoiceOptions = (
+	options: IssueVoiceOptions | undefined
 ): Readonly<{
 	initialSupply: bigint;
 	divisibility: number;
@@ -136,13 +136,13 @@ const normalizeIssueCurrencyOptions = (
 	};
 };
 
-export const issueFamilyCurrencyOnChain = async (
+export const issueFamilyVoiceOnChain = async (
 	privateKey: string,
 	metadataKeySeed: string,
-	metadataValue: string | CurrencyMetadata,
-	options?: IssueCurrencyOptions
-): Promise<IssueCurrencyResult> => {
-	const normalizedMetadata = normalizeCurrencyMetadataValue(metadataValue);
+	metadataValue: string | VoiceMetadata,
+	options?: IssueVoiceOptions
+): Promise<IssueVoiceResult> => {
+	const normalizedMetadata = normalizeVoiceMetadataValue(metadataValue);
 	if (!normalizedMetadata) {
 		return {
 			ok: false,
@@ -151,7 +151,7 @@ export const issueFamilyCurrencyOnChain = async (
 		};
 	}
 
-	const normalizedOptions = normalizeIssueCurrencyOptions(options);
+	const normalizedOptions = normalizeIssueVoiceOptions(options);
 	if (!normalizedOptions) {
 		const divisibility = options?.divisibility;
 		return {
@@ -274,4 +274,4 @@ export const issueFamilyCurrencyOnChain = async (
 	};
 };
 
-export type { IssueCurrencyOptions, IssueCurrencyResult };
+export type { IssueVoiceOptions, IssueVoiceResult };

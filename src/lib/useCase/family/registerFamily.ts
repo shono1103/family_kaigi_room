@@ -4,15 +4,15 @@ import { createUser, type CreateUserInput } from "@/lib/db/user/create";
 import { createUserInfo, type CreateUserInfoInput } from "@/lib/db/userInfo/create";
 import { prisma } from "@/lib/prisma";
 import { facade } from "@/lib/symbol/config";
-import { issueFamilyCurrencyOnChain } from "@/lib/symbol/useCase/currency/create";
+import { issueFamilyVoiceOnChain } from "@/lib/symbol/useCase/voice/create";
 import { createSymbolAccount } from "@/lib/symbol/useCase/account/create";
 import { sendXymOnChain } from "@/lib/symbol/useCase/xymBalance/send";
 import { generateAccountFromPrivateKey } from "@/lib/symbol/utils/accounts";
 import type { Prisma } from "@prisma/client";
 
 const INITIAL_FAMILY_XYM_AMOUNT_RAW = 100_000_000n;
-const FAMILY_CURRENCY_METADATA_SEED =
-	process.env.SYMBOL_CURRENCY_METADATA_SEED ?? "currency:info/v1";
+const FAMILY_VOICE_METADATA_SEED =
+	process.env.SYMBOL_VOICE_METADATA_SEED ?? "voice:info/v1";
 
 export type RegisterFamilyInput = Readonly<{
 	familyName: CreateFamilyInput["familyName"];
@@ -62,26 +62,26 @@ export async function registerFamily(
 		);
 	}
 
-	console.log("[usecase:family:register] issueFamilyCurrencyOnChain request", {
+	console.log("[usecase:family:register] issueFamilyVoiceOnChain request", {
 		signerPublicKey: symbolAccount.publicKey,
-		metadataSeed: FAMILY_CURRENCY_METADATA_SEED,
+		metadataSeed: FAMILY_VOICE_METADATA_SEED,
 		metadata: {
-			name: `${input.familyName} currency`,
-			detail: `Family currency for ${input.familyName}`,
+			name: `${input.familyName} voice`,
+			detail: `Family voice for ${input.familyName}`,
 		},
 	});
-	const issueCurrencyResult = await issueFamilyCurrencyOnChain(
+	const issueFamilyVoiceResult = await issueFamilyVoiceOnChain(
 		symbolAccount.privateKey,
-		FAMILY_CURRENCY_METADATA_SEED,
+		FAMILY_VOICE_METADATA_SEED,
 		{
-			name: `${input.familyName} currency`,
-			detail: `Family currency for ${input.familyName}`,
+			name: `${input.familyName} voice`,
+			detail: `Family voice for ${input.familyName}`,
 		},
 	);
-	console.log("[usecase:family:register] issueCurrencyResult", issueCurrencyResult);
-	if (!issueCurrencyResult.ok) {
+	console.log("[usecase:family:register] issueFamilyVoiceResult", issueFamilyVoiceResult);
+	if (!issueFamilyVoiceResult.ok) {
 		throw new Error(
-			`Failed to issue family currency: [${issueCurrencyResult.error}] ${issueCurrencyResult.message}`,
+			`Failed to issue family voice: [${issueFamilyVoiceResult.error}] ${issueFamilyVoiceResult.message}`,
 		);
 	}
 
@@ -89,7 +89,7 @@ export async function registerFamily(
 		const family = await createFamily(
 			{
 				familyName: input.familyName,
-				currencyMosaicId: issueCurrencyResult.mosaicIdHex,
+				familyVoiceMosaicId: issueFamilyVoiceResult.mosaicIdHex,
 				symbolPubKey: symbolAccount.publicKey,
 				symbolPrivKey: symbolAccount.privateKey,
 			},

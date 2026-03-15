@@ -8,7 +8,7 @@ import {
 
 export type CreateFamilyInput = Readonly<{
 	familyName: string;
-	currencyMosaicId: string;
+	familyVoiceMosaicId: string;
 	symbolPubKey?: string | null;
 	symbolPrivKey?: string | null;
 }>;
@@ -20,7 +20,7 @@ export async function createFamily(
 	db: FamilyDbClient = prisma,
 ) {
 	const familyName = input.familyName.trim();
-	const currencyMosaicId = normalizeMosaicIdHex(input.currencyMosaicId);
+	const familyVoiceMosaicId = normalizeMosaicIdHex(input.familyVoiceMosaicId);
 	const symbolPubKey = normalizeSymbolPublicKey(input.symbolPubKey);
 	const symbolPrivKey = normalizeSymbolPrivateKey(input.symbolPrivKey);
 
@@ -28,12 +28,14 @@ export async function createFamily(
 		throw new Error("familyName is required");
 	}
 
-	if (!currencyMosaicId) {
-		throw new Error("currencyMosaicId is required");
+	if (!familyVoiceMosaicId) {
+		throw new Error("familyVoiceMosaicId is required");
 	}
 
-	if (!/^[0-9A-F]{16}$/.test(currencyMosaicId)) {
-		throw new Error("currencyMosaicId must be a 16-character hex string with optional 0x prefix");
+	if (!/^[0-9A-F]{16}$/.test(familyVoiceMosaicId)) {
+		throw new Error(
+			"familyVoiceMosaicId must be a 16-character hex string with optional 0x prefix",
+		);
 	}
 
 	if (input.symbolPubKey && !symbolPubKey) {
@@ -47,7 +49,7 @@ export async function createFamily(
 	return db.family.create({
 		data: {
 			familyName,
-			currencyMosaicId,
+			familyVoiceMosaicId,
 			symbolPubKey,
 			symbolPrivKey,
 		},

@@ -14,8 +14,8 @@ const errorMessageMap: Record<string, string> = {
 		"このSymbol公開鍵は既に使用されています。別の秘密鍵を入力してください。",
 	signup_symbol_priv_key_taken:
 		"このSymbol秘密鍵は既に使用されています。別の秘密鍵を入力してください。",
-	signup_currency_mosaic_taken:
-		"家族通貨の識別子が重複しました。もう一度お試しください。",
+	signup_family_voice_mosaic_taken:
+		"familyVoice の識別子が重複しました。もう一度お試しください。",
 	signup_unique_conflict:
 		"一意制約に抵触しました。入力内容を見直して再試行してください。",
 	signup_symbol_invalid:
@@ -23,7 +23,7 @@ const errorMessageMap: Record<string, string> = {
 	signup_symbol_funding_failed:
 		"家族用Symbolアカウントへの初期送金に失敗しました。時間を置いて再試行してください。",
 	signup_symbol_issue_failed:
-		"家族通貨の発行に失敗しました。時間を置いて再試行してください。",
+		"familyVoice の発行に失敗しました。時間を置いて再試行してください。",
 	signup_session_failed:
 		"家族会議室は作成されましたが、ログインセッションの作成に失敗しました。再度ログインしてください。",
 	signup_failed:

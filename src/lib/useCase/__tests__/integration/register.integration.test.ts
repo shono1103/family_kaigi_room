@@ -11,7 +11,7 @@ import { INTEGRATION_TIMEOUT_MS } from "@/lib/testing/integration/symbol/timeout
 import { loadIntegrationEnv } from "@/lib/testing/integration/symbol/env";
 import { requireEnv } from "@/lib/testing/integration/symbol/guards";
 import { facade } from "@/lib/symbol/config";
-import { getCurrencyDetailsByPublicKey } from "@/lib/symbol/useCase/currency/read";
+import { getVoiceDetailsByPublicKey } from "@/lib/symbol/useCase/voice/read";
 import { normalizeMosaicIdHex } from "@/lib/symbol/utils/normalizers";
 import { generateAccountFromPrivateKey } from "@/lib/symbol/utils/accounts";
 import { registerFamily } from "@/lib/useCase/family/registerFamily";
@@ -40,7 +40,7 @@ describe("family register use case integration", () => {
 		await cleanupFamiliesByIds(createdFamilyIds);
 	});
 
-	test("registerFamily: family / owner user / userInfo / family currency を作成できる", async () => {
+	test("registerFamily: family / owner user / userInfo / family voice を作成できる", async () => {
 		const suffix = createIntegrationSuffix();
 		const familyName = `integration-family-room-${suffix}`;
 		const userEmail = `integration-family-${suffix}@example.com`;
@@ -70,7 +70,7 @@ describe("family register use case integration", () => {
 		console.log("[integration:family:register] result", {
 			familyId: result.family.id,
 			familySymbolPubKey: result.family.symbolPubKey,
-			currencyMosaicId: result.family.currencyMosaicId,
+			familyVoiceMosaicId: result.family.familyVoiceMosaicId,
 			userId: result.ownerUser.id,
 			userInfoUserId: result.ownerUserInfo?.userId ?? null,
 		});
@@ -80,7 +80,7 @@ describe("family register use case integration", () => {
 		expect(result.family.familyName).toBe(familyName);
 		expect(result.family.symbolPubKey).toMatch(/^[0-9A-F]{64}$/);
 		expect(result.family.symbolPrivKey).toMatch(/^[0-9A-F]{64}$/);
-		expect(result.family.currencyMosaicId).toMatch(/^[0-9A-F]{16}$/);
+		expect(result.family.familyVoiceMosaicId).toMatch(/^[0-9A-F]{16}$/);
 
 		expect(result.ownerUser.familyId).toBe(result.family.id);
 		expect(result.ownerUser.email).toBe(userEmail);
@@ -102,21 +102,21 @@ describe("family register use case integration", () => {
 		expect(persistedUser?.id).toBe(result.ownerUser.id);
 		expect(persistedUserInfo?.userId).toBe(result.ownerUser.id);
 
-		const currencyReadResult = await getCurrencyDetailsByPublicKey(
+		const voiceReadResult = await getVoiceDetailsByPublicKey(
 			result.family.symbolPubKey ?? "",
-			result.family.currencyMosaicId,
+			result.family.familyVoiceMosaicId,
 		);
-		expect(currencyReadResult.ok).toBe(true);
-		if (!currencyReadResult.ok) {
-			throw new Error(`[${currencyReadResult.status}] ${currencyReadResult.message}`);
+		expect(voiceReadResult.ok).toBe(true);
+		if (!voiceReadResult.ok) {
+			throw new Error(`[${voiceReadResult.status}] ${voiceReadResult.message}`);
 		}
 
-		expect(currencyReadResult.publicKey).toBe(result.family.symbolPubKey);
-		expect(normalizeMosaicIdHex(currencyReadResult.mosaicIdHex)).toBe(
-			normalizeMosaicIdHex(result.family.currencyMosaicId),
+		expect(voiceReadResult.publicKey).toBe(result.family.symbolPubKey);
+		expect(normalizeMosaicIdHex(voiceReadResult.mosaicIdHex)).toBe(
+			normalizeMosaicIdHex(result.family.familyVoiceMosaicId),
 		);
-		expect(currencyReadResult.ownershipStatus).toBe("owned");
-		expect(currencyReadResult.currencyMetadata.name).toBe(`${familyName} currency`);
-		expect(currencyReadResult.currencyMetadata.detail).toBe(`Family currency for ${familyName}`);
+		expect(voiceReadResult.ownershipStatus).toBe("owned");
+		expect(voiceReadResult.voiceMetadata.name).toBe(`${familyName} voice`);
+		expect(voiceReadResult.voiceMetadata.detail).toBe(`Family voice for ${familyName}`);
 	}, INTEGRATION_TIMEOUT_MS);
 });

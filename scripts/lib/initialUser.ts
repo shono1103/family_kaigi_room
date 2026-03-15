@@ -6,7 +6,7 @@ import { createUser } from "../../src/lib/db/user/create";
 import { createUserInfo } from "../../src/lib/db/userInfo/create";
 import { facade } from "../../src/lib/symbol/config";
 import { createSymbolAccount } from "../../src/lib/symbol/useCase/account/create";
-import { issueFamilyCurrencyOnChain } from "../../src/lib/symbol/useCase/currency/create";
+import { issueFamilyVoiceOnChain } from "../../src/lib/symbol/useCase/voice/create";
 import { sendXymOnChain } from "../../src/lib/symbol/useCase/xymBalance/send";
 import { generateAccountFromPrivateKey } from "../../src/lib/symbol/utils/accounts";
 import type { Prisma } from "@prisma/client";
@@ -15,8 +15,8 @@ let initialUserPromise: Promise<void> | null = null;
 const INITIAL_FAMILY_NAME = "Initial Admin Family";
 const INITIAL_FAMILY_XYM_AMOUNT_RAW = 100_000_000n;
 const INITIAL_ADMIN_NAME = "Initial Admin";
-const FAMILY_CURRENCY_METADATA_SEED =
-	process.env.SYMBOL_CURRENCY_METADATA_SEED ?? "currency:info/v1";
+const FAMILY_VOICE_METADATA_SEED =
+	process.env.SYMBOL_VOICE_METADATA_SEED ?? "voice:info/v1";
 
 function getRequiredEnv(name: string): string {
 	const value = process.env[name]?.trim();
@@ -86,17 +86,17 @@ async function registerInitialAdminFamily() {
 			);
 		}
 
-		const issueCurrencyResult = await issueFamilyCurrencyOnChain(
+		const issueVoiceResult = await issueFamilyVoiceOnChain(
 			familySymbolAccount.privateKey,
-			FAMILY_CURRENCY_METADATA_SEED,
+			FAMILY_VOICE_METADATA_SEED,
 			{
-				name: `${INITIAL_FAMILY_NAME} currency`,
-				detail: `Family currency for ${INITIAL_FAMILY_NAME}`,
+				name: `${INITIAL_FAMILY_NAME} voice`,
+				detail: `Family voice for ${INITIAL_FAMILY_NAME}`,
 			},
 		);
-		if (!issueCurrencyResult.ok) {
+		if (!issueVoiceResult.ok) {
 			throw new Error(
-				`Failed to issue family currency: [${issueCurrencyResult.error}] ${issueCurrencyResult.message}`,
+				`Failed to issue family voice: [${issueVoiceResult.error}] ${issueVoiceResult.message}`,
 			);
 		}
 
@@ -104,7 +104,7 @@ async function registerInitialAdminFamily() {
 			const family = await createFamily(
 				{
 					familyName: INITIAL_FAMILY_NAME,
-					currencyMosaicId: issueCurrencyResult.mosaicIdHex,
+					familyVoiceMosaicId: issueVoiceResult.mosaicIdHex,
 					symbolPubKey: familySymbolAccount.publicKey,
 					symbolPrivKey: familySymbolAccount.privateKey,
 				},

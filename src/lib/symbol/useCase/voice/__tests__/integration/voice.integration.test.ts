@@ -2,7 +2,7 @@ import { INTEGRATION_TIMEOUT_MS } from "@/lib/testing/integration/symbol/timeout
 import { loadIntegrationEnv } from "@/lib/testing/integration/symbol/env";
 import { requireEnv } from "@/lib/testing/integration/symbol/guards";
 
-describe("symbol currency create integration", () => {
+describe("symbol voice create integration", () => {
 	let issuedMosaicIdHex: string | null = null;
 	let issuerPublicKey: string | null = null;
 	let expectedMetadata: { name: string; detail: string } | null = null;
@@ -29,22 +29,22 @@ describe("symbol currency create integration", () => {
 		loadIntegrationEnv();
 	});
 
-	test("create: issueFamilyCurrencyOnChainで家族通貨mosaicを発行する", async () => {
+	test("create: issueFamilyVoiceOnChainでfamily voice mosaicを発行する", async () => {
 		const issuerPrivateKey = requireEnv("SYMBOL_ISSUER_PRIVATE_KEY");
 		const { facade } = await import("@/lib/symbol/config");
 		const { generateAccountFromPrivateKey } = await import("@/lib/symbol/utils/accounts");
 		const issuerAccount = generateAccountFromPrivateKey(facade, issuerPrivateKey);
-		const metadataSeed = process.env.SYMBOL_CURRENCY_METADATA_SEED ?? "currency:info/v1";
+		const metadataSeed = process.env.SYMBOL_VOICE_METADATA_SEED ?? "voice:info/v1";
 		const metadata = {
-			name: `family-currency-${Date.now()}`,
-			detail: "integration test family currency",
+			name: `family-voice-${Date.now()}`,
+			detail: "integration test family voice",
 		};
 		const options = {
 			initialSupply: 1000n,
 			divisibility: 0,
 		};
 
-		console.log("[integration:currency:create] request", {
+		console.log("[integration:voice:create] request", {
 			metadataSeed,
 			metadata,
 			options: {
@@ -53,14 +53,14 @@ describe("symbol currency create integration", () => {
 			},
 		});
 
-		const { issueFamilyCurrencyOnChain } = await import("@/lib/symbol/useCase/currency/create");
-		const issueResult = await issueFamilyCurrencyOnChain(
+		const { issueFamilyVoiceOnChain } = await import("@/lib/symbol/useCase/voice/create");
+		const issueResult = await issueFamilyVoiceOnChain(
 			issuerPrivateKey,
 			metadataSeed,
 			metadata,
 			options,
 		);
-		console.log("[integration:currency:create] result", issueResult);
+		console.log("[integration:voice:create] result", issueResult);
 
 		expect(issueResult.ok).toBe(true);
 		if (!issueResult.ok) {
@@ -77,7 +77,7 @@ describe("symbol currency create integration", () => {
 		const { getMosaicWithMetadata } = await import("@/lib/symbol/utils/node-client");
 		const mosaicWithMetadata = await getMosaicWithMetadata(nodeUrl, issueResult.mosaicIdHex);
 
-		console.log("[integration:currency:create:readback] result", {
+		console.log("[integration:voice:create:readback] result", {
 			mosaic: mosaicWithMetadata.mosaic,
 			metadataEntriesCount: mosaicWithMetadata.metadataEntries.length,
 		});
@@ -93,13 +93,13 @@ describe("symbol currency create integration", () => {
 		expect(expectedMetadata).not.toBeNull();
 		expect(expectedCurrentSupplyRaw).not.toBeNull();
 		if (!expectedMetadata || !expectedCurrentSupplyRaw) {
-			throw new Error("expected currency state is null. create test must run first.");
+			throw new Error("expected voice state is null. create test must run first.");
 		}
 
-		const { getCurrencyDetailsByPublicKey } = await import("@/lib/symbol/useCase/currency/read");
-		console.log("[integration:currency:read] request", { publicKey, mosaicIdHex });
-		const readResult = await getCurrencyDetailsByPublicKey(publicKey, mosaicIdHex);
-		console.log("[integration:currency:read] result", readResult);
+		const { getVoiceDetailsByPublicKey } = await import("@/lib/symbol/useCase/voice/read");
+		console.log("[integration:voice:read] request", { publicKey, mosaicIdHex });
+		const readResult = await getVoiceDetailsByPublicKey(publicKey, mosaicIdHex);
+		console.log("[integration:voice:read] result", readResult);
 
 		expect(readResult.ok).toBe(true);
 		if (!readResult.ok) {
@@ -111,8 +111,8 @@ describe("symbol currency create integration", () => {
 		expect(readResult.mosaicIdHex).toBe(mosaicIdHex);
 		expect(readResult.ownershipStatus).toBe("owned");
 		expect(readResult.amountRaw).toBe(expectedIssuerOwnedAmountRaw);
-		expect(readResult.currencyMetadata.name).toBe(expectedMetadata.name);
-		expect(readResult.currencyMetadata.detail).toBe(expectedMetadata.detail);
+		expect(readResult.voiceMetadata.name).toBe(expectedMetadata.name);
+		expect(readResult.voiceMetadata.detail).toBe(expectedMetadata.detail);
 		expect(Array.isArray(readResult.metadataEntries)).toBe(true);
 		expect(readResult.metadataEntries.length).toBeGreaterThan(0);
 		expect(readResult.mosaic).toBeTruthy();
@@ -128,17 +128,17 @@ describe("symbol currency create integration", () => {
 		}
 
 		const nextSupply = BigInt(expectedCurrentSupplyRaw) + 250n;
-		const { updateFamilyCurrencySupplyOnChain } = await import("@/lib/symbol/useCase/currency/update");
-		console.log("[integration:currency:update] request", {
+		const { updateFamilyVoiceSupplyOnChain } = await import("@/lib/symbol/useCase/voice/update");
+		console.log("[integration:voice:update] request", {
 			mosaicIdHex,
 			nextSupply: nextSupply.toString(),
 		});
-		const updateResult = await updateFamilyCurrencySupplyOnChain(
+		const updateResult = await updateFamilyVoiceSupplyOnChain(
 			issuerPrivateKey,
 			mosaicIdHex,
 			nextSupply,
 		);
-		console.log("[integration:currency:update] result", updateResult);
+		console.log("[integration:voice:update] result", updateResult);
 
 		expect(updateResult.ok).toBe(true);
 		if (!updateResult.ok) {
@@ -150,8 +150,8 @@ describe("symbol currency create integration", () => {
 		expect(updateResult.previousSupplyRaw).toBe(expectedCurrentSupplyRaw);
 		expect(updateResult.currentSupplyRaw).toBe(nextSupply.toString());
 
-		const { getCurrencyDetailsByPublicKey } = await import("@/lib/symbol/useCase/currency/read");
-		const readResult = await getCurrencyDetailsByPublicKey(publicKey, mosaicIdHex);
+		const { getVoiceDetailsByPublicKey } = await import("@/lib/symbol/useCase/voice/read");
+		const readResult = await getVoiceDetailsByPublicKey(publicKey, mosaicIdHex);
 		expect(readResult.ok).toBe(true);
 		if (!readResult.ok) {
 			throw new Error(`[${readResult.status}] ${readResult.message}`);
@@ -179,20 +179,20 @@ describe("symbol currency create integration", () => {
 		const recipientAccount = createNewSymbolAccount(facade);
 		const recipientPublicKey = recipientAccount.publicKey.toString();
 
-		const { sendCurrencyOnChain } = await import("@/lib/symbol/useCase/currency/send");
-		console.log("[integration:currency:send] request", {
+		const { sendVoiceOnChain } = await import("@/lib/symbol/useCase/voice/send");
+		console.log("[integration:voice:send] request", {
 			recipientPublicKey,
 			mosaicIdHex,
 			amountRaw: sendAmountRaw.toString(),
 		});
-		const sendResult = await sendCurrencyOnChain(
+		const sendResult = await sendVoiceOnChain(
 			issuerPrivateKey,
 			recipientPublicKey,
 			mosaicIdHex,
 			sendAmountRaw,
-			"integration test currency transfer",
+			"integration test voice transfer",
 		);
-		console.log("[integration:currency:send] result", sendResult);
+		console.log("[integration:voice:send] result", sendResult);
 
 		expect(sendResult.ok).toBe(true);
 		if (!sendResult.ok) {
@@ -204,8 +204,8 @@ describe("symbol currency create integration", () => {
 		expect(sendResult.mosaicIdHex).toBe(mosaicIdHex);
 		expect(sendResult.amountRaw).toBe(sendAmountRaw.toString());
 
-		const { getCurrencyDetailsByPublicKey } = await import("@/lib/symbol/useCase/currency/read");
-		const recipientReadResult = await getCurrencyDetailsByPublicKey(
+		const { getVoiceDetailsByPublicKey } = await import("@/lib/symbol/useCase/voice/read");
+		const recipientReadResult = await getVoiceDetailsByPublicKey(
 			recipientPublicKey,
 			mosaicIdHex,
 		);
@@ -217,10 +217,10 @@ describe("symbol currency create integration", () => {
 		expect(recipientReadResult.publicKey).toBe(recipientPublicKey);
 		expect(recipientReadResult.ownershipStatus).toBe("owned");
 		expect(recipientReadResult.amountRaw).toBe(sendAmountRaw.toString());
-		expect(recipientReadResult.currencyMetadata.name).toBe(expectedMetadata?.name);
-		expect(recipientReadResult.currencyMetadata.detail).toBe(expectedMetadata?.detail);
+		expect(recipientReadResult.voiceMetadata.name).toBe(expectedMetadata?.name);
+		expect(recipientReadResult.voiceMetadata.detail).toBe(expectedMetadata?.detail);
 
-		const issuerReadResult = await getCurrencyDetailsByPublicKey(
+		const issuerReadResult = await getVoiceDetailsByPublicKey(
 			issuerPk,
 			mosaicIdHex,
 		);

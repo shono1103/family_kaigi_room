@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { readAccountOwnedMosaicsByPublicKey } from "@/lib/symbol/useCase/account/read"
 import { getTicketDetails } from "@/lib/symbol/useCase/ticket/read";
 import { listFamilyMembers } from "@/lib/useCase/family/listFamilyMembers";
-import { readFamilyCurrencyForUser } from "@/lib/useCase/family/readFamilyCurrency";
+import { readFamilyVoiceForUser } from "@/lib/useCase/family/readFamilyVoice";
 import { listIssuedQuests } from "@/lib/useCase/quest/listIssuedQuests";
 import { listTargetQuests } from "@/lib/useCase/quest/listTargetQuests";
 
@@ -34,7 +34,7 @@ export default async function Home({ searchParams }: HomePageProps) {
 			symbolPubKey: true,
 		},
 	});
-	const { family, familyCurrency } = await readFamilyCurrencyForUser(
+	const { family, familyVoice } = await readFamilyVoiceForUser(
 		auth.user.id,
 		userInfo?.symbolPubKey,
 	);
@@ -113,7 +113,7 @@ export default async function Home({ searchParams }: HomePageProps) {
 			isFamilyOwner={user?.isFamilyOwner ?? false}
 			familyName={family?.familyName ?? null}
 			userInfo={userInfo}
-			familyCurrency={familyCurrency}
+			familyVoice={familyVoice}
 			ownedMosaics={ownedMosaics}
 			ownedTickets={ownedTickets}
 			issuedQuests={issuedQuests}

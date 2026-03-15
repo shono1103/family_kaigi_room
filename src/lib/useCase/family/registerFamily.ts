@@ -11,8 +11,6 @@ import { generateAccountFromPrivateKey } from "@/lib/symbol/utils/accounts";
 import type { Prisma } from "@prisma/client";
 
 const INITIAL_FAMILY_XYM_AMOUNT_RAW = 100_000_000n;
-const FAMILY_VOICE_METADATA_SEED =
-	process.env.SYMBOL_VOICE_METADATA_SEED ?? "voice:info/v1";
 
 export type RegisterFamilyInput = Readonly<{
 	familyName: CreateFamilyInput["familyName"];
@@ -64,19 +62,9 @@ export async function registerFamily(
 
 	console.log("[usecase:family:register] issueFamilyVoiceOnChain request", {
 		signerPublicKey: symbolAccount.publicKey,
-		metadataSeed: FAMILY_VOICE_METADATA_SEED,
-		metadata: {
-			name: `${input.familyName} voice`,
-			detail: `Family voice for ${input.familyName}`,
-		},
 	});
 	const issueFamilyVoiceResult = await issueFamilyVoiceOnChain(
 		symbolAccount.privateKey,
-		FAMILY_VOICE_METADATA_SEED,
-		{
-			name: `${input.familyName} voice`,
-			detail: `Family voice for ${input.familyName}`,
-		},
 	);
 	console.log("[usecase:family:register] issueFamilyVoiceResult", issueFamilyVoiceResult);
 	if (!issueFamilyVoiceResult.ok) {

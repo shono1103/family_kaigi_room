@@ -24,6 +24,10 @@ export type GetMosaicWithMetadataResult = Readonly<{
 	metadataEntries: SymbolMetadataEntryDto[];
 }>;
 
+export type GetMosaicResult = Readonly<{
+	mosaic: SymbolMosaicDto;
+}>;
+
 const fetchJson = async (
 	url: string
 ): Promise<unknown> => {
@@ -84,6 +88,20 @@ export const getMosaicWithMetadata = async (
 	return {
 		mosaic: mosaicResponse,
 		metadataEntries
+	};
+};
+
+export const getMosaic = async (
+	nodeUrl: string,
+	mosaicIdHex: string,
+): Promise<GetMosaicResult> => {
+	const normalizedMosaicIdHex = normalizeMosaicIdHex(mosaicIdHex);
+	const mosaicResponse = await fetchJson(
+		`${nodeUrl}/mosaics/${normalizedMosaicIdHex}`
+	) as SymbolMosaicDto;
+
+	return {
+		mosaic: mosaicResponse,
 	};
 };
 

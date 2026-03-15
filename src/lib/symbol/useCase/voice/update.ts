@@ -4,7 +4,7 @@ import {
 	createMosaicSupplyDecreaseTransaction,
 	createMosaicSupplyIncreaseTransaction,
 } from '../../utils/transaction-builders';
-import { announceTransaction, getMosaicWithMetadata, pollTransactionState } from '../../utils/node-client';
+import { announceTransaction, getMosaic, pollTransactionState } from '../../utils/node-client';
 import { aggregateType, deadlineHours, facade, feeMultiplier, nodeUrl } from '../../config';
 import { normalizeMosaicIdHex } from '../../utils/normalizers';
 
@@ -123,7 +123,7 @@ export const updateFamilyVoiceSupplyOnChain = async (
 	try {
 		const mosaicId = BigInt(`0x${normalizedMosaicIdHex}`);
 		const account = generateAccountFromPrivateKey(facade, privateKey);
-		const mosaicWithMetadata = await getMosaicWithMetadata(nodeUrl, normalizedMosaicIdHex);
+		const mosaicWithMetadata = await getMosaic(nodeUrl, normalizedMosaicIdHex);
 		const currentSupply = extractCurrentSupply(
 			mosaicWithMetadata.mosaic as Record<string, unknown>
 		);

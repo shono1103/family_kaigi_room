@@ -5,7 +5,6 @@ import { requireEnv } from "@/lib/testing/integration/symbol/guards";
 describe("symbol voice create integration", () => {
 	let issuedMosaicIdHex: string | null = null;
 	let issuerPublicKey: string | null = null;
-	let expectedMetadata: { name: string; detail: string } | null = null;
 	let expectedCurrentSupplyRaw: string | null = null;
 	let expectedIssuerOwnedAmountRaw: string | null = null;
 
@@ -34,19 +33,12 @@ describe("symbol voice create integration", () => {
 		const { facade } = await import("@/lib/symbol/config");
 		const { generateAccountFromPrivateKey } = await import("@/lib/symbol/utils/accounts");
 		const issuerAccount = generateAccountFromPrivateKey(facade, issuerPrivateKey);
-		const metadataSeed = process.env.SYMBOL_VOICE_METADATA_SEED ?? "voice:info/v1";
-		const metadata = {
-			name: `family-voice-${Date.now()}`,
-			detail: "integration test family voice",
-		};
 		const options = {
 			initialSupply: 1000n,
 			divisibility: 0,
 		};
 
 		console.log("[integration:voice:create] request", {
-			metadataSeed,
-			metadata,
 			options: {
 				initialSupply: options.initialSupply.toString(),
 				divisibility: options.divisibility,
@@ -56,8 +48,6 @@ describe("symbol voice create integration", () => {
 		const { issueFamilyVoiceOnChain } = await import("@/lib/symbol/useCase/voice/create");
 		const issueResult = await issueFamilyVoiceOnChain(
 			issuerPrivateKey,
-			metadataSeed,
-			metadata,
 			options,
 		);
 		console.log("[integration:voice:create] result", issueResult);
@@ -68,31 +58,26 @@ describe("symbol voice create integration", () => {
 		}
 		issuedMosaicIdHex = issueResult.mosaicIdHex;
 		issuerPublicKey = issuerAccount.publicKey.toString();
-		expectedMetadata = metadata;
 		expectedCurrentSupplyRaw = options.initialSupply.toString();
 		expectedIssuerOwnedAmountRaw = options.initialSupply.toString();
 		expect(issueResult.mosaicIdHex).toMatch(/^0x[0-9A-F]{16}$/);
 
 		const { nodeUrl } = await import("@/lib/symbol/config");
-		const { getMosaicWithMetadata } = await import("@/lib/symbol/utils/node-client");
-		const mosaicWithMetadata = await getMosaicWithMetadata(nodeUrl, issueResult.mosaicIdHex);
+		const { getMosaic } = await import("@/lib/symbol/utils/node-client");
+		const mosaicWithMetadata = await getMosaic(nodeUrl, issueResult.mosaicIdHex);
 
 		console.log("[integration:voice:create:readback] result", {
 			mosaic: mosaicWithMetadata.mosaic,
-			metadataEntriesCount: mosaicWithMetadata.metadataEntries.length,
 		});
 
 		expect(mosaicWithMetadata.mosaic).toBeTruthy();
-		expect(Array.isArray(mosaicWithMetadata.metadataEntries)).toBe(true);
-		expect(mosaicWithMetadata.metadataEntries.length).toBeGreaterThan(0);
 	}, INTEGRATION_TIMEOUT_MS);
 
 	test("read: 特定アカウントの特定mosaic_idの状態を取得する", async () => {
 		const publicKey = requireIssuerPublicKey();
 		const mosaicIdHex = requireIssuedMosaicIdHex();
-		expect(expectedMetadata).not.toBeNull();
 		expect(expectedCurrentSupplyRaw).not.toBeNull();
-		if (!expectedMetadata || !expectedCurrentSupplyRaw) {
+		if (!expectedCurrentSupplyRaw) {
 			throw new Error("expected voice state is null. create test must run first.");
 		}
 
@@ -111,10 +96,6 @@ describe("symbol voice create integration", () => {
 		expect(readResult.mosaicIdHex).toBe(mosaicIdHex);
 		expect(readResult.ownershipStatus).toBe("owned");
 		expect(readResult.amountRaw).toBe(expectedIssuerOwnedAmountRaw);
-		expect(readResult.voiceMetadata.name).toBe(expectedMetadata.name);
-		expect(readResult.voiceMetadata.detail).toBe(expectedMetadata.detail);
-		expect(Array.isArray(readResult.metadataEntries)).toBe(true);
-		expect(readResult.metadataEntries.length).toBeGreaterThan(0);
 		expect(readResult.mosaic).toBeTruthy();
 	}, INTEGRATION_TIMEOUT_MS);
 
@@ -217,8 +198,6 @@ describe("symbol voice create integration", () => {
 		expect(recipientReadResult.publicKey).toBe(recipientPublicKey);
 		expect(recipientReadResult.ownershipStatus).toBe("owned");
 		expect(recipientReadResult.amountRaw).toBe(sendAmountRaw.toString());
-		expect(recipientReadResult.voiceMetadata.name).toBe(expectedMetadata?.name);
-		expect(recipientReadResult.voiceMetadata.detail).toBe(expectedMetadata?.detail);
 
 		const issuerReadResult = await getVoiceDetailsByPublicKey(
 			issuerPk,

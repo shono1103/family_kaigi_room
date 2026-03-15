@@ -15,8 +15,6 @@ let initialUserPromise: Promise<void> | null = null;
 const INITIAL_FAMILY_NAME = "Initial Admin Family";
 const INITIAL_FAMILY_XYM_AMOUNT_RAW = 100_000_000n;
 const INITIAL_ADMIN_NAME = "Initial Admin";
-const FAMILY_VOICE_METADATA_SEED =
-	process.env.SYMBOL_VOICE_METADATA_SEED ?? "voice:info/v1";
 
 function getRequiredEnv(name: string): string {
 	const value = process.env[name]?.trim();
@@ -88,11 +86,6 @@ async function registerInitialAdminFamily() {
 
 		const issueVoiceResult = await issueFamilyVoiceOnChain(
 			familySymbolAccount.privateKey,
-			FAMILY_VOICE_METADATA_SEED,
-			{
-				name: `${INITIAL_FAMILY_NAME} voice`,
-				detail: `Family voice for ${INITIAL_FAMILY_NAME}`,
-			},
 		);
 		if (!issueVoiceResult.ok) {
 			throw new Error(

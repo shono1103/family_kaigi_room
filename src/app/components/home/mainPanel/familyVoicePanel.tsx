@@ -19,8 +19,6 @@ function getStatusMessage(familyVoice: GetVoiceDetailsResult) {
 			return "familyVoice の Mosaic ID が不正です。";
 		case "account_not_found":
 			return "家族のSymbolアカウントが見つかりません。";
-		case "invalid_voice_metadata":
-			return "familyVoice のメタデータを読み取れませんでした。";
 		case "node_unreachable":
 			return "Symbolノードへ接続できませんでした。時間をおいて再試行してください。";
 		default:
@@ -64,12 +62,7 @@ export function FamilyVoicePanel({
 						<p className="text-xs font-bold text-[#4b4b65]">
 							{familyName ?? "家族"}のVoice
 						</p>
-						<p className="mt-1 text-lg font-bold text-[#202033]">
-							{familyVoice.voiceMetadata.name}
-						</p>
-						<p className="mt-2 text-sm text-[#4b4b65]">
-							{familyVoice.voiceMetadata.detail}
-						</p>
+						<p className="mt-1 text-lg font-bold text-[#202033]">所持量</p>
 					</div>
 					<p className="text-xs font-semibold text-[#4b4b65]">
 						Mosaic ID: {familyVoice.mosaicIdHex}

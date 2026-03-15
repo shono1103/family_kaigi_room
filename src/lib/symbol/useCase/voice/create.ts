@@ -1,5 +1,4 @@
 import { randomInt } from 'node:crypto';
-import { metadataGenerateKey } from 'symbol-sdk/symbol';
 import { generateAccountFromPrivateKey } from '../../utils/accounts';
 import {
 	type CreateMosaicDefinitionTransactionParams,
@@ -7,13 +6,11 @@ import {
 	buildMosaicFlags,
 	createAggregateTransaction,
 	createMosaicDefinitionTransaction,
-	createMosaicMetadataTransaction,
 	createMosaicSupplyIncreaseTransaction,
 } from '../../utils/transaction-builders';
 import { toHexMosaicId } from '../../utils/normalizers';
 import { announceTransaction, pollTransactionState } from '../../utils/node-client';
 import { aggregateType, deadlineHours, facade, feeMultiplier, nodeUrl } from '../../config';
-import type { VoiceMetadata } from './schema';
 
 type IssueVoiceResult =
 	| Readonly<{
@@ -23,7 +20,6 @@ type IssueVoiceResult =
 	| Readonly<{
 			ok: false;
 			error:
-				| 'invalid_metadata'
 				| 'invalid_supply'
 				| 'invalid_divisibility'
 				| 'node_unreachable'
@@ -42,37 +38,6 @@ const DEFAULT_INITIAL_SUPPLY = 1000n;
 const DEFAULT_DIVISIBILITY = 0;
 const DEFAULT_DURATION = 0n;
 const MAX_DIVISIBILITY = 6;
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-	'object' === typeof value && null !== value;
-
-const isVoiceMetadata = (value: unknown): value is VoiceMetadata => {
-	if (!isRecord(value)) {
-		return false;
-	}
-
-	return (
-		'string' === typeof value.name &&
-		0 < value.name.trim().length &&
-		'string' === typeof value.detail &&
-		0 < value.detail.trim().length
-	);
-};
-
-const normalizeVoiceMetadataValue = (
-	metadataInput: string | VoiceMetadata
-): VoiceMetadata | null => {
-	if ('string' !== typeof metadataInput) {
-		return isVoiceMetadata(metadataInput) ? metadataInput : null;
-	}
-
-	try {
-		const parsed = JSON.parse(metadataInput) as unknown;
-		return isVoiceMetadata(parsed) ? parsed : null;
-	} catch {
-		return null;
-	}
-};
 
 const parseBigIntLike = (value: bigint | number | string | undefined): bigint | null => {
 	if (undefined === value) {
@@ -138,19 +103,8 @@ const normalizeIssueVoiceOptions = (
 
 export const issueFamilyVoiceOnChain = async (
 	privateKey: string,
-	metadataKeySeed: string,
-	metadataValue: string | VoiceMetadata,
 	options?: IssueVoiceOptions
 ): Promise<IssueVoiceResult> => {
-	const normalizedMetadata = normalizeVoiceMetadataValue(metadataValue);
-	if (!normalizedMetadata) {
-		return {
-			ok: false,
-			error: 'invalid_metadata',
-			message: 'metadata must include name(string) and detail(string).'
-		};
-	}
-
 	const normalizedOptions = normalizeIssueVoiceOptions(options);
 	if (!normalizedOptions) {
 		const divisibility = options?.divisibility;
@@ -177,7 +131,6 @@ export const issueFamilyVoiceOnChain = async (
 		};
 	}
 
-	const metadataValueText = JSON.stringify(normalizedMetadata);
 	const account = generateAccountFromPrivateKey(facade, privateKey);
 
 	const mosaicFlagOptions: MosaicFlagOptions = {
@@ -208,17 +161,6 @@ export const issueFamilyVoiceOnChain = async (
 		}
 	);
 
-	const metadataKey = metadataGenerateKey(metadataKeySeed);
-	const embeddedMosaicMetadata = createMosaicMetadataTransaction(
-		facade,
-		account,
-		{
-			mosaicId,
-			scopedMetadataKey: metadataKey,
-			metadataValue: metadataValueText
-		}
-	);
-
 	const { transaction } = createAggregateTransaction(
 		facade,
 		account,
@@ -227,8 +169,7 @@ export const issueFamilyVoiceOnChain = async (
 			deadlineHours,
 			embeddedTransactions: [
 				embeddedMosaicDefinition,
-				embeddedMosaicSupplyIncrease,
-				embeddedMosaicMetadata
+				embeddedMosaicSupplyIncrease
 			],
 			feeMultiplier
 		}

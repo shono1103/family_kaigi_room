@@ -116,7 +116,6 @@ describe("family register use case integration", () => {
 			normalizeMosaicIdHex(result.family.familyVoiceMosaicId),
 		);
 		expect(voiceReadResult.ownershipStatus).toBe("owned");
-		expect(voiceReadResult.voiceMetadata.name).toBe(`${familyName} voice`);
-		expect(voiceReadResult.voiceMetadata.detail).toBe(`Family voice for ${familyName}`);
+		expect(voiceReadResult.amountRaw).toBe("1000");
 	}, INTEGRATION_TIMEOUT_MS);
 });

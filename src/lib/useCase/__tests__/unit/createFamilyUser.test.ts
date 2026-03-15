@@ -55,7 +55,7 @@ describe("createFamilyUser use case", () => {
 			familyRole: "child",
 		});
 
-		const { createFamilyUser } = await import("../../createFamilyUser");
+		const { createFamilyUser } = await import("../../family/createFamilyUser");
 		const result = await createFamilyUser({
 			requesterUserId: "owner-id",
 			email: "Child@example.com",
@@ -94,7 +94,7 @@ describe("createFamilyUser use case", () => {
 			isFamilyOwner: false,
 		});
 
-		const { createFamilyUser } = await import("../../createFamilyUser");
+		const { createFamilyUser } = await import("../../family/createFamilyUser");
 
 		await expect(
 			createFamilyUser({
@@ -119,7 +119,7 @@ describe("createFamilyUser use case", () => {
 			email: "child@example.com",
 		});
 
-		const { createFamilyUser } = await import("../../createFamilyUser");
+		const { createFamilyUser } = await import("../../family/createFamilyUser");
 
 		await expect(
 			createFamilyUser({

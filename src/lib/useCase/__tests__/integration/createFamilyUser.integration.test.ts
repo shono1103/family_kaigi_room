@@ -7,7 +7,7 @@ import { readUserInfoByUserId } from "@/lib/db/userInfo/read";
 import { cleanupFamiliesByIds, createIntegrationFamilyInput } from "@/lib/testing/integration/db/family";
 import { DB_INTEGRATION_TIMEOUT_MS } from "@/lib/testing/integration/db/timeout";
 import { ensureDbIntegrationEnv } from "@/lib/testing/integration/db/env";
-import { createFamilyUser } from "@/lib/useCase/createFamilyUser";
+import { createFamilyUser } from "@/lib/useCase/family/createFamilyUser";
 
 describe("createFamilyUser use case integration", () => {
 	const createdFamilyIds: string[] = [];

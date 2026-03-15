@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentAuth } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { issueQuest } from "@/lib/useCase/issueQuest";
+import { issueQuest } from "@/lib/useCase/quest/issueQuest";
 
 const MAX_TITLE_LENGTH = 100;
 const MAX_DETAIL_LENGTH = 1200;

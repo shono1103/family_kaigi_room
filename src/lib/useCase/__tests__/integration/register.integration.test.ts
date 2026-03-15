@@ -14,7 +14,7 @@ import { facade } from "@/lib/symbol/config";
 import { getCurrencyDetailsByPublicKey } from "@/lib/symbol/useCase/currency/read";
 import { normalizeMosaicIdHex } from "@/lib/symbol/utils/normalizers";
 import { generateAccountFromPrivateKey } from "@/lib/symbol/utils/accounts";
-import { registerFamily } from "@/lib/useCase/registerFamily";
+import { registerFamily } from "@/lib/useCase/family/registerFamily";
 
 describe("family register use case integration", () => {
 	const createdFamilyIds: string[] = [];

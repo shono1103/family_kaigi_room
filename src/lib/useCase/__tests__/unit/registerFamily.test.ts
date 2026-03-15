@@ -71,7 +71,7 @@ describe("registerFamily unique precheck", () => {
 		userFindUniqueMock.mockResolvedValueOnce({ id: "existing-user-id" });
 		userInfoFindUniqueMock.mockResolvedValueOnce(null);
 
-		const { registerFamily } = await import("../../registerFamily");
+		const { registerFamily } = await import("../../family/registerFamily");
 
 		await expect(
 			registerFamily({
@@ -90,7 +90,7 @@ describe("registerFamily unique precheck", () => {
 		userFindUniqueMock.mockResolvedValueOnce(null);
 		userInfoFindUniqueMock.mockResolvedValueOnce({ userId: "existing-user-info-id" });
 
-		const { registerFamily } = await import("../../registerFamily");
+		const { registerFamily } = await import("../../family/registerFamily");
 
 		await expect(
 			registerFamily({

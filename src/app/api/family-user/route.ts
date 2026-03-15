@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { FamilyRole } from "@prisma/client";
 import { getCurrentAuth } from "@/lib/auth/session";
-import { createFamilyUser } from "@/lib/useCase/createFamilyUser";
+import { createFamilyUser } from "@/lib/useCase/family/createFamilyUser";
 
 function jsonError(message: string, status: number) {
 	return NextResponse.json({ ok: false, message }, { status });

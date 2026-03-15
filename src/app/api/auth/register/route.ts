@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { hashPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
-import { registerFamily } from "@/lib/useCase/registerFamily";
+import { registerFamily } from "@/lib/useCase/family/registerFamily";
 
 function redirectToSignup(request: Request, error: string) {
 	const url = new URL("/login", request.url);

@@ -159,6 +159,7 @@ export function HomeClient({
 							<AllowancePanel
 								isActive={activeIndex === 2}
 								index={2}
+								userVoiceAmountRaw={userVoiceAmountRaw}
 								xymMarketPriceJpy={xymMarketPriceJpy}
 							/>
 							<FamilyMembersPanel

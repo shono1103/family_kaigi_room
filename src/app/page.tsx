@@ -90,37 +90,16 @@ export default async function Home({ searchParams }: HomePageProps) {
 					: ownedMosaics.status,
 			tickets: [],
 		};
-	const questTargetUsers = family?.id
-		? (
-			await prisma.user.findMany({
-				where: {
-					familyId: family.id,
-					id: {
-						not: auth.user.id,
-					},
-				},
-				select: {
-					id: true,
-					email: true,
-					userInfo: {
-						select: {
-							name: true,
-						},
-					},
-				},
-				orderBy: {
-					createdAt: "asc",
-				},
-			})
-		).map((user) => ({
-			id: user.id,
-			label: user.userInfo?.name?.trim() || user.email,
-		}))
-		: [];
 	const familyMembers = (await listFamilyMembers(auth.user.id)).map((member) => ({
 		...member,
 		isCurrentUser: member.id === auth.user.id,
 	}));
+	const questTargetUsers = familyMembers
+		.filter((member) => !member.isCurrentUser)
+		.map((member) => ({
+			id: member.id,
+			label: member.name,
+		}));
 
 	return (
 		<HomeClient

@@ -30,7 +30,7 @@ vi.mock("@/lib/prisma", () => ({
 	},
 }));
 
-describe("addUser use case", () => {
+describe("createFamilyUser use case", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		transactionMock.mockImplementation(async (callback) => callback("tx-mock"));
@@ -55,8 +55,8 @@ describe("addUser use case", () => {
 			familyRole: "child",
 		});
 
-		const { addUser } = await import("../../addUser");
-		const result = await addUser({
+		const { createFamilyUser } = await import("../../createFamilyUser");
+		const result = await createFamilyUser({
 			requesterUserId: "owner-id",
 			email: "Child@example.com",
 			name: "Child User",
@@ -94,16 +94,16 @@ describe("addUser use case", () => {
 			isFamilyOwner: false,
 		});
 
-		const { addUser } = await import("../../addUser");
+		const { createFamilyUser } = await import("../../createFamilyUser");
 
 		await expect(
-			addUser({
+			createFamilyUser({
 				requesterUserId: "normal-id",
 				email: "child@example.com",
 				name: "Child User",
 				familyRole: "child",
 			}),
-		).rejects.toThrow("only family owner can add user");
+		).rejects.toThrow("only family owner can create family user");
 		expect(createUserMock).not.toHaveBeenCalled();
 		expect(createUserInfoMock).not.toHaveBeenCalled();
 	});
@@ -119,10 +119,10 @@ describe("addUser use case", () => {
 			email: "child@example.com",
 		});
 
-		const { addUser } = await import("../../addUser");
+		const { createFamilyUser } = await import("../../createFamilyUser");
 
 		await expect(
-			addUser({
+			createFamilyUser({
 				requesterUserId: "owner-id",
 				email: "child@example.com",
 				name: "Child User",

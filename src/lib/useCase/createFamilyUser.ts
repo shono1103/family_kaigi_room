@@ -6,19 +6,21 @@ import { createUserInfo, type CreateUserInfoInput } from "@/lib/db/userInfo/crea
 import { readUserByEmail, readUserById } from "@/lib/db/user/read";
 import { prisma } from "@/lib/prisma";
 
-export type AddUserInput = Readonly<{
+export type CreateFamilyUserInput = Readonly<{
 	requesterUserId: string;
 	email: CreateUserInput["email"];
 	name: CreateUserInfoInput["name"];
 	familyRole: FamilyRole;
 }>;
 
-export type AddUserResult = Readonly<{
+export type CreateFamilyUserResult = Readonly<{
 	user: Awaited<ReturnType<typeof createUser>>;
 	initialPassword: string;
 }>;
 
-export async function addUser(input: AddUserInput): Promise<AddUserResult> {
+export async function createFamilyUser(
+	input: CreateFamilyUserInput,
+): Promise<CreateFamilyUserResult> {
 	const requesterUserId = input.requesterUserId.trim();
 	const email = input.email.trim().toLowerCase();
 	const name = input.name.trim();
@@ -41,7 +43,7 @@ export async function addUser(input: AddUserInput): Promise<AddUserResult> {
 	}
 
 	if (!requester.isFamilyOwner) {
-		throw new Error("only family owner can add user");
+		throw new Error("only family owner can create family user");
 	}
 
 	const existingUser = await readUserByEmail(email);

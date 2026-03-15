@@ -7,9 +7,9 @@ import { readUserInfoByUserId } from "@/lib/db/userInfo/read";
 import { cleanupFamiliesByIds, createIntegrationFamilyInput } from "@/lib/testing/integration/db/family";
 import { DB_INTEGRATION_TIMEOUT_MS } from "@/lib/testing/integration/db/timeout";
 import { ensureDbIntegrationEnv } from "@/lib/testing/integration/db/env";
-import { addUser } from "@/lib/useCase/addUser";
+import { createFamilyUser } from "@/lib/useCase/createFamilyUser";
 
-describe("addUser use case integration", () => {
+describe("createFamilyUser use case integration", () => {
 	const createdFamilyIds: string[] = [];
 
 	beforeAll(() => {
@@ -34,7 +34,7 @@ describe("addUser use case integration", () => {
 		});
 
 		const newUserEmail = `add-user-child-${Date.now()}@example.com`;
-		const result = await addUser({
+		const result = await createFamilyUser({
 			requesterUserId: owner.id,
 			email: newUserEmail,
 			name: "Added Child",
@@ -68,12 +68,12 @@ describe("addUser use case integration", () => {
 		});
 
 		await expect(
-			addUser({
+			createFamilyUser({
 				requesterUserId: normalUser.id,
 				email: `blocked-child-${Date.now()}@example.com`,
 				name: "Blocked Child",
 				familyRole: FamilyRole.child,
 			}),
-		).rejects.toThrow("only family owner can add user");
+		).rejects.toThrow("only family owner can create family user");
 	}, DB_INTEGRATION_TIMEOUT_MS);
 });

@@ -5,23 +5,29 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Header } from "./header";
 import { Sidebar } from "./sidebar";
 import { FamilyCurrencyPanel } from "./mainPanel/familyCurrencyPanel";
+import { FamilyUserPanel } from "./mainPanel/familyUserPanel";
 import { QuestPanel } from "./mainPanel/questPanel";
 import { BaseInfoPanel } from "./mainPanel/baseInfoPanel";
 import type { OwnedTicketsResult } from "@/lib/symbol/useCase/ticket/result";
 import type { ReadAccountOwnedMosaicsResult } from "@/lib/symbol/useCase/account/read";
 import type { GetCurrencyDetailsResult } from "@/lib/symbol/useCase/currency/read";
 
-const tabs = [
-	{ label: "クエスト", key: "tickets" },
-	{ label: "スコア", key: "balance" },
-	{ label: "設定", key: "base-info" },
-] as const;
+type HomeTab = Readonly<{
+	label: string;
+	key: string;
+}>;
 
-type HomeTabKey = (typeof tabs)[number]["key"];
-const HOME_TAB_KEY_SET = new Set<HomeTabKey>(tabs.map((tab) => tab.key));
+function buildTabs(isFamilyOwner: boolean): HomeTab[] {
+	return [
+		{ label: "クエスト", key: "tickets" },
+		{ label: "スコア", key: "balance" },
+		...(isFamilyOwner ? [{ label: "家族追加", key: "family-user" }] : []),
+		{ label: "設定", key: "base-info" },
+	];
+}
 
-function toTabIndex(tab: string | null | undefined) {
-	if (!tab || !HOME_TAB_KEY_SET.has(tab as HomeTabKey)) {
+function toTabIndex(tab: string | null | undefined, tabs: HomeTab[]) {
+	if (!tab || !new Set(tabs.map((item) => item.key)).has(tab)) {
 		return 0;
 	}
 
@@ -30,6 +36,7 @@ function toTabIndex(tab: string | null | undefined) {
 
 type HomeClientProps = {
 	userEmail: string;
+	isFamilyOwner: boolean;
 	familyName: string | null;
 	userInfo: {
 		name: string;
@@ -47,6 +54,7 @@ type HomeClientProps = {
 
 export function HomeClient({
 	userEmail,
+	isFamilyOwner,
 	familyName,
 	userInfo,
 	familyCurrency,
@@ -58,12 +66,16 @@ export function HomeClient({
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
-	const initialActiveIndex = useMemo(() => toTabIndex(initialTab), [initialTab]);
+	const tabs = useMemo(() => buildTabs(isFamilyOwner), [isFamilyOwner]);
+	const initialActiveIndex = useMemo(
+		() => toTabIndex(initialTab, tabs),
+		[initialTab, tabs],
+	);
 	const [activeIndex, setActiveIndex] = useState(initialActiveIndex);
 
 	useEffect(() => {
-		setActiveIndex(toTabIndex(searchParams.get("tab")));
-	}, [searchParams]);
+		setActiveIndex(toTabIndex(searchParams.get("tab"), tabs));
+	}, [searchParams, tabs]);
 
 	const handleTabClick = (index: number) => {
 		setActiveIndex(index);
@@ -89,20 +101,26 @@ export function HomeClient({
 					/>
 					<main className="rounded-[32px] border border-black/10 bg-white/92 shadow-[0_18px_55px_rgba(20,15,45,0.08)] backdrop-blur lg:min-h-0 lg:overflow-hidden">
 						<div className="px-6 py-6 md:px-8 md:py-8 lg:h-full lg:overflow-y-auto lg:overscroll-contain">
-								<QuestPanel
-									isActive={activeIndex === 0}
-									index={0}
-									targetUsers={questTargetUsers}
-								/>
+							<QuestPanel
+								isActive={activeIndex === 0}
+								index={0}
+								targetUsers={questTargetUsers}
+							/>
 							<FamilyCurrencyPanel
 								isActive={activeIndex === 1}
 								index={1}
 								familyName={familyName}
 								familyCurrency={familyCurrency}
 							/>
+							{isFamilyOwner ? (
+								<FamilyUserPanel
+									isActive={activeIndex === 2}
+									index={2}
+								/>
+							) : null}
 							<BaseInfoPanel
-								isActive={activeIndex === 2}
-								index={2}
+								isActive={activeIndex === (isFamilyOwner ? 3 : 2)}
+								index={isFamilyOwner ? 3 : 2}
 								userEmail={userEmail}
 								userInfo={userInfo}
 							/>

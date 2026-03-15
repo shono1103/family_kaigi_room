@@ -16,7 +16,7 @@ export default async function Home({ searchParams }: HomePageProps) {
 	const auth = await requireAuth();
 	const user = await prisma.user.findUnique({
 		where: { id: auth.user.id },
-		select: { isFirst: true },
+		select: { isFirst: true, isFamilyOwner: true },
 	});
 	if (user?.isFirst) {
 		redirect("/first-login");
@@ -120,6 +120,7 @@ export default async function Home({ searchParams }: HomePageProps) {
 	return (
 		<HomeClient
 			userEmail={auth.user.email}
+			isFamilyOwner={user?.isFamilyOwner ?? false}
 			familyName={family?.familyName ?? null}
 			userInfo={userInfo}
 			familyCurrency={familyCurrency}

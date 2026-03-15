@@ -9,8 +9,6 @@ import { FamilyMembersPanel } from "./mainPanel/familyMembersPanel";
 import { FamilyUserPanel } from "./mainPanel/familyUserPanel";
 import { QuestPanel } from "./mainPanel/questPanel";
 import { BaseInfoPanel } from "./mainPanel/baseInfoPanel";
-import type { OwnedTicketsResult } from "@/lib/symbol/useCase/ticket/result";
-import type { ReadAccountOwnedMosaicsResult } from "@/lib/symbol/useCase/account/read";
 import type { GetVoiceDetailsResult } from "@/lib/symbol/useCase/voice/read";
 
 type HomeTab = Readonly<{
@@ -45,8 +43,6 @@ type HomeClientProps = {
 		symbolPubKey: string | null;
 	} | null;
 	familyVoice: GetVoiceDetailsResult;
-	ownedMosaics?: ReadAccountOwnedMosaicsResult;
-	ownedTickets: OwnedTicketsResult;
 	issuedQuests: Array<{
 		id: string;
 		title: string;
@@ -97,8 +93,6 @@ export function HomeClient({
 	familyName,
 	userInfo,
 	familyVoice,
-	ownedMosaics: _ownedMosaics,
-	ownedTickets: _ownedTickets,
 	issuedQuests,
 	questTargetUsers,
 	familyMembers,

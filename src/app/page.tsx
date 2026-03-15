@@ -4,6 +4,7 @@ import { requireAuth } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { readUserFamilyByUserId } from "@/lib/db/user/read";
 import { listFamilyMembers } from "@/lib/useCase/family/listFamilyMembers";
+import { getXymMargetPrice } from "@/lib/useCase/getXymMargetPrice";
 import { listIssuedQuests } from "@/lib/useCase/quest/listIssuedQuests";
 import { listTargetQuests } from "@/lib/useCase/quest/listTargetQuests";
 import { readUserVoice } from "@/lib/useCase/user/readUserVoice";
@@ -33,9 +34,10 @@ export default async function Home({ searchParams }: HomePageProps) {
 			symbolPubKey: true,
 		},
 	});
-	const [userWithFamily, userVoice] = await Promise.all([
+	const [userWithFamily, userVoice, xymMarketPrice] = await Promise.all([
 		readUserFamilyByUserId(auth.user.id),
 		readUserVoice(auth.user.id),
+		getXymMargetPrice(),
 	]);
 	const family = userWithFamily?.family ?? null;
 	const familyMembers = (await listFamilyMembers(auth.user.id)).map((member) => ({
@@ -60,6 +62,7 @@ export default async function Home({ searchParams }: HomePageProps) {
 			familyName={family?.familyName ?? null}
 			userInfo={userInfo}
 			userVoiceAmountRaw={userVoice.ok ? userVoice.amountRaw : "0"}
+			xymMarketPriceJpy={xymMarketPrice.ok ? xymMarketPrice.jpy : null}
 			issuedQuests={issuedQuests}
 			questTargetUsers={questTargetUsers}
 			familyMembers={familyMembers}

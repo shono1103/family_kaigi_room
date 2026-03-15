@@ -7,6 +7,7 @@ import { createUserInfo } from "../../src/lib/db/userInfo/create";
 import { facade } from "../../src/lib/symbol/config";
 import { createSymbolAccount } from "../../src/lib/symbol/useCase/account/create";
 import { issueFamilyVoiceOnChain } from "../../src/lib/symbol/useCase/voice/create";
+import { sendVoiceOnChain } from "../../src/lib/symbol/useCase/voice/send";
 import { sendXymOnChain } from "../../src/lib/symbol/useCase/xymBalance/send";
 import { generateAccountFromPrivateKey } from "../../src/lib/symbol/utils/accounts";
 import type { Prisma } from "@prisma/client";
@@ -14,6 +15,7 @@ import type { Prisma } from "@prisma/client";
 let initialUserPromise: Promise<void> | null = null;
 const INITIAL_FAMILY_NAME = "Initial Admin Family";
 const INITIAL_FAMILY_XYM_AMOUNT_RAW = 100_000_000n;
+const INITIAL_OWNER_FAMILY_VOICE_AMOUNT_RAW = 10n;
 const INITIAL_ADMIN_NAME = "Initial Admin";
 
 function getRequiredEnv(name: string): string {
@@ -90,6 +92,19 @@ async function registerInitialAdminFamily() {
 		if (!issueVoiceResult.ok) {
 			throw new Error(
 				`Failed to issue family voice: [${issueVoiceResult.error}] ${issueVoiceResult.message}`,
+			);
+		}
+
+		const grantVoiceResult = await sendVoiceOnChain(
+			familySymbolAccount.privateKey,
+			initialAdminSymbolAccount.publicKey.toString(),
+			issueVoiceResult.mosaicIdHex,
+			INITIAL_OWNER_FAMILY_VOICE_AMOUNT_RAW,
+			"Initial family voice grant for owner",
+		);
+		if (!grantVoiceResult.ok) {
+			throw new Error(
+				`Failed to grant initial family voice to owner: [${grantVoiceResult.status}] ${grantVoiceResult.message}`,
 			);
 		}
 

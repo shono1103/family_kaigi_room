@@ -33,10 +33,11 @@ export default async function Home({ searchParams }: HomePageProps) {
 			symbolPubKey: true,
 		},
 	});
-	const [{ family }, userVoice] = await Promise.all([
+	const [userWithFamily, userVoice] = await Promise.all([
 		readUserFamilyByUserId(auth.user.id),
 		readUserVoice(auth.user.id),
 	]);
+	const family = userWithFamily?.family ?? null;
 	const familyMembers = (await listFamilyMembers(auth.user.id)).map((member) => ({
 		...member,
 		isCurrentUser: member.id === auth.user.id,

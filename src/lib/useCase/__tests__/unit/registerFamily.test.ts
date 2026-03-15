@@ -4,6 +4,7 @@ const createSymbolAccountMock = vi.fn();
 const generateAccountFromPrivateKeyMock = vi.fn();
 const sendXymOnChainMock = vi.fn();
 const issueFamilyVoiceOnChainMock = vi.fn();
+const sendVoiceOnChainMock = vi.fn();
 const transactionMock = vi.fn();
 const userFindUniqueMock = vi.fn();
 const userInfoFindUniqueMock = vi.fn();
@@ -40,6 +41,10 @@ vi.mock("@/lib/symbol/useCase/voice/create", () => ({
 	issueFamilyVoiceOnChain: issueFamilyVoiceOnChainMock,
 }));
 
+vi.mock("@/lib/symbol/useCase/voice/send", () => ({
+	sendVoiceOnChain: sendVoiceOnChainMock,
+}));
+
 vi.mock("@/lib/db/family/create", () => ({
 	createFamily: vi.fn(),
 }));
@@ -65,6 +70,13 @@ describe("registerFamily unique precheck", () => {
 			},
 		});
 		transactionMock.mockImplementation(async (callback) => callback("tx-mock"));
+		sendVoiceOnChainMock.mockResolvedValue({
+			ok: true,
+			status: "ok",
+			transactionHash: "voice-hash",
+			mosaicIdHex: "0x0123456789ABCDEF",
+			amountRaw: "10",
+		});
 	});
 
 	test("owner email が既に使われている場合は Symbol 処理前に失敗する", async () => {

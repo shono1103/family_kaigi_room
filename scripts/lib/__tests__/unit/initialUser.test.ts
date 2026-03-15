@@ -10,6 +10,7 @@ const createSymbolAccountMock = vi.fn();
 const generateAccountFromPrivateKeyMock = vi.fn();
 const sendXymOnChainMock = vi.fn();
 const issueFamilyVoiceOnChainMock = vi.fn();
+const sendVoiceOnChainMock = vi.fn();
 
 vi.mock("../../../../src/lib/prisma", () => ({
 	prisma: {
@@ -56,6 +57,10 @@ vi.mock("../../../../src/lib/symbol/useCase/voice/create", () => ({
 	issueFamilyVoiceOnChain: issueFamilyVoiceOnChainMock,
 }));
 
+vi.mock("../../../../src/lib/symbol/useCase/voice/send", () => ({
+	sendVoiceOnChain: sendVoiceOnChainMock,
+}));
+
 describe("scripts/lib/initialUser", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -64,6 +69,13 @@ describe("scripts/lib/initialUser", () => {
 		delete process.env.INITIAL_ADMIN_PASSWORD;
 		delete process.env.INITIAL_ADMIN_SYMBOL_PRIVATE_KEY;
 		transactionMock.mockImplementation(async (callback) => callback("tx-mock"));
+		sendVoiceOnChainMock.mockResolvedValue({
+			ok: true,
+			status: "ok",
+			transactionHash: "voice-hash",
+			mosaicIdHex: "0x0123456789ABCDEF",
+			amountRaw: "10",
+		});
 	});
 
 	test("users が存在する場合は何もしない", async () => {
@@ -119,6 +131,13 @@ describe("scripts/lib/initialUser", () => {
 		expect(hashPasswordMock).toHaveBeenCalledWith("admin");
 		expect(sendXymOnChainMock).toHaveBeenCalled();
 		expect(issueFamilyVoiceOnChainMock).toHaveBeenCalled();
+		expect(sendVoiceOnChainMock).toHaveBeenCalledWith(
+			"family-private-key",
+			"owner-public-key",
+			"0x0123456789ABCDEF",
+			10n,
+			"Initial family voice grant for owner",
+		);
 		expect(createFamilyMock).toHaveBeenCalledWith(
 			{
 				familyName: "Initial Admin Family",

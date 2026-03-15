@@ -5,12 +5,14 @@ import { createUserInfo, type CreateUserInfoInput } from "@/lib/db/userInfo/crea
 import { prisma } from "@/lib/prisma";
 import { facade } from "@/lib/symbol/config";
 import { issueFamilyVoiceOnChain } from "@/lib/symbol/useCase/voice/create";
+import { sendVoiceOnChain } from "@/lib/symbol/useCase/voice/send";
 import { createSymbolAccount } from "@/lib/symbol/useCase/account/create";
 import { sendXymOnChain } from "@/lib/symbol/useCase/xymBalance/send";
 import { generateAccountFromPrivateKey } from "@/lib/symbol/utils/accounts";
 import type { Prisma } from "@prisma/client";
 
 const INITIAL_FAMILY_XYM_AMOUNT_RAW = 100_000_000n;
+const INITIAL_OWNER_FAMILY_VOICE_AMOUNT_RAW = 10n;
 
 export type RegisterFamilyInput = Readonly<{
 	familyName: CreateFamilyInput["familyName"];
@@ -70,6 +72,20 @@ export async function registerFamily(
 	if (!issueFamilyVoiceResult.ok) {
 		throw new Error(
 			`Failed to issue family voice: [${issueFamilyVoiceResult.error}] ${issueFamilyVoiceResult.message}`,
+		);
+	}
+
+	const grantVoiceResult = await sendVoiceOnChain(
+		symbolAccount.privateKey,
+		ownerUserSymbolAccount.publicKey.toString(),
+		issueFamilyVoiceResult.mosaicIdHex,
+		INITIAL_OWNER_FAMILY_VOICE_AMOUNT_RAW,
+		"Initial family voice grant for owner",
+	);
+	console.log("[usecase:family:register] grantVoiceResult", grantVoiceResult);
+	if (!grantVoiceResult.ok) {
+		throw new Error(
+			`Failed to grant initial family voice to owner: [${grantVoiceResult.status}] ${grantVoiceResult.message}`,
 		);
 	}
 

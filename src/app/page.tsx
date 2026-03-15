@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { HomeClient } from "./components/home/homeClient";
 import { requireAuth } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
@@ -13,6 +14,13 @@ type HomePageProps = {
 
 export default async function Home({ searchParams }: HomePageProps) {
 	const auth = await requireAuth();
+	const user = await prisma.user.findUnique({
+		where: { id: auth.user.id },
+		select: { isFirst: true },
+	});
+	if (user?.isFirst) {
+		redirect("/first-login");
+	}
 	const resolvedSearchParams = searchParams ? await searchParams : undefined;
 	const userInfo = await prisma.userInfo.findUnique({
 		where: {

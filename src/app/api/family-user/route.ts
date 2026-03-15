@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { FamilyRole } from "@prisma/client";
 import { getCurrentAuth } from "@/lib/auth/session";
 import { addUser } from "@/lib/useCase/addUser";
 
@@ -14,20 +15,38 @@ export async function POST(request: Request) {
 
 	const formData = await request.formData();
 	const email = formData.get("email");
+	const name = formData.get("name");
+	const familyRole = formData.get("familyRole");
 
-	if (typeof email !== "string") {
+	if (
+		typeof email !== "string" ||
+		typeof name !== "string" ||
+		typeof familyRole !== "string"
+	) {
 		return jsonError("入力値が不正です。", 400);
 	}
 
 	const normalizedEmail = email.trim().toLowerCase();
+	const normalizedName = name.trim();
+
 	if (!normalizedEmail) {
 		return jsonError("メールアドレスを入力してください。", 400);
+	}
+
+	if (!normalizedName) {
+		return jsonError("名前を入力してください。", 400);
+	}
+
+	if (!Object.values(FamilyRole).includes(familyRole as FamilyRole)) {
+		return jsonError("familyRole が不正です。", 400);
 	}
 
 	try {
 		const result = await addUser({
 			requesterUserId: auth.user.id,
 			email: normalizedEmail,
+			name: normalizedName,
+			familyRole: familyRole as FamilyRole,
 		});
 
 		return NextResponse.json({

@@ -66,6 +66,18 @@ export function FamilyUserAddPanel({}: FamilyUserAddPanelProps) {
 			>
 				<label className="block">
 					<span className="mb-2 block text-xs font-bold text-[#2b2b3e]">
+						名前
+					</span>
+					<input
+						type="text"
+						name="name"
+						required
+						className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm outline-none transition focus:border-[#7c5cff] focus:shadow-[0_0_0_4px_rgba(124,92,255,0.12)]"
+						placeholder="例: 山田 花子"
+					/>
+				</label>
+				<label className="block">
+					<span className="mb-2 block text-xs font-bold text-[#2b2b3e]">
 						新規ユーザーのメールアドレス
 					</span>
 					<input
@@ -76,6 +88,21 @@ export function FamilyUserAddPanel({}: FamilyUserAddPanelProps) {
 						className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm outline-none transition focus:border-[#7c5cff] focus:shadow-[0_0_0_4px_rgba(124,92,255,0.12)]"
 						placeholder="new-user@example.com"
 					/>
+				</label>
+				<label className="block">
+					<span className="mb-2 block text-xs font-bold text-[#2b2b3e]">
+						Family Role
+					</span>
+					<select
+						name="familyRole"
+						required
+						defaultValue="child"
+						className="w-full rounded-xl border border-black/10 bg-white px-3 py-2 text-sm outline-none transition focus:border-[#7c5cff] focus:shadow-[0_0_0_4px_rgba(124,92,255,0.12)]"
+					>
+						<option value="father">father</option>
+						<option value="mother">mother</option>
+						<option value="child">child</option>
+					</select>
 				</label>
 				<p className="text-xs font-semibold text-[#4b4b65]">
 					初期パスワードは入力したメールアドレスになります。初回ログイン時に再設定します。

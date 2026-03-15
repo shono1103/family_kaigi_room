@@ -1,13 +1,16 @@
 import type { Prisma } from "@prisma/client";
-import { UserRole } from "@prisma/client";
+import { FamilyRole, UserRole } from "@prisma/client";
 import { hashPassword } from "@/lib/auth/password";
 import { createUser, type CreateUserInput } from "@/lib/db/user/create";
+import { createUserInfo, type CreateUserInfoInput } from "@/lib/db/userInfo/create";
 import { readUserByEmail, readUserById } from "@/lib/db/user/read";
 import { prisma } from "@/lib/prisma";
 
 export type AddUserInput = Readonly<{
 	requesterUserId: string;
 	email: CreateUserInput["email"];
+	name: CreateUserInfoInput["name"];
+	familyRole: FamilyRole;
 }>;
 
 export type AddUserResult = Readonly<{
@@ -18,6 +21,7 @@ export type AddUserResult = Readonly<{
 export async function addUser(input: AddUserInput): Promise<AddUserResult> {
 	const requesterUserId = input.requesterUserId.trim();
 	const email = input.email.trim().toLowerCase();
+	const name = input.name.trim();
 
 	if (!requesterUserId) {
 		throw new Error("requesterUserId is required");
@@ -25,6 +29,10 @@ export async function addUser(input: AddUserInput): Promise<AddUserResult> {
 
 	if (!email) {
 		throw new Error("email is required");
+	}
+
+	if (!name) {
+		throw new Error("name is required");
 	}
 
 	const requester = await readUserById(requesterUserId);
@@ -44,8 +52,8 @@ export async function addUser(input: AddUserInput): Promise<AddUserResult> {
 	const initialPassword = email;
 	const passwordHash = hashPassword(initialPassword);
 
-	const user = await prisma.$transaction(async (tx: Prisma.TransactionClient) =>
-		createUser(
+	const user = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+		const createdUser = await createUser(
 			{
 				email,
 				passwordHash,
@@ -55,8 +63,19 @@ export async function addUser(input: AddUserInput): Promise<AddUserResult> {
 				role: UserRole.normal,
 			},
 			tx,
-		),
-	);
+		);
+
+		await createUserInfo(
+			{
+				userId: createdUser.id,
+				name,
+				familyRole: input.familyRole,
+			},
+			tx,
+		);
+
+		return createdUser;
+	});
 
 	return {
 		user,

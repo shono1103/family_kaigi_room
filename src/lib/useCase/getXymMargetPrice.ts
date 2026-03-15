@@ -1,5 +1,6 @@
 const XYM_MARKET_PRICE_ENDPOINT =
 	"https://api.coingecko.com/api/v3/simple/price?ids=symbol&vs_currencies=jpy,usd";
+const XYM_MARKET_PRICE_REVALIDATE_SECONDS = 300;
 
 type GetXymMargetPriceSuccess = Readonly<{
 	ok: true;
@@ -35,7 +36,9 @@ export async function getXymMargetPrice(): Promise<GetXymMargetPriceResult> {
 			headers: {
 				accept: "application/json",
 			},
-			cache: "no-store",
+			next: {
+				revalidate: XYM_MARKET_PRICE_REVALIDATE_SECONDS,
+			},
 		});
 
 		if (!response.ok) {

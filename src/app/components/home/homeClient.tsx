@@ -47,6 +47,20 @@ type HomeClientProps = {
 	familyCurrency: GetCurrencyDetailsResult;
 	ownedMosaics?: ReadAccountOwnedMosaicsResult;
 	ownedTickets: OwnedTicketsResult;
+	issuedQuests: Array<{
+		id: string;
+		title: string;
+		detail: string;
+		isResolved: string;
+		createdAt: Date;
+		updatedAt: Date;
+		targetUser: {
+			id: string;
+			email: string;
+			name: string | null;
+			familyRole: string | null;
+		} | null;
+	}>;
 	questTargetUsers: Array<{
 		id: string;
 		label: string;
@@ -60,6 +74,20 @@ type HomeClientProps = {
 		isFirst: boolean;
 		isCurrentUser: boolean;
 	}>;
+	targetQuests: Array<{
+		id: string;
+		title: string;
+		detail: string;
+		isResolved: string;
+		createdAt: Date;
+		updatedAt: Date;
+		issuerUser: {
+			id: string;
+			email: string;
+			name: string | null;
+			familyRole: string | null;
+		} | null;
+	}>;
 	initialTab?: string;
 };
 
@@ -71,8 +99,10 @@ export function HomeClient({
 	familyCurrency,
 	ownedMosaics: _ownedMosaics,
 	ownedTickets: _ownedTickets,
+	issuedQuests,
 	questTargetUsers,
 	familyMembers,
+	targetQuests,
 	initialTab,
 }: HomeClientProps) {
 	const router = useRouter();
@@ -120,7 +150,9 @@ export function HomeClient({
 							<QuestPanel
 								isActive={activeIndex === 0}
 								index={0}
+								issuedQuests={issuedQuests}
 								targetUsers={questTargetUsers}
+								targetQuests={targetQuests}
 							/>
 							<FamilyCurrencyPanel
 								isActive={activeIndex === 1}

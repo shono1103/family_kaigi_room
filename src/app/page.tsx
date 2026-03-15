@@ -6,6 +6,8 @@ import { readAccountOwnedMosaicsByPublicKey } from "@/lib/symbol/useCase/account
 import { getTicketDetails } from "@/lib/symbol/useCase/ticket/read";
 import { listFamilyMembers } from "@/lib/useCase/family/listFamilyMembers";
 import { readFamilyCurrencyForUser } from "@/lib/useCase/family/readFamilyCurrency";
+import { listIssuedQuests } from "@/lib/useCase/quest/listIssuedQuests";
+import { listTargetQuests } from "@/lib/useCase/quest/listTargetQuests";
 
 type HomePageProps = {
 	searchParams?: Promise<{
@@ -94,6 +96,10 @@ export default async function Home({ searchParams }: HomePageProps) {
 		...member,
 		isCurrentUser: member.id === auth.user.id,
 	}));
+	const [issuedQuests, targetQuests] = await Promise.all([
+		listIssuedQuests(auth.user.id),
+		listTargetQuests(auth.user.id),
+	]);
 	const questTargetUsers = familyMembers
 		.filter((member) => !member.isCurrentUser)
 		.map((member) => ({
@@ -110,8 +116,10 @@ export default async function Home({ searchParams }: HomePageProps) {
 			familyCurrency={familyCurrency}
 			ownedMosaics={ownedMosaics}
 			ownedTickets={ownedTickets}
+			issuedQuests={issuedQuests}
 			questTargetUsers={questTargetUsers}
 			familyMembers={familyMembers}
+			targetQuests={targetQuests}
 			initialTab={resolvedSearchParams?.tab}
 		/>
 	);

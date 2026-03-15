@@ -3,6 +3,34 @@ import type { FormEvent } from "react";
 export type QuestPanelProps = {
 	isActive: boolean;
 	index: number;
+	issuedQuests: Array<{
+		id: string;
+		title: string;
+		detail: string;
+		isResolved: string;
+		createdAt: Date;
+		updatedAt: Date;
+		targetUser: {
+			id: string;
+			email: string;
+			name: string | null;
+			familyRole: string | null;
+		} | null;
+	}>;
+	targetQuests: Array<{
+		id: string;
+		title: string;
+		detail: string;
+		isResolved: string;
+		createdAt: Date;
+		updatedAt: Date;
+		issuerUser: {
+			id: string;
+			email: string;
+			name: string | null;
+			familyRole: string | null;
+		} | null;
+	}>;
 	targetUsers: Array<{
 		id: string;
 		label: string;

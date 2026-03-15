@@ -109,7 +109,7 @@ export async function registerFamily(
 			{
 				ownerUserId: ownerUser.id,
 				ownerUserName: input.ownerUserName ?? `${input.familyName} Owner`,
-				ownerUserFamilyRole: input.ownerUserFamilyRole ?? FamilyRole.child,
+				ownerUserFamilyRole: input.ownerUserFamilyRole ?? FamilyRole.father,
 				ownerUserSymbolPubKey: ownerUserSymbolAccount.publicKey.toString(),
 			},
 			tx,

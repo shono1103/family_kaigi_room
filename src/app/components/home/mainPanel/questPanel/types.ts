@@ -7,7 +7,7 @@ export type QuestPanelProps = {
 		id: string;
 		title: string;
 		detail: string;
-		isResolved: string;
+		isResolved: boolean;
 		createdAt: Date;
 		updatedAt: Date;
 		targetUser: {
@@ -21,7 +21,7 @@ export type QuestPanelProps = {
 		id: string;
 		title: string;
 		detail: string;
-		isResolved: string;
+		isResolved: boolean;
 		createdAt: Date;
 		updatedAt: Date;
 		issuerUser: {
@@ -44,7 +44,7 @@ export type QuestIssueResponse = {
 		id: string;
 		title: string;
 		detail: string;
-		isResolved: string;
+		isResolved: boolean;
 	};
 };
 

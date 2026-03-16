@@ -69,7 +69,7 @@ describe("db quest CRUD integration", () => {
 			detail: "Clean your room for 30 minutes.",
 			issuerUserId: issuer.id,
 			targetUserId: target.id,
-			isResolved: "false",
+			isResolved: false,
 		});
 
 		questId = created.id;
@@ -78,7 +78,7 @@ describe("db quest CRUD integration", () => {
 		expect(created.userId).toBe(issuer.id);
 		expect(created.issuerUserId).toBe(issuer.id);
 		expect(created.targetUserId).toBe(target.id);
-		expect(created.isResolved).toBe("false");
+		expect(created.isResolved).toBe(false);
 	}, DB_INTEGRATION_TIMEOUT_MS);
 
 	test("read: id / userId / isResolved で quest を取得できる", async () => {
@@ -90,7 +90,7 @@ describe("db quest CRUD integration", () => {
 
 		const byId = await readQuestById(resolvedQuestId);
 		const byUserId = await readQuestsByUserId(issuerUserId);
-		const byIsResolved = await readQuestsByIsResolved("false");
+		const byIsResolved = await readQuestsByIsResolved(false);
 
 		expect(byId?.id).toBe(resolvedQuestId);
 		expect(byUserId.some((quest) => quest.id === resolvedQuestId)).toBe(true);
@@ -103,13 +103,13 @@ describe("db quest CRUD integration", () => {
 		const updated = await updateQuest(resolvedQuestId, {
 			title: "Clean the kitchen",
 			detail: "Clean the kitchen after dinner.",
-			isResolved: "true",
+			isResolved: true,
 		});
 
 		expect(updated.id).toBe(resolvedQuestId);
 		expect(updated.title).toBe("Clean the kitchen");
 		expect(updated.detail).toBe("Clean the kitchen after dinner.");
-		expect(updated.isResolved).toBe("true");
+		expect(updated.isResolved).toBe(true);
 	}, DB_INTEGRATION_TIMEOUT_MS);
 
 	test("delete: quest を削除できる", async () => {

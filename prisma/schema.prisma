@@ -44,6 +44,7 @@ model User {
   sessions      Session[]
   userInfo      UserInfo?
   quests        Quest[]
+  discussions   Discussion[]
 
   @@index([familyId])
   @@map("users")
@@ -85,7 +86,7 @@ model Quest {
   detail       String
   issuerUserId String   @map("issuer_user_id") @db.Uuid
   targetUserId String   @map("target_user_id") @db.Uuid
-  isResolved   String   @map("is_resolved")
+  isResolved   Boolean  @map("is_resolved")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
@@ -93,4 +94,19 @@ model Quest {
 
   @@index([userId])
   @@map("quests")
+}
+
+model Discussion {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  title        String
+  detail       String
+  authorUserId String   @map("author_user_id") @db.Uuid
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("discussions")
 }

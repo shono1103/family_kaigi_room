@@ -49,7 +49,7 @@ type HomeClientProps = {
 		id: string;
 		title: string;
 		detail: string;
-		isResolved: string;
+		isResolved: boolean;
 		createdAt: Date;
 		updatedAt: Date;
 		targetUser: {
@@ -76,7 +76,7 @@ type HomeClientProps = {
 		id: string;
 		title: string;
 		detail: string;
-		isResolved: string;
+		isResolved: boolean;
 		createdAt: Date;
 		updatedAt: Date;
 		issuerUser: {

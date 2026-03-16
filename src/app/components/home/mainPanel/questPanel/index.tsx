@@ -17,19 +17,17 @@ function formatQuestDate(date: Date) {
 	}).format(date);
 }
 
-function QuestStatusBadge({ isResolved }: { isResolved: string }) {
-	const resolved = isResolved === "true";
-
+function QuestStatusBadge({ isResolved }: { isResolved: boolean }) {
 	return (
 		<span
 			className={[
 				"rounded-full px-3 py-1 text-xs font-bold",
-				resolved
+				isResolved
 					? "bg-emerald-100 text-emerald-800"
 					: "bg-sky-100 text-sky-800",
 			].join(" ")}
 		>
-			{resolved ? "解決済み" : "進行中"}
+			{isResolved ? "解決済み" : "進行中"}
 		</span>
 	);
 }

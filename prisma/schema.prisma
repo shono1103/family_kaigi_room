@@ -26,6 +26,7 @@ model Family {
   familyVoiceMosaicId String   @unique @map("family_voice_mosaic_id")
   createdAt        DateTime @default(now()) @map("created_at")
   users            User[]
+  discussions      Discussion[]
 
   @@map("families")
 }
@@ -99,6 +100,7 @@ model Quest {
 model Discussion {
   id           String   @id @default(uuid()) @db.Uuid
   userId       String   @map("user_id") @db.Uuid
+  familyId     String   @map("family_id") @db.Uuid
   title        String
   detail       String
   authorUserId String   @map("author_user_id") @db.Uuid
@@ -106,7 +108,9 @@ model Discussion {
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([familyId])
   @@map("discussions")
 }

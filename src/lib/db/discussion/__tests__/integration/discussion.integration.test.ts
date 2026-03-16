@@ -58,6 +58,7 @@ describe("db discussion CRUD integration", () => {
 
 		const created = await createDiscussion({
 			userId: author.id,
+			familyId: family.id,
 			title: "Weekend plan",
 			detail: "Let's discuss this weekend's schedule.",
 			authorUserId: author.id,
@@ -67,6 +68,7 @@ describe("db discussion CRUD integration", () => {
 		authorUserId = author.id;
 
 		expect(created.userId).toBe(author.id);
+		expect(created.familyId).toBe(family.id);
 		expect(created.authorUserId).toBe(author.id);
 		expect(created.title).toBe("Weekend plan");
 	}, DB_INTEGRATION_TIMEOUT_MS);

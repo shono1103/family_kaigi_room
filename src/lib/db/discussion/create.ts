@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 export type CreateDiscussionInput = Readonly<{
 	userId: string;
+	familyId: string;
 	title: string;
 	detail: string;
 	authorUserId: string;
@@ -15,6 +16,7 @@ export async function createDiscussion(
 	db: DiscussionDbClient = prisma,
 ) {
 	const userId = input.userId.trim();
+	const familyId = input.familyId.trim();
 	const title = input.title.trim();
 	const detail = input.detail.trim();
 	const authorUserId = input.authorUserId.trim();
@@ -25,6 +27,10 @@ export async function createDiscussion(
 
 	if (!title) {
 		throw new Error("title is required");
+	}
+
+	if (!familyId) {
+		throw new Error("familyId is required");
 	}
 
 	if (!detail) {
@@ -38,6 +44,7 @@ export async function createDiscussion(
 	return db.discussion.create({
 		data: {
 			userId,
+			familyId,
 			title,
 			detail,
 			authorUserId,

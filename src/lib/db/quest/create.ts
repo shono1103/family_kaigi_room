@@ -7,7 +7,7 @@ export type CreateQuestInput = Readonly<{
 	detail: string;
 	issuerUserId: string;
 	targetUserId: string;
-	isResolved: string;
+	isResolved: boolean;
 }>;
 
 type QuestDbClient = PrismaClient | Prisma.TransactionClient;
@@ -21,7 +21,7 @@ export async function createQuest(
 	const detail = input.detail.trim();
 	const issuerUserId = input.issuerUserId.trim();
 	const targetUserId = input.targetUserId.trim();
-	const isResolved = input.isResolved.trim();
+	const isResolved = input.isResolved;
 
 	if (!userId) {
 		throw new Error("userId is required");
@@ -41,10 +41,6 @@ export async function createQuest(
 
 	if (!targetUserId) {
 		throw new Error("targetUserId is required");
-	}
-
-	if (!isResolved) {
-		throw new Error("isResolved is required");
 	}
 
 	return db.quest.create({

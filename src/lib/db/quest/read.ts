@@ -31,16 +31,10 @@ export async function readQuestsByUserId(userId: string) {
 	});
 }
 
-export async function readQuestsByIsResolved(isResolved: string) {
-	const normalizedIsResolved = isResolved.trim();
-
-	if (!normalizedIsResolved) {
-		throw new Error("isResolved is required");
-	}
-
+export async function readQuestsByIsResolved(isResolved: boolean) {
 	return prisma.quest.findMany({
 		where: {
-			isResolved: normalizedIsResolved,
+			isResolved,
 		},
 		orderBy: {
 			createdAt: "desc",

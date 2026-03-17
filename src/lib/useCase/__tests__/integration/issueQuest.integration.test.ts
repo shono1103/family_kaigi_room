@@ -49,7 +49,7 @@ describe("issueQuest use case integration", () => {
 		expect(result.quest.userId).toBe(issuer.id);
 		expect(result.quest.issuerUserId).toBe(issuer.id);
 		expect(result.quest.targetUserId).toBe(target.id);
-		expect(result.quest.isResolved).toBe("false");
+		expect(result.quest.isResolved).toBe(false);
 
 		const persistedQuest = await readQuestById(result.quest.id);
 		expect(persistedQuest?.id).toBe(result.quest.id);

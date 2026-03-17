@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Header } from "./header";
 import { Sidebar } from "./sidebar";
-import { AgendaPanel } from "./mainPanel/agendaPanel";
+import { DiscussionPanel } from "./mainPanel/discussionPanel";
 import { AllowancePanel } from "./mainPanel/allowancePanel";
 import { FamilyMembersPanel } from "./mainPanel/familyMembersPanel";
 import { FamilyUserPanel } from "./mainPanel/familyUserPanel";
@@ -19,7 +19,7 @@ type HomeTab = Readonly<{
 function buildTabs(isFamilyOwner: boolean): HomeTab[] {
 	return [
 		{ label: "クエスト", key: "quest" },
-		{ label: "議題", key: "agenda" },
+		{ label: "議論", key: "discussion" },
 		{ label: "お小遣い", key: "allowance" },
 		{ label: "メンバー", key: "members" },
 		...(isFamilyOwner ? [{ label: "家族追加", key: "family-user" }] : []),
@@ -49,7 +49,7 @@ type HomeClientProps = {
 		id: string;
 		title: string;
 		detail: string;
-		isResolved: string;
+		isResolved: boolean;
 		createdAt: Date;
 		updatedAt: Date;
 		targetUser: {
@@ -76,7 +76,7 @@ type HomeClientProps = {
 		id: string;
 		title: string;
 		detail: string;
-		isResolved: string;
+		isResolved: boolean;
 		createdAt: Date;
 		updatedAt: Date;
 		issuerUser: {
@@ -152,7 +152,7 @@ export function HomeClient({
 								targetUsers={questTargetUsers}
 								targetQuests={targetQuests}
 							/>
-							<AgendaPanel
+							<DiscussionPanel
 								isActive={activeIndex === 1}
 								index={1}
 							/>

@@ -65,9 +65,21 @@ entity "quests" as quests {
   user_id : UUID <<FK>>
   title : TEXT
   detail : TEXT
-  issuer_user_id: UUID
-  target_user_id: UUID
-  is_resolved : TEXT
+  issuer_user_id : UUID
+  target_user_id : UUID
+  is_resolved : BOOLEAN
+  created_at : TIMESTAMP(3)
+  updated_at : TIMESTAMP(3)
+}
+
+entity "discussions" as discussions {
+  id : UUID <<PK>>
+  --
+  user_id : UUID <<FK>>
+  title : TEXT
+  detail : TEXT
+  author_user_id : UUID
+  family_id : UUID
   created_at : TIMESTAMP(3)
   updated_at : TIMESTAMP(3)
 }
@@ -76,6 +88,7 @@ users "1" -- "0..*" sessions : user_id
 families "1" -- "0..*" users : family_id
 users "1" -- "0..1" user_infos : user_id
 users "1" -- "0..*" quests : user_id
+users "1" -- "0..*" discussions : user_id
 users "0..*" -- "1" UserRole : role
 user_infos "0..*" -- "1" FamilyRole : family_role
 
@@ -143,16 +156,33 @@ note right of user_infos
 end note
 
 note right of quests
-  UNIQUE:
-  - mosaic_id
-  - resolved_mosaic_id
-
   INDEX:
   - user_id
 
   FK:
   - user_id -> users.id
     ON DELETE CASCADE
+
+  RULE:
+  - issuer_user_id stores
+    quest creator
+  - target_user_id stores
+    assignee
+  - is_resolved stores
+    completion status
+end note
+
+note right of discussions
+  INDEX:
+  - user_id
+
+  FK:
+  - user_id -> users.id
+    ON DELETE CASCADE
+
+  RULE:
+  - author_user_id stores
+    discussion creator
 end note
 
 @enduml

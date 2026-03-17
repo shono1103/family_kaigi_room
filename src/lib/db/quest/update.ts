@@ -5,7 +5,7 @@ export type UpdateQuestInput = Readonly<{
 	detail?: string;
 	issuerUserId?: string;
 	targetUserId?: string;
-	isResolved?: string;
+	isResolved?: boolean;
 }>;
 
 export async function updateQuest(id: string, input: UpdateQuestInput) {
@@ -20,7 +20,7 @@ export async function updateQuest(id: string, input: UpdateQuestInput) {
 		detail?: string;
 		issuerUserId?: string;
 		targetUserId?: string;
-		isResolved?: string;
+		isResolved?: boolean;
 	} = {};
 
 	if (undefined !== input.title) {
@@ -56,11 +56,7 @@ export async function updateQuest(id: string, input: UpdateQuestInput) {
 	}
 
 	if (undefined !== input.isResolved) {
-		const isResolved = input.isResolved.trim();
-		if (!isResolved) {
-			throw new Error("isResolved must not be empty");
-		}
-		data.isResolved = isResolved;
+		data.isResolved = input.isResolved;
 	}
 
 	return prisma.quest.update({

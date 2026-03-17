@@ -4,7 +4,7 @@ export type ListTargetQuestsResult = Array<{
 	id: string;
 	title: string;
 	detail: string;
-	isResolved: string;
+	isResolved: boolean;
 	createdAt: Date;
 	updatedAt: Date;
 	issuerUser: {

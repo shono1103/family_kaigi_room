@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, type FormEvent } from "react";
 import { QuestIssueModal } from "./QuestIssueModal";
-import type { QuestPanelProps } from "./types";
-import { useQuestIssue } from "./useQuestIssue";
+import type { QuestIssueResponse, QuestPanelProps } from "./types";
 
 type QuestListTab = "issued" | "target";
+const ISSUE_REQUEST_TIMEOUT_MS = 15000;
 
 function formatQuestDate(date: Date) {
 	return new Intl.DateTimeFormat("ja-JP", {
@@ -17,19 +18,17 @@ function formatQuestDate(date: Date) {
 	}).format(date);
 }
 
-function QuestStatusBadge({ isResolved }: { isResolved: string }) {
-	const resolved = isResolved === "true";
-
+function QuestStatusBadge({ isResolved }: { isResolved: boolean }) {
 	return (
 		<span
 			className={[
 				"rounded-full px-3 py-1 text-xs font-bold",
-				resolved
+				isResolved
 					? "bg-emerald-100 text-emerald-800"
 					: "bg-sky-100 text-sky-800",
 			].join(" ")}
 		>
-			{resolved ? "解決済み" : "進行中"}
+			{isResolved ? "解決済み" : "進行中"}
 		</span>
 	);
 }
@@ -41,15 +40,73 @@ export function QuestPanel({
 	targetQuests,
 	targetUsers,
 }: QuestPanelProps) {
+	const router = useRouter();
 	const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
 	const [activeQuestTab, setActiveQuestTab] = useState<QuestListTab>("issued");
-	const {
-		isSubmitting,
-		submitError,
-		submitSuccess,
-		clearMessages,
-		submitQuestIssue,
-	} = useQuestIssue();
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [submitError, setSubmitError] = useState<string | null>(null);
+	const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+
+	const clearMessages = () => {
+		setSubmitError(null);
+		setSubmitSuccess(null);
+	};
+
+	const submitQuestIssue = async (
+		event: FormEvent<HTMLFormElement>,
+	): Promise<boolean> => {
+		event.preventDefault();
+		const form = event.currentTarget;
+		const formData = new FormData(form);
+
+		clearMessages();
+		setIsSubmitting(true);
+		let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+		try {
+			const abortController = new AbortController();
+			timeoutId = setTimeout(
+				() => abortController.abort(),
+				ISSUE_REQUEST_TIMEOUT_MS,
+			);
+
+			const response = await fetch("/api/quest/issue", {
+				method: "POST",
+				body: formData,
+				signal: abortController.signal,
+			});
+			const result = (await response.json()) as QuestIssueResponse;
+			if (!response.ok || !result.ok) {
+				setSubmitError(
+					result.message ??
+						"クエスト発行に失敗しました。時間をおいて再試行してください。",
+				);
+				return false;
+			}
+
+			setSubmitSuccess(
+				result.quest?.title
+					? `クエスト「${result.quest.title}」を作成しました。`
+					: "クエストを作成しました。",
+			);
+			form.reset();
+			router.refresh();
+			return true;
+		} catch (error) {
+			const knownError = error as { name?: string } | null;
+			if (knownError?.name === "AbortError") {
+				setSubmitError("作成処理がタイムアウトしました。もう一度お試しください。");
+			} else {
+				setSubmitError("通信エラーが発生しました。接続状態を確認してください。");
+			}
+			return false;
+		} finally {
+			if (timeoutId) {
+				clearTimeout(timeoutId);
+			}
+			setIsSubmitting(false);
+		}
+	};
 
 	const openIssueModal = () => {
 		clearMessages();

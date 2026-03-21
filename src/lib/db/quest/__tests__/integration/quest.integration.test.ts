@@ -67,6 +67,8 @@ describe("db quest CRUD integration", () => {
 			userId: issuer.id,
 			title: "Clean the room",
 			detail: "Clean your room for 30 minutes.",
+			questType: "personalQuest",
+			voiceReward: 3,
 			issuerUserId: issuer.id,
 			targetUserId: target.id,
 			isResolved: false,

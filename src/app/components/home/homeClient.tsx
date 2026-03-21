@@ -49,7 +49,11 @@ type HomeClientProps = {
 		id: string;
 		title: string;
 		detail: string;
+		questType: string;
+		voiceReward: number;
 		isResolved: boolean;
+		evaluationPercent: number | null;
+		isRewarded: boolean;
 		createdAt: Date;
 		updatedAt: Date;
 		targetUser: {
@@ -76,7 +80,11 @@ type HomeClientProps = {
 		id: string;
 		title: string;
 		detail: string;
+		questType: string;
+		voiceReward: number;
 		isResolved: boolean;
+		evaluationPercent: number | null;
+		isRewarded: boolean;
 		createdAt: Date;
 		updatedAt: Date;
 		issuerUser: {
@@ -160,6 +168,7 @@ export function HomeClient({
 							<QuestPanel
 								isActive={activeIndex === 0}
 								index={0}
+								isFamilyOwner={isFamilyOwner}
 								issuedQuests={issuedQuests}
 								targetUsers={questTargetUsers}
 								targetQuests={targetQuests}

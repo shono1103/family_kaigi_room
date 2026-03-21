@@ -3,10 +3,15 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { QuestIssueModal } from "./QuestIssueModal";
-import type { QuestIssueResponse, QuestPanelProps } from "./types";
+import type {
+	QuestEvaluateResponse,
+	QuestIssueResponse,
+	QuestPanelProps,
+} from "./types";
 
 type QuestListTab = "issued" | "target";
 const ISSUE_REQUEST_TIMEOUT_MS = 15000;
+const EVALUATE_REQUEST_TIMEOUT_MS = 30000;
 
 function formatQuestDate(date: Date) {
 	return new Intl.DateTimeFormat("ja-JP", {
@@ -33,9 +38,120 @@ function QuestStatusBadge({ isResolved }: { isResolved: boolean }) {
 	);
 }
 
+function QuestTypeBadge({ questType }: { questType: string }) {
+	const isFamily = questType === "familyQuest";
+	return (
+		<span
+			className={[
+				"rounded-full px-2 py-0.5 text-xs font-bold",
+				isFamily
+					? "bg-violet-100 text-violet-800"
+					: "bg-orange-100 text-orange-800",
+			].join(" ")}
+		>
+			{isFamily ? "ファミリー" : "パーソナル"}
+		</span>
+	);
+}
+
+type EvaluateFormProps = {
+	questId: string;
+	onEvaluated: (message: string) => void;
+	onError: (message: string) => void;
+};
+
+function EvaluateForm({ questId, onEvaluated, onError }: EvaluateFormProps) {
+	const [percent, setPercent] = useState(100);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+
+	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
+		setIsSubmitting(true);
+		let timeoutId: ReturnType<typeof setTimeout> | null = null;
+		try {
+			const formData = new FormData();
+			formData.append("questId", questId);
+			formData.append("evaluationPercent", String(percent));
+
+			const abortController = new AbortController();
+			timeoutId = setTimeout(
+				() => abortController.abort(),
+				EVALUATE_REQUEST_TIMEOUT_MS,
+			);
+
+			const response = await fetch("/api/quest/evaluate", {
+				method: "POST",
+				body: formData,
+				signal: abortController.signal,
+			});
+			const result = (await response.json()) as QuestEvaluateResponse;
+
+			if (!response.ok || !result.ok) {
+				onError(result.message ?? "評価に失敗しました。");
+				return;
+			}
+
+			const parts: string[] = [];
+			if (result.rewardAmount === 0) {
+				parts.push("報酬なし（評価0%）で完了しました。");
+			} else if (result.rewardSent) {
+				parts.push(`報酬 ${result.rewardAmount} Voice を対象者へ送金しました。`);
+			} else {
+				parts.push("評価を完了しました（報酬送金はスキップされました）。");
+			}
+			if (result.refundAmount && result.refundAmount > 0) {
+				parts.push(
+					result.refundSent
+						? `残額 ${result.refundAmount} Voice をあなたへ返金しました。`
+						: `残額 ${result.refundAmount} Voice の返金はスキップされました。`,
+				);
+			}
+			onEvaluated(parts.join(" "));
+		} catch (error) {
+			const knownError = error as { name?: string } | null;
+			if (knownError?.name === "AbortError") {
+				onError("評価処理がタイムアウトしました。");
+			} else {
+				onError("通信エラーが発生しました。");
+			}
+		} finally {
+			if (timeoutId) clearTimeout(timeoutId);
+			setIsSubmitting(false);
+		}
+	};
+
+	return (
+		<form
+			onSubmit={handleSubmit}
+			className="mt-3 flex items-center gap-3 rounded-xl border border-black/10 bg-[#f8f8fc] px-4 py-3"
+		>
+			<label className="text-xs font-bold text-[#3a3a52]">評価</label>
+			<input
+				type="range"
+				min={0}
+				max={100}
+				value={percent}
+				onChange={(e) => setPercent(Number(e.target.value))}
+				className="flex-1"
+			/>
+			<span className="w-10 text-right text-sm font-bold text-[#1e1e2a]">
+				{percent}%
+			</span>
+			<button
+				type="submit"
+				disabled={isSubmitting}
+				className="rounded-lg bg-[#1e1e2a] px-3 py-1.5 text-xs font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+			>
+				{isSubmitting ? "送信中..." : "評価する"}
+			</button>
+		</form>
+	);
+}
+
 export function QuestPanel({
 	isActive,
 	index,
+	isFamilyOwner,
 	issuedQuests,
 	targetQuests,
 	targetUsers,
@@ -84,11 +200,17 @@ export function QuestPanel({
 				return false;
 			}
 
-			setSubmitSuccess(
-				result.quest?.title
-					? `クエスト「${result.quest.title}」を作成しました。`
-					: "クエストを作成しました。",
-			);
+			if (result.quests) {
+				setSubmitSuccess(
+					`ファミリークエスト「${result.quests[0]?.title ?? ""}」を${result.quests.length}名に発行しました。`,
+				);
+			} else {
+				setSubmitSuccess(
+					result.quest?.title
+						? `クエスト「${result.quest.title}」を作成しました。`
+						: "クエストを作成しました。",
+				);
+			}
 			form.reset();
 			router.refresh();
 			return true;
@@ -141,7 +263,7 @@ export function QuestPanel({
 					type="button"
 					onClick={openIssueModal}
 					className="rounded-lg bg-[#1e1e2a] px-4 py-2 text-sm font-bold text-white transition hover:opacity-90"
-					disabled={targetUsers.length === 0}
+					disabled={targetUsers.length === 0 && !isFamilyOwner}
 				>
 					クエスト作成
 				</button>
@@ -184,14 +306,22 @@ export function QuestPanel({
 							>
 								<div className="flex flex-wrap items-start justify-between gap-3">
 									<div>
-										<p className="text-lg font-bold text-[#202033]">
-											{quest.title}
-										</p>
+										<div className="flex flex-wrap items-center gap-2">
+											<p className="text-lg font-bold text-[#202033]">
+												{quest.title}
+											</p>
+											<QuestTypeBadge questType={quest.questType} />
+										</div>
 										<p className="mt-2 text-sm font-semibold text-[#5b5b75]">
 											対象: {quest.targetUser?.name ?? quest.targetUser?.email ?? "不明"}
 										</p>
 									</div>
-									<QuestStatusBadge isResolved={quest.isResolved} />
+									<div className="flex flex-col items-end gap-1">
+										<QuestStatusBadge isResolved={quest.isResolved} />
+										<span className="text-xs font-bold text-[#6a6a84]">
+											報酬: {quest.voiceReward} Voice
+										</span>
+									</div>
 								</div>
 								<p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-[#3a3a52]">
 									{quest.detail}
@@ -205,12 +335,30 @@ export function QuestPanel({
 											Role: {quest.targetUser.familyRole}
 										</span>
 									) : null}
+									{quest.evaluationPercent !== null ? (
+										<span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-800">
+											評価: {quest.evaluationPercent}%
+											{quest.isRewarded
+												? ` (${Math.floor((quest.voiceReward * quest.evaluationPercent) / 100)} Voice 送金済み)`
+												: ""}
+										</span>
+									) : null}
 								</div>
+								{!quest.isResolved && quest.evaluationPercent === null ? (
+									<EvaluateForm
+										questId={quest.id}
+										onEvaluated={(msg) => {
+											setSubmitSuccess(msg);
+											router.refresh();
+										}}
+										onError={(msg) => setSubmitError(msg)}
+									/>
+								) : null}
 							</article>
 						))
 					) : (
 						<div className="rounded-2xl border border-dashed border-black/15 bg-black/[0.03] p-6 text-sm font-semibold text-[#4b4b65]">
-							{targetUsers.length > 0
+							{targetUsers.length > 0 || isFamilyOwner
 								? "まだ発行したクエストはありません。"
 								: "対象ユーザーがいないため、今はクエストを作成できません。"}
 						</div>
@@ -226,14 +374,22 @@ export function QuestPanel({
 							>
 								<div className="flex flex-wrap items-start justify-between gap-3">
 									<div>
-										<p className="text-lg font-bold text-[#202033]">
-											{quest.title}
-										</p>
+										<div className="flex flex-wrap items-center gap-2">
+											<p className="text-lg font-bold text-[#202033]">
+												{quest.title}
+											</p>
+											<QuestTypeBadge questType={quest.questType} />
+										</div>
 										<p className="mt-2 text-sm font-semibold text-[#5b5b75]">
 											発行者: {quest.issuerUser?.name ?? quest.issuerUser?.email ?? "不明"}
 										</p>
 									</div>
-									<QuestStatusBadge isResolved={quest.isResolved} />
+									<div className="flex flex-col items-end gap-1">
+										<QuestStatusBadge isResolved={quest.isResolved} />
+										<span className="text-xs font-bold text-[#6a6a84]">
+											報酬: {quest.voiceReward} Voice
+										</span>
+									</div>
 								</div>
 								<p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-[#3a3a52]">
 									{quest.detail}
@@ -247,6 +403,18 @@ export function QuestPanel({
 											Role: {quest.issuerUser.familyRole}
 										</span>
 									) : null}
+									{quest.evaluationPercent !== null ? (
+										<span className="rounded-full bg-emerald-100 px-3 py-1 text-emerald-800">
+											評価: {quest.evaluationPercent}%
+											{quest.isRewarded
+												? ` (${Math.floor((quest.voiceReward * quest.evaluationPercent) / 100)} Voice 受取済み)`
+												: ""}
+										</span>
+									) : (
+										<span className="rounded-full bg-sky-100 px-3 py-1 text-sky-800">
+											評価待ち
+										</span>
+									)}
 								</div>
 							</article>
 						))
@@ -280,6 +448,7 @@ export function QuestPanel({
 					return isSuccess;
 				}}
 				isSubmitting={isSubmitting}
+				isFamilyOwner={isFamilyOwner}
 				targetUsers={targetUsers}
 			/>
 		</section>

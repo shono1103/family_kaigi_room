@@ -3,11 +3,16 @@ import type { FormEvent } from "react";
 export type QuestPanelProps = {
 	isActive: boolean;
 	index: number;
+	isFamilyOwner: boolean;
 	issuedQuests: Array<{
 		id: string;
 		title: string;
 		detail: string;
+		questType: string;
+		voiceReward: number;
 		isResolved: boolean;
+		evaluationPercent: number | null;
+		isRewarded: boolean;
 		createdAt: Date;
 		updatedAt: Date;
 		targetUser: {
@@ -21,7 +26,11 @@ export type QuestPanelProps = {
 		id: string;
 		title: string;
 		detail: string;
+		questType: string;
+		voiceReward: number;
 		isResolved: boolean;
+		evaluationPercent: number | null;
+		isRewarded: boolean;
 		createdAt: Date;
 		updatedAt: Date;
 		issuerUser: {
@@ -46,6 +55,19 @@ export type QuestIssueResponse = {
 		detail: string;
 		isResolved: boolean;
 	};
+	quests?: Array<{
+		id: string;
+		title: string;
+	}>;
+};
+
+export type QuestEvaluateResponse = {
+	ok: boolean;
+	message?: string;
+	rewardSent?: boolean;
+	rewardAmount?: number;
+	refundAmount?: number;
+	refundSent?: boolean;
 };
 
 export type QuestIssueModalProps = {
@@ -53,6 +75,7 @@ export type QuestIssueModalProps = {
 	onClose: () => void;
 	onSubmit: (event: FormEvent<HTMLFormElement>) => Promise<boolean>;
 	isSubmitting: boolean;
+	isFamilyOwner: boolean;
 	targetUsers: Array<{
 		id: string;
 		label: string;

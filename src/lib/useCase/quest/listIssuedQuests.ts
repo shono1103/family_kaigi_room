@@ -4,7 +4,11 @@ export type ListIssuedQuestsResult = Array<{
 	id: string;
 	title: string;
 	detail: string;
+	questType: string;
+	voiceReward: number;
 	isResolved: boolean;
+	evaluationPercent: number | null;
+	isRewarded: boolean;
 	createdAt: Date;
 	updatedAt: Date;
 	targetUser: {
@@ -35,7 +39,11 @@ export async function listIssuedQuests(
 			id: true,
 			title: true,
 			detail: true,
+			questType: true,
+			voiceReward: true,
 			isResolved: true,
+			evaluationPercent: true,
+			isRewarded: true,
 			createdAt: true,
 			updatedAt: true,
 			targetUserId: true,
@@ -79,7 +87,11 @@ export async function listIssuedQuests(
 		id: quest.id,
 		title: quest.title,
 		detail: quest.detail,
+		questType: quest.questType,
+		voiceReward: quest.voiceReward,
 		isResolved: quest.isResolved,
+		evaluationPercent: quest.evaluationPercent,
+		isRewarded: quest.isRewarded,
 		createdAt: quest.createdAt,
 		updatedAt: quest.updatedAt,
 		targetUser: targetUsersById.get(quest.targetUserId) ?? null,

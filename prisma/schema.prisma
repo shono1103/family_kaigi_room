@@ -12,6 +12,11 @@ enum UserRole {
   normal
 }
 
+enum QuestType {
+  personalQuest
+  familyQuest
+}
+
 enum FamilyRole {
   father
   mother
@@ -81,15 +86,19 @@ model UserInfo {
 }
 
 model Quest {
-  id           String   @id @default(uuid()) @db.Uuid
-  userId       String   @map("user_id") @db.Uuid
-  title        String
-  detail       String
-  issuerUserId String   @map("issuer_user_id") @db.Uuid
-  targetUserId String   @map("target_user_id") @db.Uuid
-  isResolved   Boolean  @map("is_resolved")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id                String    @id @default(uuid()) @db.Uuid
+  userId            String    @map("user_id") @db.Uuid
+  title             String
+  detail            String
+  questType         QuestType @default(personalQuest) @map("quest_type")
+  voiceReward       Int       @map("voice_reward")
+  issuerUserId      String    @map("issuer_user_id") @db.Uuid
+  targetUserId      String    @map("target_user_id") @db.Uuid
+  isResolved        Boolean   @map("is_resolved")
+  evaluationPercent Int?      @map("evaluation_percent")
+  isRewarded        Boolean   @default(false) @map("is_rewarded")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

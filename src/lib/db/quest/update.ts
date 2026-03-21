@@ -6,6 +6,8 @@ export type UpdateQuestInput = Readonly<{
 	issuerUserId?: string;
 	targetUserId?: string;
 	isResolved?: boolean;
+	evaluationPercent?: number;
+	isRewarded?: boolean;
 }>;
 
 export async function updateQuest(id: string, input: UpdateQuestInput) {
@@ -21,6 +23,8 @@ export async function updateQuest(id: string, input: UpdateQuestInput) {
 		issuerUserId?: string;
 		targetUserId?: string;
 		isResolved?: boolean;
+		evaluationPercent?: number;
+		isRewarded?: boolean;
 	} = {};
 
 	if (undefined !== input.title) {
@@ -57,6 +61,14 @@ export async function updateQuest(id: string, input: UpdateQuestInput) {
 
 	if (undefined !== input.isResolved) {
 		data.isResolved = input.isResolved;
+	}
+
+	if (undefined !== input.evaluationPercent) {
+		data.evaluationPercent = input.evaluationPercent;
+	}
+
+	if (undefined !== input.isRewarded) {
+		data.isRewarded = input.isRewarded;
 	}
 
 	return prisma.quest.update({

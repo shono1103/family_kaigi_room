@@ -1,10 +1,12 @@
-import type { Prisma, PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient, QuestType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export type CreateQuestInput = Readonly<{
 	userId: string;
 	title: string;
 	detail: string;
+	questType: QuestType;
+	voiceReward: number;
 	issuerUserId: string;
 	targetUserId: string;
 	isResolved: boolean;
@@ -19,6 +21,8 @@ export async function createQuest(
 	const userId = input.userId.trim();
 	const title = input.title.trim();
 	const detail = input.detail.trim();
+	const questType = input.questType;
+	const voiceReward = input.voiceReward;
 	const issuerUserId = input.issuerUserId.trim();
 	const targetUserId = input.targetUserId.trim();
 	const isResolved = input.isResolved;
@@ -48,6 +52,8 @@ export async function createQuest(
 			userId,
 			title,
 			detail,
+			questType,
+			voiceReward,
 			issuerUserId,
 			targetUserId,
 			isResolved,

@@ -41,18 +41,22 @@ describe("issueQuest use case integration", () => {
 
 		const result = await issueQuest({
 			userId: issuer.id,
+			questType: "personalQuest",
+			voiceReward: 3,
 			targetUserId: target.id,
 			title: "Take out the trash",
 			detail: "Take out the trash before 8pm.",
 		});
 
-		expect(result.quest.userId).toBe(issuer.id);
-		expect(result.quest.issuerUserId).toBe(issuer.id);
-		expect(result.quest.targetUserId).toBe(target.id);
-		expect(result.quest.isResolved).toBe(false);
+		const quest = result.quests[0];
+		expect(quest).toBeDefined();
+		expect(quest?.userId).toBe(issuer.id);
+		expect(quest?.issuerUserId).toBe(issuer.id);
+		expect(quest?.targetUserId).toBe(target.id);
+		expect(quest?.isResolved).toBe(false);
 
-		const persistedQuest = await readQuestById(result.quest.id);
-		expect(persistedQuest?.id).toBe(result.quest.id);
+		const persistedQuest = await readQuestById(quest?.id ?? "");
+		expect(persistedQuest?.id).toBe(quest?.id);
 		expect(persistedQuest?.targetUserId).toBe(target.id);
 	}, DB_INTEGRATION_TIMEOUT_MS);
 });

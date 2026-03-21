@@ -11,4 +11,4 @@ CREATE TYPE "QuestType" AS ENUM ('personalQuest', 'familyQuest');
 ALTER TABLE "quests" ADD COLUMN     "evaluation_percent" INTEGER,
 ADD COLUMN     "is_rewarded" BOOLEAN NOT NULL DEFAULT false,
 ADD COLUMN     "quest_type" "QuestType" NOT NULL DEFAULT 'personalQuest',
-ADD COLUMN     "voice_reward" INTEGER NOT NULL;
+ADD COLUMN     "voice_reward" INTEGER NOT NULL DEFAULT 0;

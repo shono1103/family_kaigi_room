@@ -21,7 +21,7 @@ describe("createDiscussion use case integration", () => {
 		await cleanupFamiliesByIds(createdFamilyIds);
 	});
 
-	test("discussion を作成し、authorUserId を userId として保存できる", async () => {
+	test("discussion を作成し、authorUserId と chatRoomId が返る", async () => {
 		const family = await createFamily(createIntegrationFamilyInput());
 		createdFamilyIds.push(family.id);
 
@@ -38,12 +38,13 @@ describe("createDiscussion use case integration", () => {
 			userId: author.id,
 			title: "Family meeting topic",
 			detail: "Let's discuss the family meeting agenda for next week.",
+			symbolPrivKey: "test-priv-key",
 		});
 
-		expect(result.discussion.userId).toBe(author.id);
 		expect(result.discussion.familyId).toBe(family.id);
 		expect(result.discussion.authorUserId).toBe(author.id);
 		expect(result.discussion.title).toBe("Family meeting topic");
+		expect(result.chatRoomId).toBeTruthy();
 
 		const persistedDiscussion = await readDiscussionById(result.discussion.id);
 		expect(persistedDiscussion?.id).toBe(result.discussion.id);

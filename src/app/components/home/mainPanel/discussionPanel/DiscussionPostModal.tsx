@@ -55,10 +55,27 @@ export function DiscussionPostModal({
 							name="detail"
 							required
 							maxLength={1200}
-							rows={6}
+							rows={5}
 							disabled={isSubmitting}
 							className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm"
 							placeholder="家族で話したい内容を入力"
+						/>
+					</div>
+					<div>
+						<label htmlFor="discussion-symbol-priv-key" className="text-sm font-bold text-[#2f2f47]">
+							Symbol 秘密鍵
+						</label>
+						<p className="mt-0.5 text-xs text-[#7b7b95]">
+							議論の発行には 3 Voice を消費します。あなたの Symbol 秘密鍵を入力してください。
+						</p>
+						<input
+							id="discussion-symbol-priv-key"
+							name="symbolPrivKey"
+							type="password"
+							required
+							disabled={isSubmitting}
+							className="mt-1 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm font-mono"
+							placeholder="64文字の16進数"
 						/>
 					</div>
 					<div className="flex justify-end gap-2 pt-2">
@@ -75,7 +92,7 @@ export function DiscussionPostModal({
 							disabled={isSubmitting}
 							className="rounded-lg bg-[#1e1e2a] px-4 py-2 text-sm font-bold text-white transition hover:opacity-90"
 						>
-							{isSubmitting ? "投稿中..." : "議論を投稿"}
+							{isSubmitting ? "投稿中..." : "議論を投稿 (3 Voice)"}
 						</button>
 					</div>
 				</form>

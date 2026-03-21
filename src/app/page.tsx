@@ -8,6 +8,7 @@ import { getXymMargetPrice } from "@/lib/useCase/getXymMargetPrice";
 import { listIssuedQuests } from "@/lib/useCase/quest/listIssuedQuests";
 import { listTargetQuests } from "@/lib/useCase/quest/listTargetQuests";
 import { readUserVoice } from "@/lib/useCase/user/readUserVoice";
+import { listDiscussion } from "@/lib/useCase/discussion/listDiscussion";
 
 type HomePageProps = {
 	searchParams?: Promise<{
@@ -44,9 +45,10 @@ export default async function Home({ searchParams }: HomePageProps) {
 		...member,
 		isCurrentUser: member.id === auth.user.id,
 	}));
-	const [issuedQuests, targetQuests] = await Promise.all([
+	const [issuedQuests, targetQuests, discussions] = await Promise.all([
 		listIssuedQuests(auth.user.id),
 		listTargetQuests(auth.user.id),
+		listDiscussion(auth.user.id),
 	]);
 	const questTargetUsers = familyMembers
 		.filter((member) => !member.isCurrentUser)
@@ -67,6 +69,7 @@ export default async function Home({ searchParams }: HomePageProps) {
 			questTargetUsers={questTargetUsers}
 			familyMembers={familyMembers}
 			targetQuests={targetQuests}
+			discussions={discussions}
 			initialTab={resolvedSearchParams?.tab}
 		/>
 	);

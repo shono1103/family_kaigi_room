@@ -6,6 +6,7 @@ export type ListDiscussionResult = Array<{
 	detail: string;
 	createdAt: Date;
 	updatedAt: Date;
+	chatRoomId: string | null;
 	authorUser: {
 		id: string;
 		email: string;
@@ -23,9 +24,18 @@ export async function listDiscussion(
 		throw new Error("userId is required");
 	}
 
+	const user = await prisma.user.findUnique({
+		where: { id: normalizedUserId },
+		select: { familyId: true },
+	});
+
+	if (!user?.familyId) {
+		throw new Error("user family was not found");
+	}
+
 	const discussions = await prisma.discussion.findMany({
 		where: {
-			userId: normalizedUserId,
+			familyId: user.familyId,
 		},
 		orderBy: {
 			createdAt: "desc",
@@ -37,6 +47,7 @@ export async function listDiscussion(
 			createdAt: true,
 			updatedAt: true,
 			authorUserId: true,
+			discussionChatRoom: { select: { id: true } },
 		},
 	});
 
@@ -79,6 +90,7 @@ export async function listDiscussion(
 		detail: discussion.detail,
 		createdAt: discussion.createdAt,
 		updatedAt: discussion.updatedAt,
+		chatRoomId: discussion.discussionChatRoom?.id ?? null,
 		authorUser: authorUsersById.get(discussion.authorUserId) ?? null,
 	}));
 }

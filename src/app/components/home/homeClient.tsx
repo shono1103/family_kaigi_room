@@ -86,6 +86,17 @@ type HomeClientProps = {
 			familyRole: string | null;
 		} | null;
 	}>;
+	discussions: Array<{
+		id: string;
+		title: string;
+		detail: string;
+		createdAt: Date;
+		chatRoomId: string | null;
+		authorUser: {
+			id: string;
+			name: string | null;
+		} | null;
+	}>;
 	initialTab?: string;
 };
 
@@ -100,6 +111,7 @@ export function HomeClient({
 	questTargetUsers,
 	familyMembers,
 	targetQuests,
+	discussions,
 	initialTab,
 }: HomeClientProps) {
 	const router = useRouter();
@@ -155,6 +167,14 @@ export function HomeClient({
 							<DiscussionPanel
 								isActive={activeIndex === 1}
 								index={1}
+								initialDiscussions={discussions.map((d) => ({
+									id: d.id,
+									title: d.title,
+									detail: d.detail,
+									authorName: d.authorUser?.name ?? null,
+									createdAt: d.createdAt,
+									chatRoomId: d.chatRoomId,
+								}))}
 							/>
 							<AllowancePanel
 								isActive={activeIndex === 2}

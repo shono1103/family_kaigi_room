@@ -45,7 +45,6 @@ model User {
   sessions      Session[]
   userInfo      UserInfo?
   quests        Quest[]
-  discussions   Discussion[]
   chatMessages  DiscussionChatMessage[]
 
   @@index([familyId])
@@ -100,7 +99,6 @@ model Quest {
 
 model Discussion {
   id           String   @id @default(uuid()) @db.Uuid
-  userId       String   @map("user_id") @db.Uuid
   familyId     String   @map("family_id") @db.Uuid
   title        String
   detail       String
@@ -108,11 +106,9 @@ model Discussion {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  family   Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  family             Family              @relation(fields: [familyId], references: [id], onDelete: Cascade)
   discussionChatRoom DiscussionChatRoom?
 
-  @@index([userId])
   @@index([familyId])
   @@map("discussions")
 }

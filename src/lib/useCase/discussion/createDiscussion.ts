@@ -10,7 +10,7 @@ import { sendVoiceOnChain } from "@/lib/symbol/useCase/voice/send";
 const VOICE_COST = 3n;
 
 export type CreateDiscussionUseCaseInput = Readonly<{
-	userId: CreateDiscussionInput["userId"];
+	userId: string;
 	title: CreateDiscussionInput["title"];
 	detail: CreateDiscussionInput["detail"];
 	symbolPrivKey: string;
@@ -68,7 +68,6 @@ export async function createDiscussion(
 		async (tx: Prisma.TransactionClient) => {
 			const discussion = await createDiscussionRecord(
 				{
-					userId,
 					familyId,
 					title,
 					detail,

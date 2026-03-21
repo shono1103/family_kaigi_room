@@ -24,9 +24,18 @@ export async function listDiscussion(
 		throw new Error("userId is required");
 	}
 
+	const user = await prisma.user.findUnique({
+		where: { id: normalizedUserId },
+		select: { familyId: true },
+	});
+
+	if (!user?.familyId) {
+		throw new Error("user family was not found");
+	}
+
 	const discussions = await prisma.discussion.findMany({
 		where: {
-			userId: normalizedUserId,
+			familyId: user.familyId,
 		},
 		orderBy: {
 			createdAt: "desc",

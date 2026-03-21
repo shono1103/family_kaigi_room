@@ -28,7 +28,6 @@ export type DiscussionCreateResponse = {
 		authorUserId: string;
 		createdAt: string;
 		updatedAt: string;
-		userId: string;
 	};
 };
 

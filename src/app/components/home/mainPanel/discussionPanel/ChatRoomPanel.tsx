@@ -67,7 +67,12 @@ export function ChatRoomPanel({ chatRoomId, discussionTitle, onBack }: Props) {
 			if (data.message) {
 				setMessages((prev) => [
 					...prev,
-					{ ...data.message!, createdAt: new Date(data.message!.createdAt) },
+					{
+						...data.message!,
+						createdAt: new Date(data.message!.createdAt),
+						isCurrentUser: true,
+						authorName: null,
+					},
 				]);
 			}
 			form.reset();

@@ -4,7 +4,6 @@ import { deleteDiscussion } from "@/lib/db/discussion/delete";
 import {
 	readDiscussionById,
 	readDiscussionsByAuthorUserId,
-	readDiscussionsByUserId,
 } from "@/lib/db/discussion/read";
 import { updateDiscussion } from "@/lib/db/discussion/update";
 import { createFamily } from "@/lib/db/family/create";
@@ -57,7 +56,6 @@ describe("db discussion CRUD integration", () => {
 		});
 
 		const created = await createDiscussion({
-			userId: author.id,
 			familyId: family.id,
 			title: "Weekend plan",
 			detail: "Let's discuss this weekend's schedule.",
@@ -67,13 +65,12 @@ describe("db discussion CRUD integration", () => {
 		discussionId = created.id;
 		authorUserId = author.id;
 
-		expect(created.userId).toBe(author.id);
 		expect(created.familyId).toBe(family.id);
 		expect(created.authorUserId).toBe(author.id);
 		expect(created.title).toBe("Weekend plan");
 	}, DB_INTEGRATION_TIMEOUT_MS);
 
-	test("read: id / userId / authorUserId で discussion を取得できる", async () => {
+	test("read: id / authorUserId で discussion を取得できる", async () => {
 		const resolvedDiscussionId = requireDiscussionId();
 		expect(authorUserId).not.toBeNull();
 		if (!authorUserId) {
@@ -81,11 +78,9 @@ describe("db discussion CRUD integration", () => {
 		}
 
 		const byId = await readDiscussionById(resolvedDiscussionId);
-		const byUserId = await readDiscussionsByUserId(authorUserId);
 		const byAuthorUserId = await readDiscussionsByAuthorUserId(authorUserId);
 
 		expect(byId?.id).toBe(resolvedDiscussionId);
-		expect(byUserId.some((discussion) => discussion.id === resolvedDiscussionId)).toBe(true);
 		expect(byAuthorUserId.some((discussion) => discussion.id === resolvedDiscussionId)).toBe(true);
 	}, DB_INTEGRATION_TIMEOUT_MS);
 

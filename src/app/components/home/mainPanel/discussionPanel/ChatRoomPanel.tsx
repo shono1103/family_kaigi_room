@@ -58,7 +58,6 @@ export function ChatRoomPanel({ chatRoomId, discussionTitle, onBack }: Props) {
 			const data = (await res.json()) as {
 				ok: boolean;
 				message?: ChatMessage;
-				message_text?: string;
 			};
 			if (!res.ok || !data.ok) {
 				setSendError("送信に失敗しました。");

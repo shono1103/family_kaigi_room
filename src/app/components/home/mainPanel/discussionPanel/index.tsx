@@ -4,21 +4,25 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { DiscussionItemCard } from "./DiscussionItemCard";
 import { DiscussionPostModal } from "./DiscussionPostModal";
+import { DiscussionDetailModal } from "./DiscussionDetailModal";
+import { ChatRoomPanel } from "./ChatRoomPanel";
 import type {
 	DiscussionCreateResponse,
 	DiscussionItem,
 	DiscussionPanelProps,
 } from "./types";
 
-const CREATE_REQUEST_TIMEOUT_MS = 15000;
+const CREATE_REQUEST_TIMEOUT_MS = 30000;
 
-export function DiscussionPanel({ isActive, index }: DiscussionPanelProps) {
+export function DiscussionPanel({ isActive, index, initialDiscussions }: DiscussionPanelProps) {
 	const router = useRouter();
-	const [discussionItems, setDiscussionItems] = useState<DiscussionItem[]>([]);
+	const [discussionItems, setDiscussionItems] = useState<DiscussionItem[]>(initialDiscussions);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submitError, setSubmitError] = useState<string | null>(null);
 	const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+	const [selectedDiscussion, setSelectedDiscussion] = useState<DiscussionItem | null>(null);
+	const [activeChatRoom, setActiveChatRoom] = useState<{ id: string; title: string } | null>(null);
 
 	const clearMessages = () => {
 		setSubmitError(null);
@@ -36,10 +40,7 @@ export function DiscussionPanel({ isActive, index }: DiscussionPanelProps) {
 
 		try {
 			const abortController = new AbortController();
-			timeoutId = setTimeout(
-				() => abortController.abort(),
-				CREATE_REQUEST_TIMEOUT_MS,
-			);
+			timeoutId = setTimeout(() => abortController.abort(), CREATE_REQUEST_TIMEOUT_MS);
 
 			const response = await fetch("/api/discussion", {
 				method: "POST",
@@ -49,8 +50,7 @@ export function DiscussionPanel({ isActive, index }: DiscussionPanelProps) {
 			const result = (await response.json()) as DiscussionCreateResponse;
 			if (!response.ok || !result.ok || !result.discussion) {
 				setSubmitError(
-					result.message ??
-						"議論の投稿に失敗しました。時間をおいて再試行してください。",
+					result.message ?? "議論の投稿に失敗しました。時間をおいて再試行してください。",
 				);
 				return false;
 			}
@@ -61,6 +61,7 @@ export function DiscussionPanel({ isActive, index }: DiscussionPanelProps) {
 				detail: result.discussion.detail,
 				authorName: "あなた",
 				createdAt: new Date(result.discussion.createdAt),
+				chatRoomId: result.chatRoomId ?? null,
 			};
 
 			setDiscussionItems((current) => [nextItem, ...current]);
@@ -82,11 +83,15 @@ export function DiscussionPanel({ isActive, index }: DiscussionPanelProps) {
 			}
 			return false;
 		} finally {
-			if (timeoutId) {
-				clearTimeout(timeoutId);
-			}
+			if (timeoutId) clearTimeout(timeoutId);
 			setIsSubmitting(false);
 		}
+	};
+
+	const handleOpenChatRoom = (chatRoomId: string) => {
+		const discussion = discussionItems.find((d) => d.chatRoomId === chatRoomId);
+		setSelectedDiscussion(null);
+		setActiveChatRoom({ id: chatRoomId, title: discussion?.title ?? "チャットルーム" });
 	};
 
 	return (
@@ -102,54 +107,76 @@ export function DiscussionPanel({ isActive, index }: DiscussionPanelProps) {
 					: "hidden translate-y-2 scale-[0.98] opacity-0",
 			].join(" ")}
 		>
-			<div className="flex items-start justify-between gap-3">
-				<div>
-					<h2 className="mt-0 text-2xl font-semibold">議論</h2>
-					<p className="mt-4 text-sm font-semibold text-[#4b4b65]">
-						family 内で話し合いたい内容を discussion として投稿して一覧表示します。
-					</p>
-				</div>
-				<button
-					type="button"
-					onClick={() => {
-						clearMessages();
-						setIsModalOpen(true);
-					}}
-					className="rounded-lg bg-[#1e1e2a] px-4 py-2 text-sm font-bold text-white transition hover:opacity-90"
-				>
-					議論を投稿
-				</button>
-			</div>
-
-			<div className="mt-6 grid gap-4">
-				{discussionItems.length > 0 ? (
-					discussionItems.map((item) => (
-						<DiscussionItemCard key={item.id} item={item} />
-					))
-				) : (
-					<div className="rounded-2xl border border-dashed border-black/15 bg-black/[0.03] p-6 text-sm font-semibold text-[#4b4b65]">
-						まだ discussion はありません。
+			{activeChatRoom ? (
+				<ChatRoomPanel
+					chatRoomId={activeChatRoom.id}
+					discussionTitle={activeChatRoom.title}
+					onBack={() => setActiveChatRoom(null)}
+				/>
+			) : (
+				<>
+					<div className="flex items-start justify-between gap-3">
+						<div>
+							<h2 className="mt-0 text-2xl font-semibold">議論</h2>
+							<p className="mt-4 text-sm font-semibold text-[#4b4b65]">
+								family 内で話し合いたい内容を discussion として投稿して一覧表示します。
+							</p>
+						</div>
+						<button
+							type="button"
+							onClick={() => {
+								clearMessages();
+								setIsModalOpen(true);
+							}}
+							className="rounded-lg bg-[#1e1e2a] px-4 py-2 text-sm font-bold text-white transition hover:opacity-90"
+						>
+							議論を投稿
+						</button>
 					</div>
-				)}
-			</div>
 
-			{submitSuccess ? (
-				<p className="mt-3 rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-sm font-semibold text-emerald-800">
-					{submitSuccess}
-				</p>
-			) : null}
-			{submitError ? (
-				<p className="mt-3 rounded-lg border border-rose-300 bg-rose-50 p-3 text-sm font-semibold text-rose-700">
-					{submitError}
-				</p>
-			) : null}
+					<div className="mt-6 grid gap-4">
+						{discussionItems.length > 0 ? (
+							discussionItems.map((item) => (
+								<DiscussionItemCard
+									key={item.id}
+									item={item}
+									onClick={setSelectedDiscussion}
+								/>
+							))
+						) : (
+							<div className="rounded-2xl border border-dashed border-black/15 bg-black/[0.03] p-6 text-sm font-semibold text-[#4b4b65]">
+								まだ discussion はありません。
+							</div>
+						)}
+					</div>
 
-			<DiscussionPostModal
-				isOpen={isModalOpen}
-				onClose={() => setIsModalOpen(false)}
-				onSubmit={handleSubmit}
-				isSubmitting={isSubmitting}
-			/>
+					{submitSuccess ? (
+						<p className="mt-3 rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-sm font-semibold text-emerald-800">
+							{submitSuccess}
+						</p>
+					) : null}
+					{submitError ? (
+						<p className="mt-3 rounded-lg border border-rose-300 bg-rose-50 p-3 text-sm font-semibold text-rose-700">
+							{submitError}
+						</p>
+					) : null}
+
+					<DiscussionPostModal
+						isOpen={isModalOpen}
+						onClose={() => setIsModalOpen(false)}
+						onSubmit={handleSubmit}
+						isSubmitting={isSubmitting}
+					/>
+
+					{selectedDiscussion && (
+						<DiscussionDetailModal
+							item={selectedDiscussion}
+							onClose={() => setSelectedDiscussion(null)}
+							onOpenChatRoom={handleOpenChatRoom}
+						/>
+					)}
+				</>
+			)}
 		</section>
 	);
 }

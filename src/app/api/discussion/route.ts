@@ -18,8 +18,13 @@ export async function POST(request: Request) {
 	const formData = await request.formData();
 	const title = formData.get("title");
 	const detail = formData.get("detail");
+	const symbolPrivKey = formData.get("symbolPrivKey");
 
-	if (typeof title !== "string" || typeof detail !== "string") {
+	if (
+		typeof title !== "string" ||
+		typeof detail !== "string" ||
+		typeof symbolPrivKey !== "string"
+	) {
 		return jsonError("入力値が不正です。", 400);
 	}
 
@@ -39,11 +44,13 @@ export async function POST(request: Request) {
 			userId: auth.user.id,
 			title: normalizedTitle,
 			detail: normalizedDetail,
+			symbolPrivKey: symbolPrivKey.trim(),
 		});
 
 		return NextResponse.json({
 			ok: true,
 			discussion: created.discussion,
+			chatRoomId: created.chatRoomId,
 		});
 	} catch (error) {
 		const message = error instanceof Error ? error.message : "unknown error";

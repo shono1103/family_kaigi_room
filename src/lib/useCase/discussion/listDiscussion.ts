@@ -6,6 +6,7 @@ export type ListDiscussionResult = Array<{
 	detail: string;
 	createdAt: Date;
 	updatedAt: Date;
+	chatRoomId: string | null;
 	authorUser: {
 		id: string;
 		email: string;
@@ -37,6 +38,7 @@ export async function listDiscussion(
 			createdAt: true,
 			updatedAt: true,
 			authorUserId: true,
+			discussionChatRoom: { select: { id: true } },
 		},
 	});
 
@@ -79,6 +81,7 @@ export async function listDiscussion(
 		detail: discussion.detail,
 		createdAt: discussion.createdAt,
 		updatedAt: discussion.updatedAt,
+		chatRoomId: discussion.discussionChatRoom?.id ?? null,
 		authorUser: authorUsersById.get(discussion.authorUserId) ?? null,
 	}));
 }

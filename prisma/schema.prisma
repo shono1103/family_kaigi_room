@@ -46,6 +46,7 @@ model User {
   userInfo      UserInfo?
   quests        Quest[]
   discussions   Discussion[]
+  chatMessages  DiscussionChatMessage[]
 
   @@index([familyId])
   @@map("users")
@@ -107,10 +108,37 @@ model Discussion {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family   Family   @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  discussionChatRoom DiscussionChatRoom?
 
   @@index([userId])
   @@index([familyId])
   @@map("discussions")
+}
+
+model DiscussionChatRoom {
+  id           String        @id @default(uuid()) @db.Uuid
+  discussionId String        @unique @map("discussion_id") @db.Uuid
+  createdAt    DateTime      @default(now()) @map("created_at")
+
+  discussion Discussion    @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  messages   DiscussionChatMessage[]
+
+  @@map("discussion_chat_rooms")
+}
+
+model DiscussionChatMessage {
+  id         String   @id @default(uuid()) @db.Uuid
+  chatRoomId String   @map("chat_room_id") @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  content    String
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  discussionChatRoom DiscussionChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([chatRoomId])
+  @@index([userId])
+  @@map("discussion_chat_messages")
 }

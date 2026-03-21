@@ -9,7 +9,7 @@
 		"docker:db:test:down": "docker compose -f docker-compose-dev.yml --profile test stop postgres_test",
 		"init": "tsx scripts/init.ts",
 		"dev": "pnpm run init && next dev",
-		"build": "pnpm run prisma:migrate:resolve && pnpm run prisma:migrate:prod && pnpm run prisma:generate && pnpm run init && next build",
+		"build": "pnpm run prisma:migrate:prod && pnpm run prisma:generate && pnpm run init && next build",
 		"start": "pnpm run init && next start",
 		"test": "vitest run --config vitest.config.ts",
 		"test:watch": "vitest --config vitest.config.ts",
@@ -19,8 +19,7 @@
 		"prisma:generate": "prisma generate",
 		"prisma:migrate:dev": "prisma migrate dev",
 		"prisma:migrate:prod": "prisma migrate deploy",
-		"prisma:studio": "prisma studio",
-		"prisma:migrate:resolve": "prisma migrate resolve --rolled-back 20260321171059 || true"
+		"prisma:studio": "prisma studio"
 	},
 	"dependencies": {
 		"@next/env": "16.1.6",
